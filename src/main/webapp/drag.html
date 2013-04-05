@@ -1,0 +1,75 @@
+<script>
+    function createUploader() {
+        var uploader = new qq.FileUploader({
+            element:document.getElementById('file-uploader-demo1'),
+            action:'rest/hello/findSimilar',
+            forceMultipart:true,
+            debug:false,
+            onSubmit:localSubmit,
+            onComplete:localFinished
+//            ,
+//            extraDropzones: [qq.getByClass(document, 'qq-upload-extra-drop-area')[0]]
+        });
+    }
+
+    function localSubmit(id, name, json) {
+        $('.qq-upload-list').children().remove();
+        var img = document.createElement("img");
+        // li.appendChild(img);
+        reader = new FileReader();
+        reader.onload = (function (theImg) {
+
+            return function (evt) {
+                theImg.src = evt.target.result;
+//                jQuery(document).ready(function () {
+//                    jQuery('.nailthumb-container').nailthumb();
+//                    jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+//                });
+            };
+
+        }(img));
+        reader.readAsDataURL(this._handler._files[id]);
+        // display the source image
+        $("#duplicate_upload_source").children().remove();
+        $("#duplicate_upload_result").children().remove();
+        div_t = document.createElement("div");
+        div_t.className = "nailthumb-container nailthumb-image-titles-animated-onhover square";
+        div_t.appendChild(img);
+
+        $("#duplicate_upload_source").append(div_t);
+        jQuery(document).ready(function () {
+            jQuery('.nailthumb-container').nailthumb();
+            jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+        });
+
+
+    }
+
+    function localFinished(id, name, json) {
+        uploadFinished(json.images);
+        $(".qq-upload-list").children().remove();
+    }
+
+
+    jQuery(document).ready(function () {
+        createUploader();
+    });
+
+</script>
+
+<div id="file-uploader-demo1">
+    <noscript>
+        <p>Please enable JavaScript to use file uploader.</p>
+        <!-- or put a simple form for upload here -->
+    </noscript>
+</div>
+
+
+
+
+<div id="duplicate_upload_source" style="margin:10px 0px"></div>
+
+<div id="duplicate_upload_result" style="margin:10px 0px"></div>
+
+<!--</body>-->
+<!--</html>-->

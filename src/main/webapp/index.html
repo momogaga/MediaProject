@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet"
+          href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css"/>
+    <link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+    <script src="js/jquery.form.js"></script>
+    <script src="js/thumbstore.js"></script>
+    <script src="js/jquery.iframe-transport.js"></script>
+
+    <script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
+    <script src="js/mustache.js"></script>
+
+
+    <script src="js/jquery.fileupload.js"></script>
+    <script src="js/jquery.fileupload-fp.js"></script>
+    <link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
+    <script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
+    <!--<script src="js/thumbstore.js" type="text/javascript"></script>-->
+
+    <!--<script src="js/jquery.exif.js"></script>-->
+
+    <script type="text/javascript" src="galleriffic-2.0/js/jquery.galleriffic.js"></script>
+    <link rel="stylesheet" href="galleriffic-2.0/css/galleriffic-1.css" type="text/css" />
+
+   <script src="js/jquery.ay-table-sort.js"></script>
+    <style>
+        table { table-layout: fixed; border-collapse: collapse; width: 100%; }
+        thead { background: #b9c9fe; }
+        td,th { padding: 5px; }
+        tbody tr { border-top: 1px solid #fff; background: #e8edff; }
+
+        th.size { width: 10%; }
+        .authorship { margin-top: 20px; }
+
+        th.files { width: 10%; }
+
+        .paths {font-size: 12px;}
+
+
+
+        tbody { border-top: 5px solid #fff; }
+
+        thead th { text-align: left; cursor: pointer; }
+        th.ay-sort-asc span {
+            background: url("images/sort_up.png") right center no-repeat;
+            padding-right: 25px;
+            background-size: 15px 15px;
+        }
+
+        th.ay-sort-desc span {
+            background: url("images/sort_down.png") right center no-repeat;
+            padding-right: 25px;
+            background-size: 15px 15px;
+        }
+
+    </style>
+
+
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJYZeuZ4jmifhLj-u4YrBIFv8X7K7dHe8&sensor=false">
+    </script>
+
+
+    <style>
+        .ui-progressbar .ui-progressbar-value {
+            background-image: url(images/pbar-ani.gif);
+        }
+
+        .cls {
+            clear: both;
+        }
+
+        .flt {
+            float: left;
+        }
+
+        .square {
+            width: 100px;
+            height: 100px;
+        }
+
+        .horiz {
+            width: 150px;
+            height: 90px;
+        }
+
+        .vert {
+            width: 100px;
+            height: 130px;
+        }
+
+        .nailthumb-image-titles-bigger span.nailthumb-title {
+            background: none repeat scroll 0 0 rgba(0, 125, 0, 0.5);
+            font-size: 15px;
+            height: 30px;
+        }
+
+        .description {
+            padding-bottom: 10px;
+        }
+
+
+            /*remove border of thead tabs*/
+        .ui-widget-content {
+            border: none;
+        }
+
+
+        /* selected row input table*/
+        table#duplicate-folder-table {
+            border-collapse: collapse;
+        }
+        #duplicate-folder-table tr {
+            background-color: #eee;
+            border-top: 1px solid #fff;
+        }
+        #duplicate-folder-table tr:hover {
+            background-color: #ccc;
+        }
+        #duplicate-folder-table th {
+            background-color: #fff;
+        }
+        #duplicate-folder-table th, #example td {
+            padding: 3px 5px;
+        }
+        #duplicate-folder-table td:hover {
+            cursor: pointer;
+        }
+
+    </style>
+
+    <script>
+
+        //global variables
+
+        jQuery.ajaxSettings.traditional = true;
+
+        $(function () {
+            $("#tabs").tabs({     cache:true,
+                        show:function (event, ui) {
+                            if (ui.index == 4) {
+                                    initialize();
+                                google.maps.event.trigger(map, 'resize');
+                            }
+                        }
+                    }
+            );
+        })
+        ;
+        $(function () {
+            $("#progressbar").progressbar({
+                value:59
+            });
+        });
+        $(function () {
+            $("#accordion").accordion();
+            $('#accordion-duplicate-folders').accordion();
+        });
+        $(function () {
+            $('#fileupload').fileupload({
+                dataType:'json',
+                forceIframeTransport:true,
+                previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
+                fail:function (e, data) {
+                    alert("xxx" + e + " " + data);
+                    for (i in e) {
+                        console.log("-" + i + " " + e[i]);
+                    }
+                    for (i in data) {
+                        console.log("-" + i + " " + data[i]);
+                    }
+                },
+                hideDropzones:false,
+                done:function (e, data) {
+                    uploadFinished(data);
+                }
+
+            });
+        });
+
+
+    </script>
+</head>
+<body>
+
+
+<div id="header" style="padding:0">
+    <iframe src="thumbstore_status.html" height="30"
+            style="width:100%; border: 0; padding: 0; overflow-x: hidden; display: block" class="frame"></iframe>
+
+</div>
+
+
+<div id="tabs">
+    <ul>
+        <li><a href="thumbstore.html">ThumbStore controle</a></li>
+        <li><a href="#tabs-2">Duplicate media</a></li>
+        <li><a href="#tabs-folder">Duplicate folders</a></li>
+        <li><a href="drag.html">Drag'n'Drop</a></li>
+        <li><a href="grid.html">GPS</a></li>
+
+    </ul>
+
+
+    <div id="tabs-2">
+        <form name="myform" action="rest/hello/identical" method="POST">
+            <div align="center">
+                <br> <br> <input type=text size="25" value="5" name="max">
+                <br> <a href="javascript: getDuplicate()">Search</a>
+            </div>
+        </form>
+
+
+        <div id="accordion"></div>
+        <span id="duplicate_result"></span>
+    </div>
+
+    <div id="tabs-folder">
+
+
+
+        <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
+
+            <input type="submit" value="get Folders">
+        </form>
+        <div  style="width:70%;float:left">
+            <table id="duplicate-folder-table" ></table>
+        </div>
+        <div id="duplicate-folders-details" style="width: 30% ; float:left"></div>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

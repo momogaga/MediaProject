@@ -1,0 +1,40 @@
+<script>
+    getSize();
+    getPath();
+    getIndexedPaths('db_paths');
+    // getFolder();
+
+</script>
+<div id="tabs-1">
+    <p>
+        Path db : <span id="db_path"> </span>
+    </p>
+
+    <p>
+        Size of db : <span id="db_size"> </span>
+    </p>
+
+    <div id="db_paths" style="margin-bottom: 0"> </div>
+    <p>
+    <div style="float: left; padding-right: 20px">
+        <form name="input" action="javascript: shrink()">
+            <input type="submit" value="Shrink"/>
+        </form>
+    </div>
+    <div style="float: left">
+        <form name="input" action="javascript: update()">
+            <input type="submit" value="Update"/>
+        </form>
+    </div>
+    </p>
+    <script type="text/javascript">
+
+        jQuery(document).ready(function () {
+            jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+            jQuery('.nailthumb-image-titles-animated-onload').nailthumb({titleWhen:'load'});
+            jQuery('.nailthumb-image-titles-onhover').nailthumb({animateTitle:false});
+            jQuery('.nailthumb-image-titles-onload').nailthumb({titleWhen:'load', animateTitle:false});
+            jQuery('.nailthumb-image-titles-bigger').nailthumb({titleWhen:'load'});
+        })
+    </script>
+</div>
