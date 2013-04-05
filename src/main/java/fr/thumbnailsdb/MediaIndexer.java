@@ -197,8 +197,8 @@ public class MediaIndexer {
 
         try {
             if (ts.isInDataBaseBasedOnName(f.getCanonicalPath())) {
-                 System.out.println("MediaIndexer.generateAndSave " + f);
-                 System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring");
+                 //System.out.println("MediaIndexer.generateAndSave " + f);
+                // System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring");
                 if (forceGPSUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
                     MetaDataFinder mdf = new MetaDataFinder(f);

@@ -367,7 +367,7 @@ public class ThumbStore {
     }
 
     public void updateToDB(MediaFileDescriptor id) {
-        PreparedStatement psmnt;
+        PreparedStatement psmnt = null;
         Connection connexion = findResponsibleDB(id.getPath());
         try {
             Statement st;
