@@ -204,7 +204,7 @@ public class ThumbStore {
         st.execute(action);
         action = "CREATE TABLE IMAGES_tmp(id  bigint identity(1,1), path varchar(256), size long, mtime long, md5 varchar(256), data blob,  lat double, lon double)";
         st.execute(action);
-        action = "INSERT INTO  IMAGES_TMP  (path,size,mtime,md5,data, lat, lon)  SELECT * from IMAGES";
+        action = "INSERT INTO  IMAGES_TMP  (path,id, size,mtime,md5,data, lat, lon)  SELECT * from IMAGES";
         System.out.println("ThumbStore.upgradeToV1 moving data to new table");
         st.execute(action);
         System.out.println("ThumbStore.upgradeToV1 droping old table");
