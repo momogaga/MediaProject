@@ -50,7 +50,9 @@ public class DuplicateFileList implements Iterable<DuplicateFileGroup> {
 
     private boolean match(DuplicateFileGroup d, String[] filter) {
         for (String s : filter) {
-            System.out.println("DuplicateFileList.match " + d + " with filter " +s);
+            if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("DuplicateFileList.match " + d + " with filter " +s);
+            }
             if (d.match(s)) {
                 return true;
             }

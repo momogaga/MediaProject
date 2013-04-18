@@ -546,7 +546,7 @@ public class ThumbStore {
         System.out.println("ThumbStore.getMFDOrderedByMD5 sorting  " + mf.size() + " data");
         long t0 = System.currentTimeMillis();
         Collections.sort(mf, new Comparator<MediaFileDescriptor>() {
-            @Override
+
             public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
 //                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
 //                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
@@ -826,6 +826,27 @@ public class ThumbStore {
 //        }
     }
 
+    public void dump() {
+        String select = "SELECT * FROM IMAGES";
+        Statement st;
+        for (Connection connexion : getConnections()) {
+            try {
+                st = connexion.createStatement();
+
+                ResultSet res = st.executeQuery(select);
+                while (res.next()) {
+                    String i = res.getString("path");
+                   // byte[] d = res.getBytes("data");
+                    System.out.println(i + " has mtime " + res.getLong("mtime"));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     public void testDuplicate() {
         System.out.println("ThumbStore.testDuplicate()");
         ResultSet rs = getOrderedByMD5();
@@ -884,5 +905,6 @@ public class ThumbStore {
         ts.test2();
 
     }
+
 
 }

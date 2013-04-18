@@ -90,6 +90,10 @@ function toFolderAndFileLink(path) {
         '  <a href="explorer://rest/hello/folder/?path=' + folder + '">[folder]</a>'
 }
 
+function toDualFolderLink(path1, path2) {
+    return  '  <a href="explorer://rest/hello/folder/?path1=' + path1 + '&path2=' + path2 + '">[folders]</a>'
+}
+
 function updateAccordion(output) {
     $('#accordion').children().remove();
 
@@ -164,7 +168,8 @@ function getDuplicateFolder() {
                 + val['totalSize'].toFixed(4) + '</a></td>'
                 + '<td class="files"> ' + val['occurences'] + '</td>'
                 + '<td class="paths"> <div id="folder1">' + toFolderLink(val['folder1']) + toDirectLink(val['folder1']) + '</div> ' +
-                '<div id="folder2">' + toFolderLink(val['folder2']) + toDirectLink(val['folder2']) + '</div>  </td>'
+                '<div id="folder2">' + toFolderLink(val['folder2']) + toDirectLink(val['folder2']) + ' ' +
+                toDualFolderLink(val['folder1'],val['folder2']) + '</div>  </td>'
                 + '</tr> ';
         });
         html_table += '</tbody>';

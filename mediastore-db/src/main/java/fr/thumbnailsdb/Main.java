@@ -65,6 +65,12 @@ public class Main {
             //df.prettyPrintDuplicateFolder(df.findDuplicateMedia());
         }
 
+        if ("dump".equals(args[0])) {
+            tb.dump();
+            // String source = args[1];
+            //df.prettyPrintDuplicateFolder(df.findDuplicateMedia());
+        }
+
 	}
 
 	public static void main(String[] args) {
@@ -85,7 +91,8 @@ public class Main {
 			System.err.println("   db size");
 			System.err.println("   db duplicate");
             System.err.println("   db duplicateFolder");
-			System.err.println("   media similar folder_or_file_to_process");
+            System.err.println("   db dump");
+            System.err.println("   media similar folder_or_file_to_process");
 			System.err.println("   media duplicate folder_or_file_to_process");
 			System.exit(-1);
 		} else {

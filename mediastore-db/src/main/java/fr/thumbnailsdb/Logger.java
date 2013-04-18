@@ -3,7 +3,8 @@ package fr.thumbnailsdb;
 public class Logger {
 
 	private static Logger log = new Logger();
-	
+	private static boolean enabled = false;
+
 	
 	public static Logger getLogger() {
 		return log;
@@ -12,7 +13,11 @@ public class Logger {
 	private Logger() {
 		
 	}
-	
+
+    public boolean isEnabled() {
+        return getLogger().enabled;
+    }
+
 	public void log(String s) {
 		System.out.println(s);
 	}

@@ -197,13 +197,13 @@ public class MediaIndexer {
 
         try {
             if (ts.isInDataBaseBasedOnName(f.getCanonicalPath())) {
-                 //System.out.println("MediaIndexer.generateAndSave " + f);
-                // System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring");
+                System.out.println("MediaIndexer.generateAndSave " + f);
+                System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring");
                 if (forceGPSUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
                     MetaDataFinder mdf = new MetaDataFinder(f);
                     double latLon[] = mdf.getLatLong();
-                    // System.out.println("MediaIndexer.generateAndSave working on " + f);
+                    System.out.println("MediaIndexer.generateAndSave working on " + f);
                     if (latLon != null) {
                         mfd.setLat(latLon[0]);
                         mfd.setLon(latLon[1]);
@@ -218,7 +218,9 @@ public class MediaIndexer {
                 if (id != null) {
                     ts.saveToDB(id);
                 }
-                log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
+                if (log.isEnabled()) {
+                    log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
+                }
                 newFiles++;
             }
         } catch (IOException e) {
@@ -294,6 +296,7 @@ public class MediaIndexer {
             executorService.submit(new RunnableProcess(fd));
         } else {
             if (fd.isDirectory()) {
+                System.out.println("MediaIndexer.processMT processing () " + fd);
                 String entries[] = fd.list();
                 if (entries != null) {
                     for (int i = 0; i < entries.length; i++) {
@@ -317,7 +320,7 @@ public class MediaIndexer {
     public void updateDB(List<String> al) {
 
         for (String s : al) {
-            System.out.println("MediaIndexer.updateDB updating " +s);
+            System.out.println("MediaIndexer.updateDB updating " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);
 
             processMTRoot(s);
