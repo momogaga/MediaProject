@@ -41,11 +41,11 @@
                         <manifest>
                             <mainClass>fr.thumbnailsdb.Main</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Build-Time>
-                                ${build.time}
-                            </Build-Time>
-                        </manifestEntries>
+                        <!--<manifestEntries>-->
+                            <!--<Build-Time>-->
+                                <!--${build.time}-->
+                            <!--</Build-Time>-->
+                        <!--</manifestEntries>-->
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -84,6 +84,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0-beta-3</version>
+                <configuration>
+                    <fromFile>target/dbStore.jar</fromFile>
+                    <url>${my-home}</url>
+                    <serverId>my-home</serverId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>upload-war-to-server</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>upload-single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 
         </plugins>
     </build>

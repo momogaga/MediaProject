@@ -486,31 +486,7 @@ public class ThumbStore {
     }
 
 
-    /**
-     * TODO : Make a custom result set which encapsulates the real resultSets.
-     * When queyried, simply return the next result with the min MD5 value
-     *
-     * @return
-     */
-    public MD5OrderedMultiResultSet getOrderedByMD5() {
 
-        Statement sta;
-        ResultSet res = null;
-        MD5OrderedMultiResultSet mom = new MD5OrderedMultiResultSet();
-        for (Connection connexion : getConnections()) {
-            try {
-                sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//			res = sta
-//					.executeQuery("SELECT DISTINCT A.path, A.size, A.md5 from images A JOIN ( SELECT COUNT(*) as Count, B.md5   FROM Images B   GROUP BY B.md5) AS B ON A.md5 = B.md5 WHERE B.Count > 1 ORDER by A.md5;");
-                res = sta
-                        .executeQuery("SELECT path, md5, size from IMAGES order by md5;");
-                mom.addResultSet(res);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return mom;
-    }
 
 
     public ArrayList<MediaFileDescriptor> getMFDOrderedByMD5() {
@@ -846,19 +822,6 @@ public class ThumbStore {
         }
     }
 
-
-    public void testDuplicate() {
-        System.out.println("ThumbStore.testDuplicate()");
-        ResultSet rs = getOrderedByMD5();
-        try {
-            while (rs.next()) {
-                System.out.println(rs.getLong("size") + "  " + rs.getString("path"));
-            }
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
     public ArrayList<String> getPath() {
         return this.pathsOfDBOnDisk;
