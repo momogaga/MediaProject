@@ -205,6 +205,22 @@ public class RestTest {
     }
 
 
+    @GET
+    @Path("open/")
+    public Response openPath(@QueryParam("path") String path) {
+        Logger.getLogger().log("RestTest.openPath " + path);
+        File file = new File (path);
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        return Response.status(200).build();
+    }
+
+
     protected String getImageAsHTMLImg(String imageId) {
         String img = "";
         try {
