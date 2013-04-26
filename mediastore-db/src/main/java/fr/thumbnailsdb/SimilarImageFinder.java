@@ -113,6 +113,11 @@ public class SimilarImageFinder {
 
     }
 
+    public void flushPreloadedDescriptors() {
+        this.preloadedDescriptors.clear();
+        this.preloadedDescriptors=null;
+    }
+
     protected ArrayList<MediaFileDescriptor> getPreloadedDescriptors() {
         if (preloadedDescriptors == null) {
             Status.getStatus().setStringStatus("Building descriptors list");

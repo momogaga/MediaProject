@@ -133,11 +133,11 @@ public class RestTest {
     @Path("/duplicateFolder")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getDuplicateFolder(@QueryParam("folder") final java.util.List<String> obj) {
-        System.out.println("RestTest.getDuplicateFolder " + obj);
+        Logger.getLogger().log("RestTest.getDuplicateFolder " + obj);
         Status.getStatus().setStringStatus("Requesting duplicate folder list");
 
         Collection<DuplicateFolderGroup> col = getDuplicateFolderGroup().asSortedCollection(obj.toArray(new String[]{}), 300);
-        System.out.println("RestTest.getDuplicateFolder sending results of size " + col.size());
+        Logger.getLogger().log("RestTest.getDuplicateFolder sending results of size " + col.size());
         Status.getStatus().setStringStatus(Status.IDLE);
 
         return Response.status(200).entity(col).build();
@@ -237,6 +237,7 @@ public class RestTest {
     @Path("shrink/")
     public Response shrink(@QueryParam("folder") final java.util.List<String> obj) {
         tb.shrink(obj);
+        si.flushPreloadedDescriptors();
         return Response.status(200).entity("Shrink done").build();
     }
 
@@ -245,6 +246,7 @@ public class RestTest {
     @Path("update/")
     public Response update(@QueryParam("folder") final java.util.List<String> obj) {
         new MediaIndexer(tb).updateDB(obj);
+        si.flushPreloadedDescriptors();
         return Response.status(200).entity("Update done").build();
     }
 
@@ -275,7 +277,7 @@ public class RestTest {
         File temp = null;
         try {
             InputStream source = bpe.getInputStream();
-            System.out.println("RestTest.findSimilar() received " + source);
+            Logger.getLogger().log("RestTest.findSimilar() received " + source);
             //BufferedImage bi = ImageIO.read(source);
 
             temp = File.createTempFile("tempImage", ".jpg");
@@ -293,7 +295,7 @@ public class RestTest {
             } finally {
                 fo.close();
             }
-            System.out.println("RestTest.findSimilar()  written to " + temp + " with size " + total);
+            Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
         } catch (Exception e) {
             // message = e.getMessage();
             e.printStackTrace();

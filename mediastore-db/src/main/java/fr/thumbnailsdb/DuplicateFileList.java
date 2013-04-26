@@ -33,7 +33,7 @@ public class DuplicateFileList implements Iterable<DuplicateFileGroup> {
     }
 
     public Collection<DuplicateFileGroup> toCollection(int max, String[] filter) {
-        System.out.println("DuplicateFileList.toCollection filters : " + filter[0]);
+        Logger.getLogger().log("DuplicateFileList.toCollection filters : " + filter[0]);
         ArrayList<DuplicateFileGroup> al = new ArrayList<DuplicateFileGroup>(max);
         Iterator<DuplicateFileGroup> it = tree.iterator();
         int i = 0;
@@ -51,7 +51,7 @@ public class DuplicateFileList implements Iterable<DuplicateFileGroup> {
     private boolean match(DuplicateFileGroup d, String[] filter) {
         for (String s : filter) {
             if (Logger.getLogger().isEnabled()) {
-            Logger.getLogger().log("DuplicateFileList.match " + d + " with filter " +s);
+                Logger.getLogger().log("DuplicateFileList.match " + d + " with filter " + s);
             }
             if (d.match(s)) {
                 return true;

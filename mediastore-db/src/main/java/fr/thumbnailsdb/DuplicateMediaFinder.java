@@ -109,7 +109,7 @@ public class DuplicateMediaFinder {
             //first compute the tree of folders
             dfl.addOrIncrement(dg);
         }
-        System.out.println("DuplicateMediaFinder.computeDuplicateFolderSets has " + dfl.size() + " entries");
+        Logger.getLogger().log("DuplicateMediaFinder.computeDuplicateFolderSets has " + dfl.size() + " entries");
         return dfl;
     }
 

@@ -180,7 +180,7 @@ public class ThumbStore {
 
             }
             if (dbVersion == 1) {
-               // upgradeToV1(connection);
+                // upgradeToV1(connection);
                 upgradeToV2(connection);
             }
 
@@ -222,7 +222,7 @@ public class ThumbStore {
         //ok we need to upgrade the DB to the next version
         //This one includes an index for the path
         //CREATE INDEX index_name
-       // ON table_name (column_name)
+        // ON table_name (column_name)
         Statement st = connection.createStatement();
         String action = "CREATE UNIQUE INDEX path_index ON IMAGES(path)";
         System.out.println("ThumbStore.upgradeToV2 creating Index");
@@ -251,7 +251,7 @@ public class ThumbStore {
         if (connexion == null) {
             connexion = connexions.values().iterator().next();
         }
-        connexions.put(path,connexion);
+        connexions.put(path, connexion);
         System.out.println("ThumbStore.addIndexPath no db storing information for path " + path + "  found");
         System.out.println("ThumbStore.addIndexPath using " + connexion);
 
@@ -486,9 +486,6 @@ public class ThumbStore {
     }
 
 
-
-
-
     public ArrayList<MediaFileDescriptor> getMFDOrderedByMD5() {
 
         Statement sta;
@@ -630,9 +627,11 @@ public class ThumbStore {
     }
 
     public void shrink(List<String> paths) {
-        System.out.println("ThumbStore.shrink() BD has " + this.size() + " entries");
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("ThumbStore.shrink() BD has " + this.size() + " entries");
+        }
         for (String path : paths) {
-            System.out.println("ThumbStore.shrink() processing path " + path);
+            Logger.getLogger().log("ThumbStore.shrink() processing path " + path);
             ResultSet all = this.getAllInDataBase(connexions.get(path));
             MediaFileDescriptor id = null;
 
@@ -812,7 +811,7 @@ public class ThumbStore {
                 ResultSet res = st.executeQuery(select);
                 while (res.next()) {
                     String i = res.getString("path");
-                   // byte[] d = res.getBytes("data");
+                    // byte[] d = res.getBytes("data");
                     System.out.println(i + " has mtime " + res.getLong("mtime"));
                 }
 
