@@ -465,13 +465,13 @@ public class ThumbStore {
         return al;
     }
 
-    public ArrayList<ResultSet> getAllInDataBase() {
-        Statement sta;
-        ArrayList<ResultSet> res = new ArrayList<ResultSet>();
-        for (Connection connexion : getConnections()) {
-            res.add(this.getAllInDataBase(connexion));
+    public MultipleResultSet getAllInDataBase() {
+        MultipleResultSet mrs = new MultipleResultSet();
+        // ArrayList<ResultSet> res = new ArrayList<ResultSet>();
+        for (Connection connection : getConnections()) {
+            mrs.add(connection, this.getAllInDataBase(connection));
         }
-        return res;
+        return mrs;
     }
 
     public ResultSet getAllInDataBase(Connection connexion) {
@@ -568,6 +568,31 @@ public class ThumbStore {
         return p;
     }
 
+    public String getPath(Connection c, int index) {
+        Statement sta;
+        ResultSet res = null;
+        String p = null;
+        try {
+       //     System.out.println("ThumbStore.getPath " +c  + " with index " + index);
+            sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+
+            PreparedStatement psmnt;
+
+            psmnt = c.prepareStatement("SELECT path from IMAGES WHERE id=(?)");
+            psmnt.setInt(1,index);
+            psmnt.execute();
+            res = psmnt.getResultSet();
+            while (res.next()) {
+                p = res.getString("path");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return p;
+
+    }
+
 
     public ArrayList<MediaFileDescriptor> getDuplicatesMD5(MediaFileDescriptor mfd) {
         Statement sta;
@@ -592,7 +617,7 @@ public class ThumbStore {
      * remove incorrect records from the DB
      */
     public void fix() {
-        ArrayList<ResultSet> results = this.getAllInDataBase();
+        ArrayList<ResultSet> results = this.getAllInDataBase().getResultSets();
         MediaFileDescriptor id = null;
         System.out.println("ThumbStore.fix() BD has " + this.size() + " entries");
         for (ResultSet all : results) {

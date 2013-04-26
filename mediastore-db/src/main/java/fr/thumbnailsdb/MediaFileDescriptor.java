@@ -3,53 +3,56 @@ package fr.thumbnailsdb;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.*;
+import java.sql.Connection;
 
 
 @XmlRootElement
 public class MediaFileDescriptor implements Serializable {
     @XmlElement
-	protected String path;
-	protected long size;
-	protected long mtime;
-	protected String md5Digest;
-	protected int[] data;
-protected double lat;
+    protected String path;
+    protected long size;
+    protected long mtime;
+    protected String md5Digest;
+    //the DB used to access this media
+    protected Connection connection;
+    protected int[] data;
+    protected double lat;
     protected double lon;
 
     //id in the database
     protected int id;
 
     @XmlElement
-	protected double rmse;
+    protected double rmse;
 
-	public static MediaFileDescriptor readFromDisk(String path) {
-		MediaFileDescriptor id = null;
-		File f = new File(path);
-		long size = f.length();
-		long modifiedTime = f.lastModified();
+    public static MediaFileDescriptor readFromDisk(String path) {
+        MediaFileDescriptor id = null;
+        File f = new File(path);
+        long size = f.length();
+        long modifiedTime = f.lastModified();
 
-		int[] data;
+        int[] data;
 
 //		try {
-		//	FileInputStream fi = new FileInputStream(f);
-			data = new int[(int) size];
-			// int read = fi.read(data);
-			// System.out.println("ImageDescriptor.main() read " + read +
-			// " bytes from file");
-			id = new MediaFileDescriptor(path, size, modifiedTime, data, null);
+        //	FileInputStream fi = new FileInputStream(f);
+        data = new int[(int) size];
+        // int read = fi.read(data);
+        // System.out.println("ImageDescriptor.main() read " + read +
+        // " bytes from file");
+        id = new MediaFileDescriptor(path, size, modifiedTime, data, null);
 //		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
-		return id;
-	}
+        return id;
+    }
 
-	//
+    //
 
-	public MediaFileDescriptor() {
+    public MediaFileDescriptor() {
 
-	}
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -78,129 +81,138 @@ protected double lat;
     }
 
     /**
-	 * int[] data will be converted to argb byte[]
-	 * 
-	 * @param path
-	 * @param size
-	 * @param mtime
-	 * @param data
-	 * @param md5
-	 */
-	public MediaFileDescriptor(String path, long size, long mtime, int[] data, String md5) {
-		super();
-		this.path = path;
+     * int[] data will be converted to argb byte[]
+     *
+     * @param path
+     * @param size
+     * @param mtime
+     * @param data
+     * @param md5
+     */
+    public MediaFileDescriptor(String path, long size, long mtime, int[] data, String md5) {
+        super();
+        this.path = path;
 
-		this.size = size;
-		this.mtime = mtime;
+        this.size = size;
+        this.mtime = mtime;
 
-		// byte[] rgba = convertToARGB(data);
-		// this.data = rgba;
-		this.data = data;
-		this.md5Digest = md5;
-	}
+        // byte[] rgba = convertToARGB(data);
+        // this.data = rgba;
+        this.data = data;
+        this.md5Digest = md5;
+    }
 
-	protected byte[] convertToARGB(int[] data) {
-		byte[] rgba = new byte[data.length * 4];
-		// int j = 0;
-		for (int i = 0; i < data.length - 4; i++) {
-			if (i == 0) {
-				System.out.println("ImageDescriptor.convertToARGB()");
-				System.out.println("   " + ((data[i] >>> 16) & 0xFF) + " -> " + (byte) ((data[i] >>> 16) & 0xFF));
-				System.out.println("   " + ((data[i] >>> 8) & 0xFF) + " -> " + (byte) ((data[i] >>> 8) & 0xFF));
+    protected byte[] convertToARGB(int[] data) {
+        byte[] rgba = new byte[data.length * 4];
+        // int j = 0;
+        for (int i = 0; i < data.length - 4; i++) {
+            if (i == 0) {
+                System.out.println("ImageDescriptor.convertToARGB()");
+                System.out.println("   " + ((data[i] >>> 16) & 0xFF) + " -> " + (byte) ((data[i] >>> 16) & 0xFF));
+                System.out.println("   " + ((data[i] >>> 8) & 0xFF) + " -> " + (byte) ((data[i] >>> 8) & 0xFF));
 
-				System.out.println("   " + ((data[i] >>> 0) & 0xFF) + " -> " + (byte) ((data[i] >>> 0) & 0xFF));
+                System.out.println("   " + ((data[i] >>> 0) & 0xFF) + " -> " + (byte) ((data[i] >>> 0) & 0xFF));
 
-			}
-			rgba[4 * i] = (byte) ((data[i] >>> 24) & 0xFF);
-			rgba[4 * i + 1] = (byte) ((data[i] >>> 16) & 0xFF);
-			rgba[4 * 1 + 2] = (byte) ((data[i] >>> 8) & 0xFF);
-			rgba[4 * +3] = (byte) ((data[i] >>> 0) & 0xFF);
-			// j++;
-		}
-		return rgba;
-	}
+            }
+            rgba[4 * i] = (byte) ((data[i] >>> 24) & 0xFF);
+            rgba[4 * i + 1] = (byte) ((data[i] >>> 16) & 0xFF);
+            rgba[4 * 1 + 2] = (byte) ((data[i] >>> 8) & 0xFF);
+            rgba[4 * +3] = (byte) ((data[i] >>> 0) & 0xFF);
+            // j++;
+        }
+        return rgba;
+    }
 
-	public double getRmse() {
-		return rmse;
-	}
+    public double getRmse() {
+        return rmse;
+    }
 
-	public void setRmse(double rmse) {
-		this.rmse = rmse;
-	}
+    public void setRmse(double rmse) {
+        this.rmse = rmse;
+    }
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public void setSize(long size) {
-		this.size = size;
-	}
+    public void setSize(long size) {
+        this.size = size;
+    }
 
-	public void setMtime(long mtime) {
-		this.mtime = mtime;
-	}
+    public void setMtime(long mtime) {
+        this.mtime = mtime;
+    }
 
-	public void setMd5Digest(String md5Digest) {
-		this.md5Digest = md5Digest;
-	}
+    public void setMd5Digest(String md5Digest) {
+        this.md5Digest = md5Digest;
+    }
 
-	public void setData(int[] data) {
-		this.data = data; // this.convertToARGB(data);
-	}
+    public void setData(int[] data) {
+        this.data = data; // this.convertToARGB(data);
+    }
 
-	//
-	// public void setData(byte[] data) {
-	// this.data = data;
-	// }
+    //
+    // public void setData(byte[] data) {
+    // this.data = data;
+    // }
 
-	public String getPath() {
-		return path;
-	}
+    public String getPath() {
+        return path;
+    }
 
-	public long getSize() {
-		return size;
-	}
+    public long getSize() {
+        return size;
+    }
 
-	public long getMtime() {
-		return mtime;
-	}
+    public long getMtime() {
+        return mtime;
+    }
 
-	public int[] getData() {
-		return data;
-	}
+    public int[] getData() {
+        return data;
+    }
 
-	public byte[] getDataAsByte() {
-		// convert the int[] array to byte[] array
-		if (data == null) {
+    public byte[] getDataAsByte() {
+        // convert the int[] array to byte[] array
+        if (data == null) {
             System.out.println("MediaFileDescriptor.getDataAsByte found null data");
-			return null;
-		}
-		ByteArrayOutputStream ba = new ByteArrayOutputStream();
-		ObjectOutputStream oi;
-		try {
-			oi = new ObjectOutputStream(ba);
-			oi.writeObject(data);
-			oi.close();
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return ba.toByteArray();
-	}
+            return null;
+        }
+        ByteArrayOutputStream ba = new ByteArrayOutputStream();
+        ObjectOutputStream oi;
+        try {
+            oi = new ObjectOutputStream(ba);
+            oi.writeObject(data);
+            oi.close();
 
-	public String getMD5() {
-		return md5Digest;
-	}
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return ba.toByteArray();
+    }
 
-	@Override
-	public String toString() {
-		return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + "]";
-	}
+    public String getMD5() {
+        return md5Digest;
+    }
 
-	public static void main(String[] args) {
-		String path = "/user/fhuet/desktop/home/workspaces/rechercheefficaceimagessimilaires/images/tn/original.jpg";
-		// / System.out.println(ImageDescriptor.readFromDisk(path));
-	}
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public Connection getConnection() {
+
+        return connection;
+    }
+
+    @Override
+    public String toString() {
+        return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + "]";
+    }
+
+    public static void main(String[] args) {
+        String path = "/user/fhuet/desktop/home/workspaces/rechercheefficaceimagessimilaires/images/tn/original.jpg";
+        // / System.out.println(ImageDescriptor.readFromDisk(path));
+    }
 
 }
