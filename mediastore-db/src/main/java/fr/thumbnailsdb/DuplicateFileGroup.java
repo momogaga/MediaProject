@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class DuplicateFileGroup {
 	long fileSize;
+
 	@XmlElement
 	ArrayList<String> al = new ArrayList<String>();
 

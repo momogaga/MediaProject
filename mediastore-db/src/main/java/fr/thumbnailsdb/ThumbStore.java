@@ -22,6 +22,9 @@ public class ThumbStore {
     protected static int CURRENT_VERSION = 2;
 
 
+    //This is used as a cache of preloaded descriptors
+    protected ArrayList<MediaFileDescriptor> preloadedDescriptors;
+
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -503,7 +506,6 @@ public class ThumbStore {
 
                 while (res.next()) {
                     String path = res.getString("path");
-
                     String md5 = res.getString("md5");
                     long size = res.getLong("size");
                     if (md5 != null) {
@@ -573,14 +575,14 @@ public class ThumbStore {
         ResultSet res = null;
         String p = null;
         try {
-       //     System.out.println("ThumbStore.getPath " +c  + " with index " + index);
+            //     System.out.println("ThumbStore.getPath " +c  + " with index " + index);
             sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
 
             PreparedStatement psmnt;
 
             psmnt = c.prepareStatement("SELECT path from IMAGES WHERE id=(?)");
-            psmnt.setInt(1,index);
+            psmnt.setInt(1, index);
             psmnt.execute();
             res = psmnt.getResultSet();
             while (res.next()) {
@@ -878,6 +880,105 @@ public class ThumbStore {
 //        }
     }
 
+
+    protected ArrayList<MediaFileDescriptor> getPreloadedDescriptors() {
+        if (preloadedDescriptors == null) {
+            Status.getStatus().setStringStatus("Building descriptors list");
+            ProgressBar pb = new ProgressBar();
+            int dbSize = size();
+            preloadedDescriptors = new ArrayList<MediaFileDescriptor>(dbSize);
+            int increment = dbSize / 20;
+            int i = 0;
+            int step = 0;
+            if (increment == 0) {
+                increment = 1;
+            }
+            MultipleResultSet mrs = getAllInDataBase();
+            ArrayList<ResultSet> ares = mrs.getResultSets();
+            ArrayList<Connection> connections = mrs.getConnections();
+            int currentConnection = 0;
+            for (ResultSet res : ares) {
+                try {
+                    Connection c = connections.get(currentConnection);
+                    while (res.next()) {
+                        i++;
+                        if (i > increment) {
+                            i = 0;
+                            step++;
+                            if (pb != null) {
+                                pb.update(step, 20);
+                            }
+                            Status.getStatus().setStringStatus("Building descriptors list " + ((step + 1) * 5) + "%");
+                        }
+                        String path = null;
+                        //   if (SimilarImageFinder.USE_FULL_PATH) {
+                        path = res.getString("path");
+                        // }
+                        byte[] d = res.getBytes("data");
+                        int id = res.getInt("id");
+                        String md5 = res.getString("md5");
+                        long size = res.getLong("size");
+                        //  size = res.getLong("size");
+                        if (d != null) {
+                            ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
+                            int[] idata = (int[]) oi.readObject();
+                            if (path != null && md5 != null) {
+                                MediaFileDescriptor imd = new MediaFileDescriptor();
+                                if (SimilarImageFinder.USE_FULL_PATH) {
+                                    imd.setPath(path);
+                                }
+
+                                imd.setId(id);
+                                imd.setData(idata);
+                                imd.setSize(size);
+                                // System.out.println("MD5 is " + md5);
+                                imd.setMd5Digest(md5);
+                                // System.out.println("SimilarImageFinder.getPreloadedDescriptors connection " +c);
+                                imd.setConnection(c);
+                                preloadedDescriptors.add(imd);
+                            } else {
+                                //  System.out.println("Thumbstore: something is wrong with data " + path);
+                                //TODO : we should clean the data here
+                            }
+                        }
+                    }
+                    currentConnection++;
+                } catch (SQLException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (IOException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+
+            System.out.println("ThumbStore.getPreloadedDescriptors sorting  " + preloadedDescriptors.size() + " data");
+            long t0 = System.currentTimeMillis();
+            Collections.sort(preloadedDescriptors, new Comparator<MediaFileDescriptor>() {
+
+                public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
+//                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
+//                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
+                    return o1.getMD5().compareTo(o2.getMD5());
+                }
+            });
+            long t1 = System.currentTimeMillis();
+
+
+            System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
+            Status.getStatus().setStringStatus(Status.IDLE);
+
+        }
+        return preloadedDescriptors;
+    }
+
+    public void flushPreloadedDescriptors() {
+        if (this.preloadedDescriptors != null) {
+            this.preloadedDescriptors.clear();
+            this.preloadedDescriptors = null;
+        }
+    }
+
     public static void main(String[] args) {
 
         ThumbStore ts = new ThumbStore("localDB");
@@ -892,6 +993,4 @@ public class ThumbStore {
         ts.test2();
 
     }
-
-
 }

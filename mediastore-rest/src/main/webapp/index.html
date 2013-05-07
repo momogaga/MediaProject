@@ -74,8 +74,16 @@
         }
 
         .cls {
-            clear: both;
+            /*clear: both;*/
+            /*float : left;*/
+            display : inline-block;
+            width : 33%;
+
         }
+        .cls:nth-child(odd)		{ background-color:#eee; }
+        .cls:nth-child(even)		{ background-color:#fff; }
+
+
 
         .flt {
             float: left;
@@ -104,6 +112,8 @@
 
         .description {
             padding-bottom: 10px;
+            word-wrap: break-word;
+            width: 90%;
         }
 
 
@@ -114,25 +124,29 @@
 
 
         /* selected row input table*/
-        table#duplicate-folder-table {
+        table.hover-table  {
             border-collapse: collapse;
         }
-        #duplicate-folder-table tr {
-            background-color: #eee;
+        .hover-table tr {
+            background-color: #e8edff;
             border-top: 1px solid #fff;
         }
-        #duplicate-folder-table tr:hover {
-            background-color: #ccc;
+        .hover-table tr:hover {
+            background-color: #b9c9fe;
         }
-        #duplicate-folder-table th {
-            background-color: #fff;
+        .hover-table  th {
+            background-color: #9aaffe;
         }
-        #duplicate-folder-table th, #example td {
+        .hover-table  th, #example td {
             padding: 3px 5px;
         }
-        #duplicate-folder-table td:hover {
+        .hover-table  td:hover {
             cursor: pointer;
         }
+        .hover-table  thead {
+            background-color : #b9c9fe;
+        }
+
 
     </style>
 
@@ -218,22 +232,24 @@
         </form>
 
 
-        <div id="accordion"></div>
-        <span id="duplicate_result"></span>
+        <!--<div id="accordion"></div>-->            <div  style="width:70%;float:left">
+        <table class="hover-table" id="duplicate-file-table"></table>
+        </div>
+        <!--<span id="duplicate_result"></span>-->
     </div>
 
     <div id="tabs-folder">
-
-
-
         <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
 
             <input type="submit" value="get Folders">
         </form>
-        <div  style="width:70%;float:left">
-            <table id="duplicate-folder-table" ></table>
+        <div  style="width:65%;float:left">
+            <table class="hover-table" id="duplicate-folder-table" ></table>
         </div>
-        <div id="duplicate-folders-details" style="width: 30% ; float:left"></div>
+        <!--<div id="duplicate-folders-details" style="width: 30% ; float:left"></div>-->
+        <div id="duplicate-folders-details" style="width:35% ; height : 75% ;
+        position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc"></div>
+
 
     </div>
 

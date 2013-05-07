@@ -46,7 +46,7 @@ public class RestTest {
     protected DuplicateMediaFinder df;
 
 
-    DuplicateFolderList dc = null;
+//    DuplicateFolderList dc = null;
 
 
     public RestTest() {
@@ -145,10 +145,15 @@ public class RestTest {
 
     private synchronized DuplicateFolderList getDuplicateFolderGroup() {
 
-        if (dc == null) {
-            dc = df.computeDuplicateFolderSets(df.findDuplicateMedia());
-        }
+      //  if (dc == null) {
+
+        ArrayList<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
+        Status.getStatus().setStringStatus("Computing duplicate folders");
+          DuplicateFolderList dc =  df.computeDuplicateFolderSets(mfdList);
+        Status.getStatus().setStringStatus(Status.IDLE);
         return dc;
+        //}
+//        return dc;
     }
 
     @GET
@@ -208,7 +213,7 @@ public class RestTest {
     @GET
     @Path("open/")
     public Response openPath(@QueryParam("path") String path) {
-        Logger.getLogger().log("RestTest.openPath " + path);
+       System.out.println("RestTest.openPath " + path);
         File file = new File (path);
         Desktop desktop = Desktop.getDesktop();
         try {
@@ -237,7 +242,7 @@ public class RestTest {
     @Path("shrink/")
     public Response shrink(@QueryParam("folder") final java.util.List<String> obj) {
         tb.shrink(obj);
-        si.flushPreloadedDescriptors();
+        tb.flushPreloadedDescriptors();
         return Response.status(200).entity("Shrink done").build();
     }
 
@@ -246,7 +251,7 @@ public class RestTest {
     @Path("update/")
     public Response update(@QueryParam("folder") final java.util.List<String> obj) {
         new MediaIndexer(tb).updateDB(obj);
-        si.flushPreloadedDescriptors();
+       tb.flushPreloadedDescriptors();
         return Response.status(200).entity("Update done").build();
     }
 

@@ -17,7 +17,8 @@ public class DuplicateMediaFinder {
     }
 
     public ArrayList<MediaFileDescriptor> findDuplicateMedia() {
-        return thumbstore.getMFDOrderedByMD5();
+//        return thumbstore.getMFDOrderedByMD5();
+        return thumbstore.getPreloadedDescriptors();
     }
 
     public void prettyPrintDuplicate(ResultSet r) {
@@ -55,15 +56,19 @@ public class DuplicateMediaFinder {
             MediaFileDescriptor mfd = it.next();
             String md5 = mfd.getMD5();
             if (md5 != null) {
+                //TODO : this should be done in the DB directly
+                int index = mfd.getId();
+                String path = thumbstore.getPath(mfd.getConnection(), index);
+              //  mfd.setPath(path);
                 if (md5.equals(currentMd5)) {
                     // add to current group
-                    dg.add(mfd.getSize(), mfd.getPath());
+                    dg.add(mfd.getSize(), path);
                 } else {
                     if (dg.size() > 1) {
                         duplicateFileList.add(dg);
                     }
                     dg = new DuplicateFileGroup();
-                    dg.add(mfd.getSize(), mfd.getPath());
+                    dg.add(mfd.getSize(), path);
                     currentMd5 = md5;
 
                 }
@@ -91,6 +96,12 @@ public class DuplicateMediaFinder {
         while (it.hasNext()) {
             MediaFileDescriptor mfd = it.next();
             String md5 = mfd.getMD5();
+            //TODO : this should be done in the DB directly
+            int index = mfd.getId();
+            String path = thumbstore.getPath(mfd.getConnection(), index);
+            mfd.setPath(path);
+
+
             if (md5.equals(currentMd5)) {
                 dg.add(mfd.getSize(), mfd.getPath());
             } else {
@@ -100,7 +111,6 @@ public class DuplicateMediaFinder {
                 dg = new DuplicateFileGroup();
                 dg.add(mfd.getSize(), mfd.getPath());
                 currentMd5 = md5;
-
             }
         }
         if (dg.size() > 1) {

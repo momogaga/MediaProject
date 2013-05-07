@@ -4,11 +4,9 @@ import fr.thumbnailsdb.bktree.BKTree;
 import fr.thumbnailsdb.bktree.RMSEDistance;
 import fr.thumbnailsdb.vptree.VPTree;
 import fr.thumbnailsdb.vptree.VPTreeBuilder;
-import fr.thumbnailsdb.vptree.VPTreeSeeker;
 import fr.thumbnailsdb.vptree.distances.VPRMSEDistance;
 
 import java.io.*;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -18,12 +16,11 @@ public class SimilarImageFinder {
 
     //indicate whether we use the full path in the cache
     //or rely on indexes for lower memory footprint
-    private static boolean USE_FULL_PATH = false;
+    protected static boolean USE_FULL_PATH = false;
 
     protected ThumbStore thumbstore;
 
-    //This is used as a cache of preloaded descriptors
-    protected ArrayList<MediaFileDescriptor> preloadedDescriptors;
+
 
     protected BKTree<MediaFileDescriptor> bkTree;// = new BKTree<String>(new RMSEDistance());
 
@@ -44,7 +41,7 @@ public class SimilarImageFinder {
             //we have to add the path to the selected images
             for (MediaFileDescriptor mfd : result) {
                 int index = mfd.getId();
-                System.out.println("SimilarImageFinder.findSimilarMedia ID is " + index);
+               // System.out.println("SimilarImageFinder.findSimilarMedia ID is " + index);
                 String path = thumbstore.getPath(mfd.getConnection(), index);
                 mfd.setPath(path);
             }
@@ -134,78 +131,6 @@ public class SimilarImageFinder {
 
     }
 
-    public void flushPreloadedDescriptors() {
-        this.preloadedDescriptors.clear();
-        this.preloadedDescriptors = null;
-    }
-
-    protected ArrayList<MediaFileDescriptor> getPreloadedDescriptors() {
-        if (preloadedDescriptors == null) {
-            Status.getStatus().setStringStatus("Building descriptors list");
-            ProgressBar pb = new ProgressBar();
-            int size = thumbstore.size();
-            preloadedDescriptors = new ArrayList<MediaFileDescriptor>(size);
-            int increment = size / 20;
-            int i = 0;
-            int step = 0;
-            if (increment == 0) {
-                increment = 1;
-            }
-            MultipleResultSet mrs = thumbstore.getAllInDataBase();
-            ArrayList<ResultSet> ares = mrs.getResultSets();
-            ArrayList<Connection> connections = mrs.getConnections();
-            int currentConnection = 0;
-            for (ResultSet res : ares) {
-                try {
-                    Connection c = connections.get(currentConnection);
-                    while (res.next()) {
-                        i++;
-                        if (i > increment) {
-                            i = 0;
-                            step++;
-                            if (pb != null) {
-                                pb.update(step, 20);
-                            }
-                            Status.getStatus().setStringStatus("Building descriptors list " + ((step + 1) * 5) + "%");
-                        }
-                        String path = null;
-                        if (USE_FULL_PATH) {
-                            path = res.getString("path");
-                        }
-                        byte[] d = res.getBytes("data");
-                        int id = res.getInt("id");
-                        if (d != null) {
-                            ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                            int[] idata = (int[]) oi.readObject();
-                            if (idata != null) {
-                                MediaFileDescriptor imd = new MediaFileDescriptor();
-                                imd.setPath(path);
-                                imd.setId(id);
-                                imd.setData(idata);
-                               // System.out.println("SimilarImageFinder.getPreloadedDescriptors connection " +c);
-                                imd.setConnection(c);
-                                preloadedDescriptors.add(imd);
-                            }
-                        }
-                    }
-                    currentConnection++;
-                } catch (SQLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
-        }
-
-
-        Status.getStatus().setStringStatus(Status.IDLE);
-
-        return preloadedDescriptors;
-
-
-    }
 
 
     protected TreeSet<MediaFileDescriptor> findSimilarImage(MediaFileDescriptor id, int max) {
@@ -216,10 +141,10 @@ public class SimilarImageFinder {
             }
         });
 
-        Iterator<MediaFileDescriptor> it = getPreloadedDescriptors().iterator();
+        Iterator<MediaFileDescriptor> it = thumbstore.getPreloadedDescriptors().iterator();
         int found = 0;
         Status.getStatus().setStringStatus(Status.FIND_SIMILAR);
-        int size = getPreloadedDescriptors().size();
+        int size = thumbstore.getPreloadedDescriptors().size();
         int processed = 0;
         ProgressBar pb = new ProgressBar();
         int increment = size / 20;
@@ -235,6 +160,9 @@ public class SimilarImageFinder {
             processed++;
             //  String path = current.getPath();
             int[] idata = current.getData();
+            if (idata==null) {
+                continue;
+            }
             double rmse = ImageComparator.compareARGBUsingRMSE(id.getData(), idata);
             if (i > increment) {
                 i = 0;

@@ -22,6 +22,13 @@ public class DuplicateFolderGroup {
     @XmlElement
     long totalSize;
 
+    @XmlElement
+    ArrayList<String> file1 = new ArrayList<String>();
+
+    @XmlElement
+    ArrayList<String> file2 = new ArrayList<String>();
+
+
     public ArrayList<String> getFile1() {
         return file1;
     }
@@ -30,11 +37,7 @@ public class DuplicateFolderGroup {
         return file2;
     }
 
-    // @XmlElement
-    ArrayList<String> file1 = new ArrayList<String>();
 
-   // @XmlElement
-    ArrayList<String> file2 = new ArrayList<String>();
 
     public DuplicateFolderGroup(String f1, String f2) {
         folder1=f1;
