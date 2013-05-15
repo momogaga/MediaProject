@@ -61,6 +61,7 @@ function getDuplicate() {
 
             for (i in data) {
                 data[i]['occurences'] = data[i].al.length;
+                data[i]['fileSize'] = data[i]['fileSize']/1024/1024;
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
                     rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '</div> ';
