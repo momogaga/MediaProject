@@ -130,7 +130,7 @@ public class ThumbStore {
             String table = "CREATE TABLE VERSION(version int)";
             Statement st = connexion.createStatement();
             st.execute(table);
-            table = "INSERT into VERSION VALUES(0)";
+            table = "INSERT into VERSION VALUES(" + CURRENT_VERSION+")";
             st.execute(table);
             System.out.println("ThumbStore.checkAndCreateTables() table created with version 0");
         }

@@ -65,7 +65,6 @@ function getDuplicate() {
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
                     rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '</div> ';
-
                 }
                 html_table += rowTag + '</td></tr> ';
             }
@@ -252,6 +251,12 @@ function shrink() {
 function update() {
     var folders = getSelectedFolders();
     $.get("rest/hello/update", {folder:folders}, function (data) {
+    });
+}
+
+function shrinkUpdate() {
+    var folders = getSelectedFolders();
+    $.get("rest/hello/shrinkUpdate", {folder:folders}, function (data) {
     });
 }
 

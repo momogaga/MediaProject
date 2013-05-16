@@ -382,8 +382,12 @@ public class ThumbnailGenerator {
             //   InputStream in = new ByteArrayInputStream(mf.getDataAsByte());
             // image = ImageIO.read(in);
             // image.setRGB(0,0,WIDTH,HEIGHT,mf.getData(),0,WIDTH);
-            target = tg.downScaleImage(image, 300, 300);
+            target = tg.downScaleImage(image, 200, 200);
             System.out.println("ThumbnailGenerator.main image is " + target);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(target, "JPEG", out);
+            System.out.println("ThumbnailGenerator.main size of thumbnails is " + out.toByteArray().length  +  " bytes");
+
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

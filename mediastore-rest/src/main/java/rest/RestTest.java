@@ -241,8 +241,8 @@ public class RestTest {
     @GET
     @Path("shrink/")
     public Response shrink(@QueryParam("folder") final java.util.List<String> obj) {
-        tb.shrink(obj);
         tb.flushPreloadedDescriptors();
+        tb.shrink(obj);
         return Response.status(200).entity("Shrink done").build();
     }
 
@@ -250,8 +250,19 @@ public class RestTest {
     @GET
     @Path("update/")
     public Response update(@QueryParam("folder") final java.util.List<String> obj) {
+        tb.flushPreloadedDescriptors();
         new MediaIndexer(tb).updateDB(obj);
-       tb.flushPreloadedDescriptors();
+        return Response.status(200).entity("Update done").build();
+    }
+
+
+    @GET
+    @Path("shrinkUpdate/")
+    public Response shrinkUpdate(@QueryParam("folder") final java.util.List<String> obj) {
+        tb.flushPreloadedDescriptors();
+        tb.shrink();
+        MediaIndexer mdi = new MediaIndexer(tb);
+        mdi.updateDB(obj);
         return Response.status(200).entity("Update done").build();
     }
 
