@@ -61,7 +61,7 @@ function getDuplicate() {
 
             for (i in data) {
                 data[i]['occurences'] = data[i].al.length;
-                data[i]['fileSize'] = data[i]['fileSize']/1024/1024;
+                data[i]['fileSize'] = data[i]['fileSize'] / 1024 / 1024;
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
                     rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '</div> ';
@@ -142,14 +142,14 @@ function getDuplicateFolderDetails(folder1, folder2) {
 
     var d = duplicateFolderDetails[folder1 + folder2];
     console.log(d);
-  //  debugger;
+    //  debugger;
 
 //    $.getJSON('rest/hello/duplicateFolderDetails', {
 //            folder1:folder1,
 //            folder2:folder2
 //        },
 //        function (data) {
-            var tab = { files:[ ] };
+    var tab = { files:[ ] };
     for (var i = 0; i < d[0].length; ++i) {
         tab.files.push({
             f1:d[0][i],
@@ -189,7 +189,7 @@ function getDuplicateFolder() {
     $('#duplicate-folders-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + ' <th class="files ay-sort"><span>#Files</span></th>'+
+        + ' <th class="files ay-sort"><span>#Files</span></th>' +
         '<th class="paths ay-sort"><span>&#37;F1</span></th>' +
         '<th class="paths ay-sort"><span>&#37;F2</span></th>' +
         '<th class="paths ay-sort"><span>Paths</span></th>' +
@@ -237,17 +237,15 @@ function getDuplicateFolder() {
                 var folder2 = $this.data('p2');
                 getDuplicateFolderDetails(folder1, folder2);
             });
-            $('.pathlink').click(function () {
-                var $this = $(this);
-                var p1 = $this.data('p1');
-                var p2 = $this.data('p2');
-                callOpen(p1, p2);
-            });
+
         });
     });
 }
 function callOpen(para1, para2) {
-    $.get("rest/hello/open", {path:para1});
+    //  debugger;
+    var folders = [];
+    folders.push(para1, para2);
+    $.get("rest/hello/open", {path:folders});
 }
 
 
@@ -300,19 +298,37 @@ function uploadFinished(object) {
     }
     jQuery(document).ready(function () {
 
-        generatePathLink();
+           generatePathLink();
         jQuery('.nailthumb-container').nailthumb();
         jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
     });
 }
 
 function generatePathLink() {
+//    $('.pathlink').click(function () {
+//        var $this = $(this);
+//        var p1 = $this.data('p1');
+//        var p2 = $this.data('p2');
+//        callOpen(p1, p2);
+//    });
+
     $('.pathlink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');
         var p2 = $this.data('p2');
-        callOpen(p1, p2);
+
+        var folders = [];
+        //folders.push(para1, para2);
+
+        $this.parent().parent().find('.pathlink').each(function () {
+            folders.push($(this).attr('data-p1'))
+        });
+
+
+        // debugger;
+        callOpen(folders[0], folders[1]);
     });
+
 }
 
 function getWithRMSE(param, rmse) {
