@@ -17,6 +17,14 @@ public class DuplicateFolderGroup {
     String folder1;
     @XmlElement
     String folder2;
+
+    @XmlElement
+    int filesInFolder1;
+
+
+    @XmlElement
+    int filesInFolder2;
+
     @XmlElement
      int occurences;
     @XmlElement
@@ -42,7 +50,7 @@ public class DuplicateFolderGroup {
     public DuplicateFolderGroup(String f1, String f2) {
         folder1=f1;
         folder2=f2;
-         occurences=1;
+        occurences=1;
      }
 
     public void increase(){
@@ -57,6 +65,15 @@ public class DuplicateFolderGroup {
 
     public void addSize(long s){
         totalSize+=s;
+    }
+
+
+    public void setFilesInFolder1(int filesInFolder1) {
+        this.filesInFolder1 = filesInFolder1;
+    }
+
+    public void setFilesInFolder2(int filesInFolder2) {
+        this.filesInFolder2 = filesInFolder2;
     }
 
 }

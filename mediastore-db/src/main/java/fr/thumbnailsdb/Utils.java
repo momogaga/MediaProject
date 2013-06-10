@@ -29,5 +29,16 @@ public class Utils {
 		videoMatcher = videoPattern.matcher(video);
 		return videoMatcher.matches();
 	}
-	
+
+
+    static String fileToDirectory(String n) {
+        int folderIndex = n.lastIndexOf('/');
+        if (folderIndex <0) {
+            //it's probably a windows path
+            folderIndex = n.lastIndexOf('\\');
+        }
+       // File file = new File(n);
+//            //File parentDir = file.getParentFile(); // to get the parent dir
+        return n.substring(0,folderIndex);//file.getParent(); // to get the parent dir name
+    }
 }

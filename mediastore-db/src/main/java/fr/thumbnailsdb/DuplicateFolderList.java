@@ -1,6 +1,7 @@
 package fr.thumbnailsdb;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -31,8 +32,8 @@ public class DuplicateFolderList {
             }
             for (int i = 0; i < dg.size() - 1; i++) {
                 for (int j = i + 1; j < dg.size(); j++) {
-                    String dir1 = fileToDirectory(dg.get(i));
-                    String dir2 = fileToDirectory(dg.get(j));
+                    String dir1 = Utils.fileToDirectory(dg.get(i));
+                    String dir2 = Utils.fileToDirectory(dg.get(j));
                     String couple = dir1 + " <-> " + dir2;
                     DuplicateFolderGroup dfg = folderWithDuplicates.get(couple);
                     if (dfg != null) {
@@ -53,31 +54,28 @@ public class DuplicateFolderList {
         }
     }
 
-    private String fileToDirectory(String n) {
-        int folderIndex = n.lastIndexOf('/');
-        if (folderIndex <0) {
-            //it's probably a windows path
-            folderIndex = n.lastIndexOf('\\');
-        }
-       // File file = new File(n);
-//            //File parentDir = file.getParentFile(); // to get the parent dir
-        return n.substring(0,folderIndex);//file.getParent(); // to get the parent dir name
-    }
-
 
     public DuplicateFolderGroup getDetails(String f1, String f2) {
         String couple = f1 + " <-> " + f2;
         return folderWithDuplicates.get(couple);
     }
 
+    /**
+     * Construct a collection of max DuplicateFolderGroup elements
+     * which pass filters in filter
+     * Complete each DuplicateFolderGroup with metadata
+     * @param filter
+     * @param max
+     * @return
+     */
     public Collection asSortedCollection(String[] filter, int max) {
         ArrayList<DuplicateFolderGroup> list = new ArrayList<DuplicateFolderGroup>();
+        //filter elements
         for (DuplicateFolderGroup d : folderWithDuplicates.values()) {
             if (match(d, filter)) {
                 list.add(d);
             }
         }
-
         ArrayList<DuplicateFolderGroup> al = new ArrayList<DuplicateFolderGroup>(list.size());
         Collections.sort(list,new Comparator<DuplicateFolderGroup>() {
             //	@Override
@@ -86,11 +84,18 @@ public class DuplicateFolderList {
             }
         });
         Iterator<DuplicateFolderGroup> it = list.iterator();
+        //select only max elements
         int i = 0;
         while (it.hasNext() && i<max) {
-            al.add(it.next());
-            i++;
+            DuplicateFolderGroup dfg = it.next();
+             for (String s : new File(dfg.folder1).list()) {
+            System.out.println("   ---  " + s);
+             }
+            dfg.setFilesInFolder1(new File(dfg.folder1).list().length);
+            dfg.setFilesInFolder2(new File(dfg.folder2).list().length);
 
+            al.add(dfg);
+            i++;
         }
         return al;
     }

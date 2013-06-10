@@ -189,12 +189,18 @@ function getDuplicateFolder() {
     $('#duplicate-folders-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + ' <th class="files ay-sort"><span>#Files</span></th>  <th class="paths ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
+        + ' <th class="files ay-sort"><span>#Files</span></th>'+
+        '<th class="paths ay-sort"><span>&#37;F1</span></th>' +
+        '<th class="paths ay-sort"><span>&#37;F2</span></th>' +
+        '<th class="paths ay-sort"><span>Paths</span></th>' +
+        '</tr></thead> <tbody>';
 
 
     var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}" >'
         + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
-        + '<td class="files">{{occurences}}</td>';
+        + '<td class="files">{{occurences}}</td>'
+        + '<td class="f1">{{filesInFolder1}}</td>'
+        + '<td class="f2">{{filesInFolder2}}</td>';
 
     $.getJSON('rest/hello/duplicateFolder', {
         folder:folders
@@ -202,6 +208,9 @@ function getDuplicateFolder() {
         $.each(data, function (key, val) {
             val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
             val['totalSize'] = val['totalSize'].toFixed(4);
+
+            val['filesInFolder1'] = (val['occurences'] * 100.0 / val['filesInFolder1']).toFixed(0);
+            val['filesInFolder2'] = (val['occurences'] * 100.0 / val['filesInFolder2']).toFixed(0);
 
             var rowTag = Mustache.to_html(template, val);
             html_table += rowTag
