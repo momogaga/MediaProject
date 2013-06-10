@@ -145,11 +145,11 @@ public class RestTest {
 
     private synchronized DuplicateFolderList getDuplicateFolderGroup() {
 
-      //  if (dc == null) {
+        //  if (dc == null) {
 
         ArrayList<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
         Status.getStatus().setStringStatus("Computing duplicate folders");
-          DuplicateFolderList dc =  df.computeDuplicateFolderSets(mfdList);
+        DuplicateFolderList dc = df.computeDuplicateFolderSets(mfdList);
         Status.getStatus().setStringStatus(Status.IDLE);
         return dc;
         //}
@@ -212,16 +212,17 @@ public class RestTest {
 
     @GET
     @Path("open/")
-    public Response openPath(@QueryParam("path") String path) {
-       System.out.println("RestTest.openPath " + path);
-        File file = new File (path);
-        Desktop desktop = Desktop.getDesktop();
-        try {
-            desktop.open(file);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    public Response openPath(@QueryParam("path") final java.util.List<String> obj) {
+        for (String path : obj) {
+            System.out.println("RestTest.openPath2 " + path);
+            File file = new File(path);
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.open(file);
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
-
         return Response.status(200).build();
     }
 
