@@ -64,6 +64,7 @@ public class DuplicateFolderList {
      * Construct a collection of max DuplicateFolderGroup elements
      * which pass filters in filter
      * Complete each DuplicateFolderGroup with metadata
+     *
      * @param filter
      * @param max
      * @return
@@ -77,7 +78,7 @@ public class DuplicateFolderList {
             }
         }
         ArrayList<DuplicateFolderGroup> al = new ArrayList<DuplicateFolderGroup>(list.size());
-        Collections.sort(list,new Comparator<DuplicateFolderGroup>() {
+        Collections.sort(list, new Comparator<DuplicateFolderGroup>() {
             //	@Override
             public int compare(DuplicateFolderGroup o1, DuplicateFolderGroup o2) {
                 return Double.compare(o2.totalSize, o1.totalSize);
@@ -86,14 +87,20 @@ public class DuplicateFolderList {
         Iterator<DuplicateFolderGroup> it = list.iterator();
         //select only max elements
         int i = 0;
-        while (it.hasNext() && i<max) {
+        while (it.hasNext() && i < max) {
             DuplicateFolderGroup dfg = it.next();
-             for (String s : new File(dfg.folder1).list()) {
-            System.out.println("   ---  " + s);
-             }
-            dfg.setFilesInFolder1(new File(dfg.folder1).list().length);
-            dfg.setFilesInFolder2(new File(dfg.folder2).list().length);
+           // for (String s : new File(dfg.folder1).list()) {
+//            System.out.println("   ---  " + s);
+            //}
 
+            String[] folders = new File(dfg.folder1).list();
+            if (folders != null) {
+                dfg.setFilesInFolder1(folders.length);
+            }
+            folders = new File(dfg.folder2).list();
+            if (folders != null) {
+                dfg.setFilesInFolder2(folders.length);
+            }
             al.add(dfg);
             i++;
         }
