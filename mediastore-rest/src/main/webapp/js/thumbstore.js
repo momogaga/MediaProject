@@ -31,7 +31,6 @@ function getIndexedPaths(div) {
     });
 }
 
-
 function getStatus() {
     $.get("rest/hello/status",function (data) {
         document.getElementById('db_status').innerHTML = data["stringStatus"];
@@ -40,7 +39,6 @@ function getStatus() {
 
         });
 }
-
 
 function getDuplicate() {
     var folders = getSelectedFolders();
@@ -94,9 +92,13 @@ function toDirectLink(path) {
 function toFolderLink(path) {
     var a1 = '  <a class="pathlink" href="#!"  data-p1="' + path + '">';
     var a2 = ' [folder] <a>';
-
-
     return path + a1 + a2;
+}
+
+function toFolderLinks(path1, path2) {
+    var a1 = '  <a class="pathlink" href="#!"  data-p1="' + path1 + '" data-p2="' + path2 + '">';
+    var a2 = ' [folders] <a>';
+    return  a1 + a2;
 }
 
 
@@ -108,47 +110,38 @@ function toFolderAndFileLink(path) {
     }
     //  var file = path.substring(n + 1);
     var folder = path.substring(0, n);
-
-
     return path + '  <a class="pathlink" href="#!"  data-p1="' + path + '">' + '  [open file]</a> ' +
         '  <a class="pathlink" href="#!"  data-p1="' + folder + '">' + '  [open folder]</a>'
 }
 
-function toDualFolderLink(path1, path2) {
-    return  '  <a href="explorer://rest/hello/folder/?path1=' + path1 + '&path2=' + path2 + '">[folders]</a>'
-}
+//function toDualFolderLink(path1, path2) {
+//    return  '  <a href="explorer://rest/hello/folder/?path1=' + path1 + '&path2=' + path2 + '">[folders]</a>'
+//}
 
-function updateAccordion(output) {
-
-    $('#accordion').children().remove();
-
-    $('#accordion').append(output).accordion('destroy').accordion({
-        collapsible:true,
-        autoHeight:false,
-        active:false,
-        change:function (event, ui) {
-            if ($(".nailthumb-container", ui.newContent).length == 0) {
-                $.each($("[id=imagePath]", ui.newContent), function (index, data) {
-                });
-            }
-        }
-
-    });
-
-}
+//function updateAccordion(output) {
+//
+//    $('#accordion').children().remove();
+//
+//    $('#accordion').append(output).accordion('destroy').accordion({
+//        collapsible:true,
+//        autoHeight:false,
+//        active:false,
+//        change:function (event, ui) {
+//            if ($(".nailthumb-container", ui.newContent).length == 0) {
+//                $.each($("[id=imagePath]", ui.newContent), function (index, data) {
+//                });
+//            }
+//        }
+//
+//    });
+//
+//}
 
 
 function getDuplicateFolderDetails(folder1, folder2) {
 
     var d = duplicateFolderDetails[folder1 + folder2];
-    console.log(d);
-    //  debugger;
-
-//    $.getJSON('rest/hello/duplicateFolderDetails', {
-//            folder1:folder1,
-//            folder2:folder2
-//        },
-//        function (data) {
+   // console.log(d);
     var tab = { files:[ ] };
     for (var i = 0; i < d[0].length; ++i) {
         tab.files.push({
@@ -166,8 +159,6 @@ function getDuplicateFolderDetails(folder1, folder2) {
         generatePathLink();
 
     });
-//        });
-
 }
 
 
@@ -213,11 +204,18 @@ function getDuplicateFolder() {
             val['filesInFolder2'] = (val['occurences'] * 100.0 / val['filesInFolder2']).toFixed(0);
 
             var rowTag = Mustache.to_html(template, val);
+//            html_table += rowTag
+//                + '<td class="paths"> <div id="folder1">' + toFolderLink(val['folder1']) + '</div> ' +
+//                '<div id="folder2">' + toFolderLink(val['folder2']) + ' ' +
+//                '</div>  </td>'
+//                + '</tr> ';
+
             html_table += rowTag
-                + '<td class="paths"> <div id="folder1">' + toFolderLink(val['folder1']) + '</div> ' +
-                '<div id="folder2">' + toFolderLink(val['folder2']) + ' ' +
+                + '<td class="paths"> <div id="folder1">' + val['folder1'] + '</div> ' +
+                '<div id="folder2">' + val['folder2'] + ' '  +  toFolderLinks(val['folder1'], val['folder2'])  +
                 '</div>  </td>'
                 + '</tr> ';
+
             var fileArray = new Array();
             fileArray[0] = val['file1'];
             fileArray[1] = val['file2'];
@@ -225,8 +223,6 @@ function getDuplicateFolder() {
             duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
         });
         html_table += '</tbody>';
-
-
         //  debugger;
         updateDuplicateTable('#duplicate-folder-table', html_table);
 
@@ -237,7 +233,6 @@ function getDuplicateFolder() {
                 var folder2 = $this.data('p2');
                 getDuplicateFolderDetails(folder1, folder2);
             });
-
         });
     });
 }
@@ -305,30 +300,19 @@ function uploadFinished(object) {
 }
 
 function generatePathLink() {
-//    $('.pathlink').click(function () {
-//        var $this = $(this);
-//        var p1 = $this.data('p1');
-//        var p2 = $this.data('p2');
-//        callOpen(p1, p2);
-//    });
-
     $('.pathlink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');
         var p2 = $this.data('p2');
-
         var folders = [];
-        //folders.push(para1, para2);
-
-        $this.parent().parent().find('.pathlink').each(function () {
-            folders.push($(this).attr('data-p1'))
-        });
-
-
-        // debugger;
+       // debugger;
+//        $this.parent().parent().find('.pathlink').each(function () {
+//            folders.push($(this).attr('data-p1'))
+//        });
+        folders.push(p1);
+        folders.push(p2);
         callOpen(folders[0], folders[1]);
     });
-
 }
 
 function getWithRMSE(param, rmse) {
