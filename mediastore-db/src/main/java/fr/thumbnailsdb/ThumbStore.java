@@ -24,7 +24,6 @@ public class ThumbStore {
 
     //This is used as a cache of preloaded descriptors
     protected ArrayList<MediaFileDescriptor> preloadedDescriptors;
-
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -963,8 +962,6 @@ public class ThumbStore {
                 }
             });
             long t1 = System.currentTimeMillis();
-
-
             System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
             Status.getStatus().setStringStatus(Status.IDLE);
 

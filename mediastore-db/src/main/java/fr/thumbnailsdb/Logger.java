@@ -3,7 +3,7 @@ package fr.thumbnailsdb;
 public class Logger {
 
 	private static Logger log = new Logger();
-	private static boolean enabled = true;
+	private static boolean enabled = false;
 
 	
 	public static Logger getLogger() {

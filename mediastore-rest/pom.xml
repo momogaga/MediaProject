@@ -89,25 +89,25 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-3</version>
-                <configuration>
-                    <fromFile>target/restThumbstore.jar</fromFile>
-                    <url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>
-                    <serverId>cloudbees-private-release-repository</serverId>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>upload-war-to-server</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>upload-single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.codehaus.mojo</groupId>-->
+                <!--<artifactId>wagon-maven-plugin</artifactId>-->
+                <!--<version>1.0-beta-3</version>-->
+                <!--<configuration>-->
+                    <!--<fromFile>target/restThumbstore.jar</fromFile>-->
+                    <!--<url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>-->
+                    <!--<serverId>cloudbees-private-release-repository</serverId>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>upload-war-to-server</id>-->
+                        <!--<phase>deploy</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>upload-single</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>

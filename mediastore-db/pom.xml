@@ -17,6 +17,7 @@
 
 
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -42,9 +43,9 @@
                             <mainClass>fr.thumbnailsdb.Main</mainClass>
                         </manifest>
                         <!--<manifestEntries>-->
-                            <!--<Build-Time>-->
-                                <!--${build.time}-->
-                            <!--</Build-Time>-->
+                        <!--<Build-Time>-->
+                        <!--${build.time}-->
+                        <!--</Build-Time>-->
                         <!--</manifestEntries>-->
                     </archive>
                     <descriptorRefs>
@@ -65,25 +66,25 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-3</version>
-                <configuration>
-                    <fromFile>target/dbStore.jar</fromFile>
-                    <url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>
-                    <serverId>cloudbees-private-release-repository</serverId>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>upload-war-to-server</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>upload-single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>wagon-maven-plugin</artifactId>-->
+            <!--<version>1.0-beta-3</version>-->
+            <!--<configuration>-->
+            <!--<fromFile>target/dbStore.jar</fromFile>-->
+            <!--<url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>-->
+            <!--<serverId>cloudbees-private-release-repository</serverId>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>upload-war-to-server</id>-->
+            <!--<phase>deploy</phase>-->
+            <!--<goals>-->
+            <!--<goal>upload-single</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
