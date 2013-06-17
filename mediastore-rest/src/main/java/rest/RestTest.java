@@ -23,6 +23,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.multipart.FormDataMultiPart;
 import fr.thumbnailsdb.*;
+import fr.thumbnailsdb.diskmonitor.DiskListener;
+import fr.thumbnailsdb.diskmonitor.DiskWatcher;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 
@@ -40,14 +42,10 @@ public class RestTest {
     private final String dbFileName = "db.txt";
 
     String bdName;
-
     protected ThumbStore tb;
     protected SimilarImageFinder si;
     protected DuplicateMediaFinder df;
-
-
-//    DuplicateFolderList dc = null;
-
+    protected DiskWatcher dw ;
 
     public RestTest() {
         System.out.println("RestTest.RestTest()");
@@ -65,9 +63,9 @@ public class RestTest {
                     }
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();  //To chanfge body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         } else {
             tb = new ThumbStore();
@@ -75,6 +73,14 @@ public class RestTest {
 
         si = new SimilarImageFinder(tb);
         df = new DuplicateMediaFinder(tb);
+        try {
+            dw = new DiskWatcher(tb.getIndexedPaths().toArray(new String[] {}));
+            dw.addListener(new DBDiskUpdater());
+            dw.processEvents();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -93,7 +99,6 @@ public class RestTest {
         if ("status".equals(info)) {
             return Response.status(200).entity("idle").build();
         }
-        // System.out.println("RestTest.getDBInfo() thumbstore is " + tb);
         return Response.status(404).build();
     }
 
@@ -101,7 +106,6 @@ public class RestTest {
     @Path("/status")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getStatus() {
-//        System.out.println("status " + Status.getStatus());
         return Response.status(200).entity(Status.getStatus()).build();
 
     }
@@ -110,10 +114,7 @@ public class RestTest {
     @Path("/paths")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getPaths() {
-//        System.out.println("status " + Status.getStatus());
-        //  System.out.println("Found the pathsOfDBOnDisk " + tb.getIndexedPaths());
         return Response.status(200).entity(tb.getIndexedPaths()).build();
-
     }
 
 
@@ -144,16 +145,11 @@ public class RestTest {
     }
 
     private synchronized DuplicateFolderList getDuplicateFolderGroup() {
-
-        //  if (dc == null) {
-
         ArrayList<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
         Status.getStatus().setStringStatus("Computing duplicate folders");
         DuplicateFolderList dc = df.computeDuplicateFolderSets(mfdList);
         Status.getStatus().setStringStatus(Status.IDLE);
         return dc;
-        //}
-//        return dc;
     }
 
     @GET
@@ -183,20 +179,15 @@ public class RestTest {
         try {
 
             BufferedImage bf = ImageIO.read(new FileInputStream(new File(imageId)));
-
-
             // scale it to the new size on-the-fly
             BufferedImage thumbImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics2D = thumbImage.createGraphics();
             graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             graphics2D.drawImage(bf, 0, 0, 100, 100, null);
-
             // save thumbnail image to outFilename
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             BufferedOutputStream out = new BufferedOutputStream(bout);
             ImageIO.write(thumbImage, "jpg", out);
-
-
             final byte[] imgData = bout.toByteArray();
             final InputStream bigInputStream =
                     new ByteArrayInputStream(imgData);
@@ -256,7 +247,6 @@ public class RestTest {
         return Response.status(200).entity("Update done").build();
     }
 
-
     @GET
     @Path("shrinkUpdate/")
     public Response shrinkUpdate(@QueryParam("folder") final java.util.List<String> obj) {
@@ -295,8 +285,6 @@ public class RestTest {
         try {
             InputStream source = bpe.getInputStream();
             Logger.getLogger().log("RestTest.findSimilar() received " + source);
-            //BufferedImage bi = ImageIO.read(source);
-
             temp = File.createTempFile("tempImage", ".jpg");
             FileOutputStream fo = new FileOutputStream(temp);
 
@@ -314,7 +302,6 @@ public class RestTest {
             }
             Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
         } catch (Exception e) {
-            // message = e.getMessage();
             e.printStackTrace();
         }
 
@@ -339,7 +326,6 @@ public class RestTest {
                 } finally {
                     f.close();
                 }
-                //  Base64.encodeBase64String(FileUtils.readFileToByteArray(new File(path)));
             } catch (IOException e) {
                 System.err.println("Err: File " + path + " not found");
             }
@@ -450,11 +436,9 @@ public class RestTest {
             responseDetailsJson.put("date", mdf.getDate());
             responseDetailsJson.put("gps", mdf.getGPS());
         } catch (JSONException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
-
-        System.out.println("RestTest.findGPSFromPath sending json " + responseDetailsJson);
+       // System.out.println("RestTest.findGPSFromPath sending json " + responseDetailsJson);
         return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
     }
 
@@ -483,6 +467,56 @@ public class RestTest {
             this.base64Data = base64Data;
         }
     }
+
+    public class DBDiskUpdater implements DiskListener {
+
+        public void fileCreated(java.nio.file.Path p) {
+            System.out.println("RestTest$DBDiskUpdater.fileCreated " +p );
+            try {
+                new MediaIndexer(tb).processMT(new File(p.toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void fileModified(java.nio.file.Path p) {
+            System.out.println("RestTest$DBDiskUpdater.fileModified " +p);
+            try {
+                new MediaIndexer(tb).processMT(new File(p.toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void fileDeleted(java.nio.file.Path p) {
+
+        }
+
+        public void folderCreated(java.nio.file.Path p) {
+            System.out.println("RestTest$DBDiskUpdater.folderCreated " +p);
+            try {
+                new MediaIndexer(tb).processMT(new File(p.toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void folderModified(java.nio.file.Path p) {
+            System.out.println("RestTest$DBDiskUpdater.fileModified " +p);
+            try {
+                new MediaIndexer(tb).processMT(new File(p.toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void folderDeleted(java.nio.file.Path p) {
+
+
+        }
+    }
+
+
 
 
 }

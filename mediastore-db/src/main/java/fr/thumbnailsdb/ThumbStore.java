@@ -302,7 +302,6 @@ public class ThumbStore {
                 while (res.next()) {
                     String s = res.getString("path");
                     paths.add(s);
-                    //       System.out.println("getIndexedPaths() path found " + s);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -910,14 +909,11 @@ public class ThumbStore {
                             Status.getStatus().setStringStatus("Building descriptors list " + ((step + 1) * 5) + "%");
                         }
                         String path = null;
-                        //   if (SimilarImageFinder.USE_FULL_PATH) {
                         path = res.getString("path");
-                        // }
                         byte[] d = res.getBytes("data");
                         int id = res.getInt("id");
                         String md5 = res.getString("md5");
                         long size = res.getLong("size");
-                        //  size = res.getLong("size");
                         if (d != null) {
                             ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
                             int[] idata = (int[]) oi.readObject();
@@ -930,9 +926,7 @@ public class ThumbStore {
                                 imd.setId(id);
                                 imd.setData(idata);
                                 imd.setSize(size);
-                                // System.out.println("MD5 is " + md5);
                                 imd.setMd5Digest(md5);
-                                // System.out.println("SimilarImageFinder.getPreloadedDescriptors connection " +c);
                                 imd.setConnection(c);
                                 preloadedDescriptors.add(imd);
                             } else {
@@ -954,20 +948,21 @@ public class ThumbStore {
             System.out.println("ThumbStore.getPreloadedDescriptors sorting  " + preloadedDescriptors.size() + " data");
             long t0 = System.currentTimeMillis();
             Collections.sort(preloadedDescriptors, new Comparator<MediaFileDescriptor>() {
-
                 public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-//                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
-//                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
                     return o1.getMD5().compareTo(o2.getMD5());
                 }
             });
             long t1 = System.currentTimeMillis();
             System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
             Status.getStatus().setStringStatus(Status.IDLE);
-
         }
         return preloadedDescriptors;
     }
+
+    public boolean preloadedDescriptorsExists() {
+        return (this.preloadedDescriptors!=null);
+    }
+
 
     public void flushPreloadedDescriptors() {
         if (this.preloadedDescriptors != null) {
@@ -977,17 +972,7 @@ public class ThumbStore {
     }
 
     public static void main(String[] args) {
-
         ThumbStore ts = new ThumbStore("localDB");
-
-//        ts.test();
-//        ts.testDuplicate();
-//        ArrayList<String> al = ts.getAllWithGPS();
-//        for (Iterator<String> iterator = al.iterator(); iterator.hasNext(); ) {
-//            String next = iterator.next();
-//            System.out.println(next);
-//        }
         ts.test2();
-
     }
 }

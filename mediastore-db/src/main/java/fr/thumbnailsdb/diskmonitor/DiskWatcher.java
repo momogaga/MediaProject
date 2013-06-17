@@ -33,7 +33,6 @@ public class DiskWatcher {
 
 
     private List<DiskListener> listeners;
-    // private final Map<WatchKey, Path> keys;
 
     //we keep the path and the time of the files
     //for which we have received a EVENT_MODIFY
@@ -45,18 +44,25 @@ public class DiskWatcher {
         return (WatchEvent<T>) event;
     }
 
-    public DiskWatcher(String[] path) throws IOException {
-       // System.out.println("DiskWatcher.DiskWatcher " + path[0]);
+    public DiskWatcher() throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         //      this.keys = new HashMap<WatchKey, Path>();
         this.currentModification = new HashMap<Path, Long>();
+        listeners = new ArrayList<fr.thumbnailsdb.diskmonitor.DiskListener>();
+    }
 
+    public DiskWatcher(String[] path) throws IOException {
+        this();
         for (String s : path) {
-            registerAll(Paths.get(s));
-        }
+            System.out.println("DiskWatcher.DiskWatcher " + Paths.get(s).toAbsolutePath() );
 
-        listeners = new ArrayList<DiskListener>();
-//
+            registerAll(Paths.get(s).toAbsolutePath());
+        }
+    }
+
+
+    public void addPath(String s ) throws IOException {
+        registerAll(Paths.get(s));
     }
 
     private void register(Path dir) throws IOException {
@@ -80,7 +86,7 @@ public class DiskWatcher {
     /**
      * Start a thread which will process incoming events
      */
-    void processEvents() {
+    public void processEvents() {
         new Thread(new Runnable() {
             public void run() {
                 for (; ; ) {
@@ -96,15 +102,12 @@ public class DiskWatcher {
                         for (WatchEvent<?> event : key.pollEvents()) {
                             processEvent(key.watchable().toString(), event);
                         }
-
                         key.reset();
                     } else {
                         //timeout reached
                         processModification(null);
                     }
-
                 }
-
             }
         }).start();
     }
@@ -210,7 +213,6 @@ public class DiskWatcher {
                 it.remove();
                 return tmp;
             }
-
         }
         return null;
     }

@@ -22,9 +22,6 @@ public class ThumbnailGenerator {
 
     protected Logger log = Logger.getLogger();
 
-    // protected ExecutorService executorService =
-    // Executors.newFixedThreadPool(3);
-//	protected final Semaphore semaphore = new Semaphore(1);
 
     ThreadPoolExecutor executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
             new LimitedQueue<Runnable>(50));
@@ -74,17 +71,17 @@ public class ThumbnailGenerator {
      */
     public BufferedImage downScaleImageToGray(BufferedImage bi, int nw, int nh) throws IOException {
 
-        if (debug) {
-            System.out.println("ThumbnailGenerator.downScaleImageToGray()  original image is " + bi.getWidth() + "x"
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("ThumbnailGenerator.downScaleImageToGray()  original image is " + bi.getWidth() + "x"
                     + bi.getHeight());
         }
         BufferedImage scaledBI = null;
         // if (nw < width || nh < height) {
-        if (debug) {
-            System.out.println("ThumbnailGenerator.downScaleImageToGray() to " + nw + "x" + nh);
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("ThumbnailGenerator.downScaleImageToGray() to " + nw + "x" + nh);
         }
-        if (debug) {
-            System.out.println("resizing to " + nw + "x" + nh);
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("resizing to " + nw + "x" + nh);
         }
         scaledBI = new BufferedImage(nw, nh, BufferedImage.TYPE_BYTE_GRAY);
         Graphics2D g = scaledBI.createGraphics();
@@ -105,15 +102,14 @@ public class ThumbnailGenerator {
      * @throws IOException
      */
     public BufferedImage downScaleImage(BufferedImage bi, int nw, int nh) throws IOException {
-        //   if (debug) {
-        System.out.println("ThumbnailGenerator.downScaleImage()  original image is " + bi.getWidth() + "x"
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("ThumbnailGenerator.downScaleImage()  original image is " + bi.getWidth() + "x"
                 + bi.getHeight());
-        //  }
+          }
         BufferedImage scaledBI = null;
-        // if (nw < width || nh < height) {
-        //  if (debug) {
-        System.out.println("ThumbnailGenerator.downScaleImage() requested to " + nw + "x" + nh);
-        //  }
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("ThumbnailGenerator.downScaleImage() requested to " + nw + "x" + nh);
+          }
 
 
         float h_original = bi.getHeight();
@@ -134,9 +130,9 @@ public class ThumbnailGenerator {
         int fWidth = Math.round(w_original / ratio);
         int fHeight = Math.round(h_original / ratio);
 
-        //  if (debug) {
-        System.out.println("resizing to " + fWidth + "x" + fHeight + " with scale " + ratio);
-        //}
+        if (Logger.getLogger().isEnabled()) {
+            Logger.getLogger().log("resizing to " + fWidth + "x" + fHeight + " with scale " + ratio);
+        }
         scaledBI = new BufferedImage(fWidth, fHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = scaledBI.createGraphics();
         g.setComposite(AlphaComposite.Src);
@@ -154,23 +150,6 @@ public class ThumbnailGenerator {
 
         fis.close();
         return s;
-        // = new byte[1024];
-        // MessageDigest complete = null;
-        // try {
-        // complete = MessageDigest.getInstance("MD5");
-        // int numRead;
-        // do {
-        // numRead = fis.read(buffer);
-        // if (numRead > 0) {
-        // complete.update(buffer, 0, numRead);
-        // }
-        // } while (numRead != -1);
-        //
-        // fis.close();
-        // } catch (NoSuchAlgorithmException e) {
-        // e.printStackTrace();
-        // }
-        // return complete.digest();
     }
 
     protected int[] generateThumbnail(File f) {
@@ -341,35 +320,6 @@ public class ThumbnailGenerator {
         }
     }
 
-//	public static void main(String[] args) {
-//		String pathToDB = "test";
-//		String source = ".";
-//		if (args.length == 2 || args.length == 4) {
-//			for (int i = 0; i < args.length; i++) {
-//				if ("-db".equals(args[i])) {
-//					pathToDB = args[i + 1];
-//					i++;
-//				}
-//				if ("-source".equals(args[i])) {
-//					source = args[i + 1];
-//					i++;
-//				}
-//			}
-//			// pathToDB=args[0];
-//		} else {
-//			System.err.println("Usage: java " + ThumbnailGenerator.class.getName()
-//					+ "[-db path_to_db] -source folder_or_file_to_process");
-//			System.exit(0);
-//		}
-//		ThumbStore ts = new ThumbStore(pathToDB);
-//		ThumbnailGenerator tb = new ThumbnailGenerator(ts);
-//		File fs = new File(source);
-//		try {
-//			tb.processMT(fs);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
     public static void main(String[] args) {
         ThumbnailGenerator tg = new ThumbnailGenerator(null);
