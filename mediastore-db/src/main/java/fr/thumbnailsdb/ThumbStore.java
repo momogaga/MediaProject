@@ -38,7 +38,6 @@ public class ThumbStore {
             path = DEFAULT_DB;
         }
         System.out.println("ThumbStore.ThumbStore() using " + path + " as DB");
-
         this.addDB(path);
     }
 
@@ -274,17 +273,14 @@ public class ThumbStore {
         try {
             sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             res = sta.executeQuery("SELECT * FROM PATHS");
-
             while (res.next()) {
                 String s = res.getString("path");
                 paths.add(s);
                 //   System.out.println("getIndexedPaths(connexion) path found " + s);
-
             }
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
         return paths;
     }
 
@@ -304,7 +300,7 @@ public class ThumbStore {
                     paths.add(s);
                 }
             } catch (SQLException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
         return paths;
@@ -324,7 +320,6 @@ public class ThumbStore {
         for (String s : connexions.keySet()) {
             if (mediaFile.contains(s)) {
                 result = connexions.get(s);
-                //    System.out.println("ThumbStore.findResponsibleDB found " + result);
                 return result;
             }
         }
@@ -487,51 +482,51 @@ public class ThumbStore {
     }
 
 
-    public ArrayList<MediaFileDescriptor> getMFDOrderedByMD5() {
-
-        Statement sta;
-        ResultSet res = null;
-        ArrayList<MediaFileDescriptor> mf = new ArrayList<MediaFileDescriptor>();
-        //  MD5OrderedMultiResultSet mom = new MD5OrderedMultiResultSet();
-        for (Connection connexion : getConnections()) {
-            try {
-                sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//			res = sta
-//					.executeQuery("SELECT DISTINCT A.path, A.size, A.md5 from images A JOIN ( SELECT COUNT(*) as Count, B.md5   FROM Images B   GROUP BY B.md5) AS B ON A.md5 = B.md5 WHERE B.Count > 1 ORDER by A.md5;");
-                res = sta
-                        .executeQuery("SELECT path, md5, size from IMAGES order by md5;");
-                //   mom.addResultSet(res);
-
-                while (res.next()) {
-                    String path = res.getString("path");
-                    String md5 = res.getString("md5");
-                    long size = res.getLong("size");
-                    if (md5 != null) {
-                        mf.add(new MediaFileDescriptor(path, size, 0, null, md5));
-                    }
-                    // }
-                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting  " + mf.size() + " data");
-        long t0 = System.currentTimeMillis();
-        Collections.sort(mf, new Comparator<MediaFileDescriptor>() {
-
-            public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-//                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
-//                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
-                return o1.getMD5().compareTo(o2.getMD5());
-            }
-        });
-        long t1 = System.currentTimeMillis();
-
-        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting data .... done after " + (t1 - t0));
-
-        return mf;
-    }
+//    public ArrayList<MediaFileDescriptor> getMFDOrderedByMD5() {
+//
+//        Statement sta;
+//        ResultSet res = null;
+//        ArrayList<MediaFileDescriptor> mf = new ArrayList<MediaFileDescriptor>();
+//        //  MD5OrderedMultiResultSet mom = new MD5OrderedMultiResultSet();
+//        for (Connection connexion : getConnections()) {
+//            try {
+//                sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+////			res = sta
+////					.executeQuery("SELECT DISTINCT A.path, A.size, A.md5 from images A JOIN ( SELECT COUNT(*) as Count, B.md5   FROM Images B   GROUP BY B.md5) AS B ON A.md5 = B.md5 WHERE B.Count > 1 ORDER by A.md5;");
+//                res = sta
+//                        .executeQuery("SELECT path, md5, size from IMAGES order by md5;");
+//                //   mom.addResultSet(res);
+//
+//                while (res.next()) {
+//                    String path = res.getString("path");
+//                    String md5 = res.getString("md5");
+//                    long size = res.getLong("size");
+//                    if (md5 != null) {
+//                        mf.add(new MediaFileDescriptor(path, size, 0, null, md5));
+//                    }
+//                    // }
+//                }
+//
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting  " + mf.size() + " data");
+//        long t0 = System.currentTimeMillis();
+//        Collections.sort(mf, new Comparator<MediaFileDescriptor>() {
+//
+//            public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
+////                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
+////                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
+//                return o1.getMD5().compareTo(o2.getMD5());
+//            }
+//        });
+//        long t1 = System.currentTimeMillis();
+//
+//        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting data .... done after " + (t1 - t0));
+//
+//        return mf;
+//    }
 
 
     public String getPath(int[] data) {
@@ -569,12 +564,11 @@ public class ThumbStore {
     }
 
     public String getPath(Connection c, int index) {
-        Statement sta;
+       // Statement sta;
         ResultSet res = null;
         String p = null;
         try {
-            //     System.out.println("ThumbStore.getPath " +c  + " with index " + index);
-            sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+          //  sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
 
             PreparedStatement psmnt;
@@ -717,21 +711,6 @@ public class ThumbStore {
             // System.out.println("path is " + path);
             ResultSet res = get(path);
             res.next();
-//            ResultSetMetaData md = res.getMetaData();
-//            int col = md.getColumnCount();
-//            System.out.println("Number of Column : "+ col);
-//            System.out.println("Columns Name: ");
-//            for (int i = 1; i <= col; i++){
-//                String col_name = md.getColumnName(i);
-//                System.out.println(col_name);
-//            }
-
-
-            // return getCurrentMediaFileDescriptor(res);
-
-            // if (res.next()) {
-            // id = new ImageDescriptor();
-            // String path = res.getString("path");
             byte[] d = res.getBytes("data");
             int[] idata = null;
             if (d != null) {
@@ -811,19 +790,6 @@ public class ThumbStore {
         updateToDB(id);
         System.out.println("ThumbStore.test() dumping entries");
 
-//        try {
-//            st = connexion.createStatement();
-//
-//            ResultSet res = st.executeQuery(select);
-//            while (res.next()) {
-//                String i = res.getString("path");
-//                byte[] d = res.getBytes("data");
-//                System.out.println(i + " has data " + d + " and mtime " + res.getLong("mtime"));
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void dump() {
@@ -836,7 +802,6 @@ public class ThumbStore {
                 ResultSet res = st.executeQuery(select);
                 while (res.next()) {
                     String i = res.getString("path");
-                    // byte[] d = res.getBytes("data");
                     System.out.println(i + " has mtime " + res.getLong("mtime"));
                 }
 
@@ -849,34 +814,10 @@ public class ThumbStore {
 
     public ArrayList<String> getPath() {
         return this.pathsOfDBOnDisk;
-//        try {
-//            return new File(this.path).getCanonicalPath();
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        return this.path;
     }
 
 
-    public void test2() {
-//        String query = "SELECT path FROM Images\n" +
-//                "where path like '%Sabine%'";
-//        Statement st;
-//        try {
-//            st = connexion.createStatement();
-//
-//            ResultSet res = st.executeQuery(query);
-//            while (res.next()) {
-//                String i = res.getString("path");
-//                // byte[] d = res.getBytes("data");
-//                System.out.println("-" + i + "-");
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-    }
+
 
 
     protected ArrayList<MediaFileDescriptor> getPreloadedDescriptors() {
@@ -969,10 +910,5 @@ public class ThumbStore {
             this.preloadedDescriptors.clear();
             this.preloadedDescriptors = null;
         }
-    }
-
-    public static void main(String[] args) {
-        ThumbStore ts = new ThumbStore("localDB");
-        ts.test2();
     }
 }
