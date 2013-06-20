@@ -84,7 +84,6 @@ public class ThumbStore {
         Connection connection = DriverManager.getConnection("jdbc:h2:" + path + "", "sa", "");
 
         return connection;
-        // System.out.println("ThumbStore.connectToDB() " + connexion.);
     }
 
     public void checkAndCreateTables(Connection connexion) throws SQLException {
@@ -177,11 +176,8 @@ public class ThumbStore {
             if (dbVersion == 0) {
                 upgradeToV1(connection);
                 upgradeToV2(connection);
-
-
             }
             if (dbVersion == 1) {
-                // upgradeToV1(connection);
                 upgradeToV2(connection);
             }
 
@@ -480,54 +476,6 @@ public class ThumbStore {
         }
         return null;
     }
-
-
-//    public ArrayList<MediaFileDescriptor> getMFDOrderedByMD5() {
-//
-//        Statement sta;
-//        ResultSet res = null;
-//        ArrayList<MediaFileDescriptor> mf = new ArrayList<MediaFileDescriptor>();
-//        //  MD5OrderedMultiResultSet mom = new MD5OrderedMultiResultSet();
-//        for (Connection connexion : getConnections()) {
-//            try {
-//                sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-////			res = sta
-////					.executeQuery("SELECT DISTINCT A.path, A.size, A.md5 from images A JOIN ( SELECT COUNT(*) as Count, B.md5   FROM Images B   GROUP BY B.md5) AS B ON A.md5 = B.md5 WHERE B.Count > 1 ORDER by A.md5;");
-//                res = sta
-//                        .executeQuery("SELECT path, md5, size from IMAGES order by md5;");
-//                //   mom.addResultSet(res);
-//
-//                while (res.next()) {
-//                    String path = res.getString("path");
-//                    String md5 = res.getString("md5");
-//                    long size = res.getLong("size");
-//                    if (md5 != null) {
-//                        mf.add(new MediaFileDescriptor(path, size, 0, null, md5));
-//                    }
-//                    // }
-//                }
-//
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting  " + mf.size() + " data");
-//        long t0 = System.currentTimeMillis();
-//        Collections.sort(mf, new Comparator<MediaFileDescriptor>() {
-//
-//            public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-////                System.out.println("ThumbStore.compare comparing " + o1.path + " " + o1.md5Digest);
-////                System.out.println("ThumbStore.compare  to " + o2.path + " " + o2.md5Digest);
-//                return o1.getMD5().compareTo(o2.getMD5());
-//            }
-//        });
-//        long t1 = System.currentTimeMillis();
-//
-//        System.out.println("ThumbStore.getMFDOrderedByMD5 sorting data .... done after " + (t1 - t0));
-//
-//        return mf;
-//    }
-
 
     public String getPath(int[] data) {
         Statement sta;
