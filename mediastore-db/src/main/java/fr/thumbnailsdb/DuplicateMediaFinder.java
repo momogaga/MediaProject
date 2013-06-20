@@ -16,7 +16,7 @@ public class DuplicateMediaFinder {
         this.thumbstore = c;
     }
 
-    public ArrayList<MediaFileDescriptor> findDuplicateMedia() {
+    public PreloadedDescriptors<MediaFileDescriptor> findDuplicateMedia() {
 //        return thumbstore.getMFDOrderedByMD5();
         return thumbstore.getPreloadedDescriptors();
     }
@@ -44,7 +44,7 @@ public class DuplicateMediaFinder {
 
     }
 
-    public DuplicateFileList computeDuplicateSets(ArrayList<MediaFileDescriptor> r) {
+    public DuplicateFileList computeDuplicateSets(PreloadedDescriptors<MediaFileDescriptor> r) {
         if (duplicateFileList != null) {
             return duplicateFileList;
         }
@@ -85,7 +85,7 @@ public class DuplicateMediaFinder {
      * @param r the set of files sorted by md5 value
      * @return
      */
-    public DuplicateFolderList computeDuplicateFolderSets(ArrayList<MediaFileDescriptor> r) {
+    public DuplicateFolderList computeDuplicateFolderSets(PreloadedDescriptors<MediaFileDescriptor> r) {
         //  DuplicateFileList list = new DuplicateFileList();
         DuplicateFileGroup dg = new DuplicateFileGroup();
         String currentMd5 = "";

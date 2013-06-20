@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -145,7 +146,7 @@ public class RestTest {
     }
 
     private synchronized DuplicateFolderList getDuplicateFolderGroup() {
-        ArrayList<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
+        PreloadedDescriptors<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
         Status.getStatus().setStringStatus("Computing duplicate folders");
         DuplicateFolderList dc = df.computeDuplicateFolderSets(mfdList);
         Status.getStatus().setStringStatus(Status.IDLE);
@@ -489,7 +490,8 @@ public class RestTest {
         }
 
         public void fileDeleted(java.nio.file.Path p) {
-
+            System.out.println("RestTest$DBDiskUpdater.fileDeleted " +p);
+            tb.deleteFromDatabase(p.toString());
         }
 
         public void folderCreated(java.nio.file.Path p) {
