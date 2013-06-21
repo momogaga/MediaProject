@@ -16,7 +16,7 @@ public class DuplicateMediaFinder {
         this.thumbstore = c;
     }
 
-    public ArrayList<MediaFileDescriptor> findDuplicateMedia() {
+    public PreloadedDescriptors<MediaFileDescriptor> findDuplicateMedia() {
 //        return thumbstore.getMFDOrderedByMD5();
         return thumbstore.getPreloadedDescriptors();
     }
@@ -44,7 +44,7 @@ public class DuplicateMediaFinder {
 
     }
 
-    public DuplicateFileList computeDuplicateSets(ArrayList<MediaFileDescriptor> r) {
+    public DuplicateFileList computeDuplicateSets(PreloadedDescriptors<MediaFileDescriptor> r) {
         if (duplicateFileList != null) {
             return duplicateFileList;
         }
@@ -85,8 +85,9 @@ public class DuplicateMediaFinder {
      * @param r the set of files sorted by md5 value
      * @return
      */
-    public DuplicateFolderList computeDuplicateFolderSets(ArrayList<MediaFileDescriptor> r) {
+    public DuplicateFolderList computeDuplicateFolderSets(PreloadedDescriptors<MediaFileDescriptor> r) {
         //  DuplicateFileList list = new DuplicateFileList();
+        Logger.getLogger().log("DuplicateMediaFinder.computeDuplicateFolderSets preloadedDescriptors  "+ r.size());
         DuplicateFileGroup dg = new DuplicateFileGroup();
         String currentMd5 = "";
         //The table to maintain the tree of folder-couples and the
@@ -94,14 +95,16 @@ public class DuplicateMediaFinder {
         DuplicateFolderList dfl = new DuplicateFolderList();
         Iterator<MediaFileDescriptor> it = r.iterator();
         while (it.hasNext()) {
+
             MediaFileDescriptor mfd = it.next();
             String md5 = mfd.getMD5();
             //TODO : this should be done in the DB directly
             int index = mfd.getId();
             String path = thumbstore.getPath(mfd.getConnection(), index);
             mfd.setPath(path);
+          //  Logger.getLogger().log("     processing  " + mfd);
 
-
+            //TODO : use multimaps to avoid this part. Simply get keys with multiple values
             if (md5.equals(currentMd5)) {
                 dg.add(mfd.getSize(), mfd.getPath());
             } else {

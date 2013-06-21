@@ -23,7 +23,7 @@ public class ThumbStore {
 
 
     //This is used as a cache of preloaded descriptors
-    protected ArrayList<MediaFileDescriptor> preloadedDescriptors;
+    protected PreloadedDescriptors<MediaFileDescriptor> preloadedDescriptors;
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -127,7 +127,7 @@ public class ThumbStore {
             String table = "CREATE TABLE VERSION(version int)";
             Statement st = connexion.createStatement();
             st.execute(table);
-            table = "INSERT into VERSION VALUES(" + CURRENT_VERSION+")";
+            table = "INSERT into VERSION VALUES(" + CURRENT_VERSION + ")";
             st.execute(table);
             System.out.println("ThumbStore.checkAndCreateTables() table created with version 0");
         }
@@ -407,7 +407,7 @@ public class ThumbStore {
 
     public boolean isInDataBaseBasedOnName(String path) {
         boolean result = false;
-        ResultSet res = get(path);
+        ResultSet res = getFromDatabase(path);
         if (res != null) {
             try {
                 result = res.next();
@@ -418,11 +418,25 @@ public class ThumbStore {
         return result;
     }
 
-    private ResultSet get(String path) {
+
+    public void deleteFromDatabase(String path) {
+        System.out.println("ThumbStore.deleteFromDatabase " + path);
+        //this.dump();
+        ResultSet res = this.getFromDatabase(path);
+        try {
+            while (res.next()) {
+                res.deleteRow();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ResultSet getFromDatabase(String path) {
         ResultSet res = null;
         Connection connexion = findResponsibleDB(path);
         try {
-            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?");
+            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             psmnt.setString(1, path);
             //		st = connexion.createStatement();
             psmnt.execute();
@@ -432,6 +446,26 @@ public class ThumbStore {
             e.printStackTrace();
         }
         return res;
+    }
+
+
+    public long getMTime(String path) {
+
+        ResultSet res = null;
+        Connection connexion = findResponsibleDB(path);
+        //    res.getLong("mtime");
+        try {
+            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?");
+            psmnt.setString(1, path);
+            //		st = connexion.createStatement();
+            psmnt.execute();
+            res = psmnt.getResultSet();
+            res.next();
+            return res.getLong("mtime");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 
@@ -457,7 +491,7 @@ public class ThumbStore {
         return al;
     }
 
-    public MultipleResultSet getAllInDataBase() {
+    public MultipleResultSet getAllInDataBases() {
         MultipleResultSet mrs = new MultipleResultSet();
         // ArrayList<ResultSet> res = new ArrayList<ResultSet>();
         for (Connection connection : getConnections()) {
@@ -465,6 +499,7 @@ public class ThumbStore {
         }
         return mrs;
     }
+
 
     public ResultSet getAllInDataBase(Connection connexion) {
         Statement sta;
@@ -512,11 +547,11 @@ public class ThumbStore {
     }
 
     public String getPath(Connection c, int index) {
-       // Statement sta;
+        // Statement sta;
         ResultSet res = null;
         String p = null;
         try {
-          //  sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            //  sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
 
             PreparedStatement psmnt;
@@ -559,7 +594,7 @@ public class ThumbStore {
      * remove incorrect records from the DB
      */
     public void fix() {
-        ArrayList<ResultSet> results = this.getAllInDataBase().getResultSets();
+        ArrayList<ResultSet> results = this.getAllInDataBases().getResultSets();
         MediaFileDescriptor id = null;
         System.out.println("ThumbStore.fix() BD has " + this.size() + " entries");
         for (ResultSet all : results) {
@@ -657,23 +692,23 @@ public class ThumbStore {
         MediaFileDescriptor id = null;
         try {
             // System.out.println("path is " + path);
-            ResultSet res = get(path);
-            res.next();
-            byte[] d = res.getBytes("data");
-            int[] idata = null;
-            if (d != null) {
-                ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                idata = (int[]) oi.readObject();
-            } else {
-                System.err.println("xxxx");
+            ResultSet res = getFromDatabase(path);
+            if (res.next()) {
+                byte[] d = res.getBytes("data");
+                int[] idata = null;
+                if (d != null) {
+                    ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
+                    idata = (int[]) oi.readObject();
+                } else {
+                    System.err.println("xxxx");
+                }
+                String md5 = res.getString("md5");
+                long mtime = res.getLong("mtime");
+                long size = res.getLong("size");
+                id = new MediaFileDescriptor(path, size, mtime, idata, md5);
             }
-            String md5 = res.getString("md5");
-            long mtime = res.getLong("mtime");
-            long size = res.getLong("size");
-            id = new MediaFileDescriptor(path, size, mtime, idata, md5);
-            // }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
+
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -765,22 +800,22 @@ public class ThumbStore {
     }
 
 
-
-
-
-    protected ArrayList<MediaFileDescriptor> getPreloadedDescriptors() {
+    protected PreloadedDescriptors<MediaFileDescriptor> getPreloadedDescriptors() {
         if (preloadedDescriptors == null) {
             Status.getStatus().setStringStatus("Building descriptors list");
             ProgressBar pb = new ProgressBar();
             int dbSize = size();
-            preloadedDescriptors = new ArrayList<MediaFileDescriptor>(dbSize);
+            preloadedDescriptors = new PreloadedDescriptors<MediaFileDescriptor>(dbSize, new Comparator<MediaFileDescriptor>() {
+                public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
+                    return o1.getMD5().compareTo(o2.getMD5());
+                }});
             int increment = dbSize / 20;
             int i = 0;
             int step = 0;
             if (increment == 0) {
                 increment = 1;
             }
-            MultipleResultSet mrs = getAllInDataBase();
+            MultipleResultSet mrs = getAllInDataBases();
             ArrayList<ResultSet> ares = mrs.getResultSets();
             ArrayList<Connection> connections = mrs.getConnections();
             int currentConnection = 0;
@@ -836,11 +871,8 @@ public class ThumbStore {
 
             System.out.println("ThumbStore.getPreloadedDescriptors sorting  " + preloadedDescriptors.size() + " data");
             long t0 = System.currentTimeMillis();
-            Collections.sort(preloadedDescriptors, new Comparator<MediaFileDescriptor>() {
-                public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-                    return o1.getMD5().compareTo(o2.getMD5());
-                }
-            });
+            preloadedDescriptors.sort();
+            //Collections.sort(preloadedDescriptors, );
             long t1 = System.currentTimeMillis();
             System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
             Status.getStatus().setStringStatus(Status.IDLE);
@@ -849,7 +881,7 @@ public class ThumbStore {
     }
 
     public boolean preloadedDescriptorsExists() {
-        return (this.preloadedDescriptors!=null);
+        return (this.preloadedDescriptors != null);
     }
 
 

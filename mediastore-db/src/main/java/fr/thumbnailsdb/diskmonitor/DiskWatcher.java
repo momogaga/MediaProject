@@ -66,6 +66,7 @@ public class DiskWatcher {
     }
 
     private void register(Path dir) throws IOException {
+
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
     }
 

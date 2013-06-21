@@ -55,7 +55,7 @@ public class SimilarImageFinder {
         if (bkTree == null) {
             int size = thumbstore.size();
             bkTree = new BKTree<MediaFileDescriptor>(new RMSEDistance());
-            ArrayList<ResultSet> ares = thumbstore.getAllInDataBase().getResultSets();
+            ArrayList<ResultSet> ares = thumbstore.getAllInDataBases().getResultSets();
             for (ResultSet res : ares) {
                 try {
                     while (res.next()) {
@@ -93,7 +93,7 @@ public class SimilarImageFinder {
             VPTreeBuilder builder = new VPTreeBuilder(new VPRMSEDistance());
             ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(size);
 
-            ArrayList<ResultSet> ares = thumbstore.getAllInDataBase().getResultSets();
+            ArrayList<ResultSet> ares = thumbstore.getAllInDataBases().getResultSets();
             for (ResultSet res : ares) {
                 try {
                     while (res.next()) {

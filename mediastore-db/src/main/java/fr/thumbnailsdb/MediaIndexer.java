@@ -160,10 +160,16 @@ public class MediaIndexer {
 
     public void generateAndSave(File f) {
        try {
-            if (ts.isInDataBaseBasedOnName(f.getCanonicalPath())) {
+           MediaFileDescriptor mf = ts.getMediaFileDescriptor(f.getCanonicalPath());
+
+            if ((mf!=null) && (f.lastModified()==mf.getMtime())) {
                 //TODO : process again if time difference
                 System.out.println("MediaIndexer.generateAndSave " + f);
-                System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring");
+                System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
+                System.out.println("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
+                System.out.println("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
+
+
                 if (forceGPSUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
                     MetaDataFinder mdf = new MetaDataFinder(f);

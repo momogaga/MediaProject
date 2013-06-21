@@ -207,7 +207,7 @@ public class MediaFileDescriptor implements Serializable {
 
     @Override
     public String toString() {
-        return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + "]";
+        return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + ",\n md5="  + md5Digest + "]";
     }
 
     public static void main(String[] args) {
