@@ -7,20 +7,21 @@ import java.sql.Connection;
 
 
 @XmlRootElement
-public class MediaFileDescriptor implements Serializable {
+public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDescriptor> {
     @XmlElement
     protected String path;
     protected long size;
     protected long mtime;
     protected String md5Digest;
-    //the DB used to access this media
-    protected Connection connection;
+
     protected int[] data;
     protected double lat;
     protected double lon;
 
     //id in the database
     protected int id;
+    //the DB used to access this media
+    protected Connection connection;
 
     @XmlElement
     protected double rmse;
@@ -210,9 +211,27 @@ public class MediaFileDescriptor implements Serializable {
         return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + ",\n md5="  + md5Digest + "]";
     }
 
-    public static void main(String[] args) {
-        String path = "/user/fhuet/desktop/home/workspaces/rechercheefficaceimagessimilaires/images/tn/original.jpg";
-        // / System.out.println(ImageDescriptor.readFromDisk(path));
+
+
+    @Override
+    public boolean equals(Object obj) {
+    //    System.out.println("MediaFileDescriptor.equals : " + this  +  "   <>   " + obj);
+        if (!(obj instanceof MediaFileDescriptor)) return false;
+        MediaFileDescriptor target = (MediaFileDescriptor) obj;
+        if ((this.path==null) || (target.getPath()==null))  {
+            //we don't have the path, just the index in the DB
+             return (this.id == target.getId());
+        }  else {
+             return this.path==target.getPath();
+        }
+        //return (this.)
+        //return super.equals(obj);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
+
+
+    public int compareTo(MediaFileDescriptor o) {
+        return this.md5Digest.compareTo(o.md5Digest);
+        //return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

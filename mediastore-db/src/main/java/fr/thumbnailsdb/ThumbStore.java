@@ -23,7 +23,7 @@ public class ThumbStore {
 
 
     //This is used as a cache of preloaded descriptors
-    protected PreloadedDescriptors<MediaFileDescriptor> preloadedDescriptors;
+    protected PreloadedDescriptors  preloadedDescriptors;
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -420,8 +420,10 @@ public class ThumbStore {
 
 
     public void deleteFromDatabase(String path) {
+
         System.out.println("ThumbStore.deleteFromDatabase " + path);
         //this.dump();
+        MediaFileDescriptor mf = this.getMediaFileDescriptor(path);
         ResultSet res = this.getFromDatabase(path);
         try {
             while (res.next()) {
@@ -429,6 +431,11 @@ public class ThumbStore {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+
+        //delete it from the cache
+        if (mf!=null) {
+          this.getPreloadedDescriptors().remove(mf);
         }
     }
 
@@ -800,12 +807,13 @@ public class ThumbStore {
     }
 
 
-    protected PreloadedDescriptors<MediaFileDescriptor> getPreloadedDescriptors() {
+    protected PreloadedDescriptors getPreloadedDescriptors() {
         if (preloadedDescriptors == null) {
+            long ti = System.currentTimeMillis();
             Status.getStatus().setStringStatus("Building descriptors list");
             ProgressBar pb = new ProgressBar();
             int dbSize = size();
-            preloadedDescriptors = new PreloadedDescriptors<MediaFileDescriptor>(dbSize, new Comparator<MediaFileDescriptor>() {
+            preloadedDescriptors = new PreloadedDescriptors(dbSize, new Comparator<MediaFileDescriptor>() {
                 public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
                     return o1.getMD5().compareTo(o2.getMD5());
                 }});
@@ -876,9 +884,12 @@ public class ThumbStore {
             long t1 = System.currentTimeMillis();
             System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
             Status.getStatus().setStringStatus(Status.IDLE);
+            System.out.println("ThumbStore.getPreloadedDescriptors all done  " + (t1 - ti));
         }
         return preloadedDescriptors;
     }
+
+
 
     public boolean preloadedDescriptorsExists() {
         return (this.preloadedDescriptors != null);

@@ -16,7 +16,7 @@ public class DuplicateMediaFinder {
         this.thumbstore = c;
     }
 
-    public PreloadedDescriptors<MediaFileDescriptor> findDuplicateMedia() {
+    public PreloadedDescriptors findDuplicateMedia() {
 //        return thumbstore.getMFDOrderedByMD5();
         return thumbstore.getPreloadedDescriptors();
     }
@@ -44,7 +44,7 @@ public class DuplicateMediaFinder {
 
     }
 
-    public DuplicateFileList computeDuplicateSets(PreloadedDescriptors<MediaFileDescriptor> r) {
+    public DuplicateFileList computeDuplicateSets(PreloadedDescriptors r) {
         if (duplicateFileList != null) {
             return duplicateFileList;
         }
@@ -85,7 +85,7 @@ public class DuplicateMediaFinder {
      * @param r the set of files sorted by md5 value
      * @return
      */
-    public DuplicateFolderList computeDuplicateFolderSets(PreloadedDescriptors<MediaFileDescriptor> r) {
+    public DuplicateFolderList computeDuplicateFolderSets(PreloadedDescriptors r) {
         //  DuplicateFileList list = new DuplicateFileList();
         Logger.getLogger().log("DuplicateMediaFinder.computeDuplicateFolderSets preloadedDescriptors  "+ r.size());
         DuplicateFileGroup dg = new DuplicateFileGroup();
@@ -102,7 +102,7 @@ public class DuplicateMediaFinder {
             int index = mfd.getId();
             String path = thumbstore.getPath(mfd.getConnection(), index);
             mfd.setPath(path);
-          //  Logger.getLogger().log("     processing  " + mfd);
+         //   Logger.getLogger().log("     processing  " + mfd);
 
             //TODO : use multimaps to avoid this part. Simply get keys with multiple values
             if (md5.equals(currentMd5)) {

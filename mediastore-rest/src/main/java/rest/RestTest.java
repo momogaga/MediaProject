@@ -146,7 +146,7 @@ public class RestTest {
     }
 
     private synchronized DuplicateFolderList getDuplicateFolderGroup() {
-        PreloadedDescriptors<MediaFileDescriptor> mfdList = df.findDuplicateMedia();
+        PreloadedDescriptors mfdList = df.findDuplicateMedia();
         Status.getStatus().setStringStatus("Computing duplicate folders on preloaded list of size " + mfdList.size());
         DuplicateFolderList dc = df.computeDuplicateFolderSets(mfdList);
         Status.getStatus().setStringStatus(Status.IDLE);
@@ -491,6 +491,8 @@ public class RestTest {
 
         public void fileDeleted(java.nio.file.Path p) {
             System.out.println("RestTest$DBDiskUpdater.fileDeleted " +p);
+
+           // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
             tb.deleteFromDatabase(p.toString());
         }
 
