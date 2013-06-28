@@ -95,7 +95,6 @@ public class DuplicateMediaFinder {
         DuplicateFolderList dfl = new DuplicateFolderList();
         Iterator<MediaFileDescriptor> it = r.iterator();
         while (it.hasNext()) {
-
             MediaFileDescriptor mfd = it.next();
             String md5 = mfd.getMD5();
             //TODO : this should be done in the DB directly
