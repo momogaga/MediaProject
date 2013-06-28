@@ -1,5 +1,7 @@
 package fr.thumbnailsdb.diskmonitor;
 
+import com.sun.nio.file.ExtendedWatchEventModifier;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -54,33 +56,49 @@ public class DiskWatcher {
     public DiskWatcher(String[] path) throws IOException {
         this();
         for (String s : path) {
-            System.out.println("DiskWatcher.DiskWatcher " + Paths.get(s).toAbsolutePath() );
+            System.out.println("DiskWatcher.DiskWatcher " + Paths.get(s).toAbsolutePath());
 
             registerAll(Paths.get(s).toAbsolutePath());
         }
     }
 
 
-    public void addPath(String s ) throws IOException {
-        registerAll(Paths.get(s));
-    }
+//    public void addPath(String s) throws IOException {
+//        registerAll(Paths.get(s));
+//    }
 
     private void register(Path dir) throws IOException {
+        WatchEvent.Kind<?>[] events = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY};
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.indexOf("win") >= 0) {
+            dir.register(watcher, events, ExtendedWatchEventModifier.FILE_TREE);
+        } else {
+            dir.register(watcher, events);
+        }
 
-        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+
     }
 
 
     private void registerAll(final Path start) throws IOException {
         // register directory and sub-directories
-        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException {
-                register(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        //on windows there is an optimisation
+
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.indexOf("win") >= 0) {
+            WatchEvent.Kind<?>[] events = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY};
+
+            start.register(watcher, events, ExtendedWatchEventModifier.FILE_TREE);
+        } else {
+            Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                        throws IOException {
+                    register(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
     }
 
 
@@ -117,9 +135,9 @@ public class DiskWatcher {
         WatchEvent.Kind kind = event.kind();
 
         WatchEvent<Path> ev = cast(event);
-       Path name= FileSystems.getDefault().getPath(path, ev.context().toString());
+        Path name = FileSystems.getDefault().getPath(path, ev.context().toString());
         //Path name = new Path(//ev.context().toAbsolutePath();
-     //   System.out.println(new String(new byte[] {47,104,111,109,101,47,1,117,101,116,47,119,111,114,107,115,112,97,99,101,115,47,114,101,99,104,101,114,99,104,101,101,102,102,105,99,97,99,101,105,109,97,103,101,115,115,105,109,105,108,97,105,114,101,115,47,77,101,100,105,97,83,116,111,114,101}));
+        //   System.out.println(new String(new byte[] {47,104,111,109,101,47,1,117,101,116,47,119,111,114,107,115,112,97,99,101,115,47,114,101,99,104,101,114,99,104,101,101,102,102,105,99,97,99,101,105,109,97,103,101,115,115,105,109,105,108,97,105,114,101,115,47,77,101,100,105,97,83,116,111,114,101}));
 
         if (kind == OVERFLOW) {
             return;
@@ -134,9 +152,9 @@ public class DiskWatcher {
         // if directory is created, and watching recursively, then
         // register it and its sub-directories
         if (kind == ENTRY_CREATE) {
-         //   System.out.println("DiskWatcher.processEvent ENTRY_CREATE " + name);
+            //   System.out.println("DiskWatcher.processEvent ENTRY_CREATE " + name);
             try {
-              //  new File(name.toAbsolutePath());
+                //  new File(name.toAbsolutePath());
 
                 if (Files.isDirectory(name)) {
                     this.fireEvent(name, FOLDER_CREATED);
@@ -177,10 +195,10 @@ public class DiskWatcher {
 
     protected void processModification(Path path) {
         if (path != null) {
-          //  System.out.println("processModification : modification in progress for " + path);
+            //  System.out.println("processModification : modification in progress for " + path);
             currentModification.put(path, System.currentTimeMillis());
         } else {
-          //  System.out.println("processModification : MODIFY_TIMEOUT reached");
+            //  System.out.println("processModification : MODIFY_TIMEOUT reached");
             Iterator<Path> it = currentModification.keySet().iterator();
             while (it.hasNext()) {
                 Path p = it.next();

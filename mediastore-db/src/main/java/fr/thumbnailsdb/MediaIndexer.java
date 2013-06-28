@@ -34,7 +34,8 @@ public class MediaIndexer {
     protected int updatedFiles = 0;
 
     ThreadPoolExecutor executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
-                                                              new LimitedQueue<Runnable>(50));;
+            new LimitedQueue<Runnable>(50));
+    ;
 
     public MediaIndexer(ThumbStore t) {
         this.ts = t;
@@ -123,6 +124,7 @@ public class MediaIndexer {
 
             data1 = new int[dest.getWidth() * dest.getHeight()];
             dest.getRGB(0, 0, dest.getWidth(), dest.getHeight(), data1, 0, dest.getWidth());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,10 +161,10 @@ public class MediaIndexer {
     }
 
     public void generateAndSave(File f) {
-       try {
-           MediaFileDescriptor mf = ts.getMediaFileDescriptor(f.getCanonicalPath());
+        try {
+            MediaFileDescriptor mf = ts.getMediaFileDescriptor(f.getCanonicalPath());
 
-            if ((mf!=null) && (f.lastModified()==mf.getMtime())) {
+            if ((mf != null) && (f.lastModified() == mf.getMtime())) {
                 //TODO : process again if time difference
                 System.out.println("MediaIndexer.generateAndSave " + f);
                 System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
@@ -185,15 +187,28 @@ public class MediaIndexer {
                 }
             } else {
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
-                if (ts.preloadedDescriptorsExists()) {
-                    System.out.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
-                    ts.getPreloadedDescriptors().add(id);
-                }
                 if (id != null) {
-                    ts.saveToDB(id);
-                }
-                if (log.isEnabled()) {
-                    log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
+                    if ((mf != null) && (f.lastModified() != mf.getMtime())) {
+                        //we need to update it
+                        ts.updateToDB(id);
+                        if (ts.preloadedDescriptorsExists()) {
+                            //remove it from the descriptors
+                            ts.getPreloadedDescriptors().remove(id);
+                        }
+                    }    else {
+                        ts.saveToDB(id);
+                    }
+
+
+                    if (ts.preloadedDescriptorsExists()) {
+                        System.out.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
+                        ts.getPreloadedDescriptors().add(id);
+                    }
+
+
+                    if (log.isEnabled()) {
+                        log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
+                    }
                 }
                 newFiles++;
             }
@@ -240,7 +255,7 @@ public class MediaIndexer {
         Date date = new Date();
         ts.addIndexPath(path);
         System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
-        if (executorService.isShutdown() ) {
+        if (executorService.isShutdown()) {
             executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
                     new LimitedQueue<Runnable>(50));
         }

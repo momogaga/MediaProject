@@ -128,7 +128,7 @@ function toFolderAndFileLink(path) {
 //        active:false,
 //        change:function (event, ui) {
 //            if ($(".nailthumb-container", ui.newContent).length == 0) {
-//                $.each($("[id=imagePath]", ui.newContent), function (index, data) {
+//                $.each($("[id=imagePath]", ui.newContent), function (index, base64Sig) {
 //                });
 //            }
 //        }
@@ -279,17 +279,26 @@ function prettyPrint(object) {
     }
 }
 
-function uploadFinished(object) {
+function uploadFinished(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
+//      debugger;
+    var sourceSigHTML = '<img class="pathlink" src="data:image;base64,' +sourceSignature +'" height="100" width="100"/>';
+    $("#duplicate_upload_source").append(sourceSigHTML);
+
     for (f in object) {
         var image = object[f];
         var rmse = (image.rmse);
-        var template = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}} "/>';
-        var imgTag = Mustache.to_html(template, image);
+        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}} "/>';
+        var templateSig =  '<img class="pathlink" src="data:image;base64,{{base64Sig}}" title="{{path}} height="100" width="100"/>';
+        var imgTag = Mustache.to_html(templateThumbnail, image);
+        var sigTag = Mustache.to_html(templateSig, image);
+
 
         description = '<div class="description flt"> Distance:' + rmse + '<br>  ' + toFolderAndFileLink(image.path) + '</a><br></div>'
 
-        $("#duplicate_upload_result").append('<div class="floated_img cls"><div class="nailthumb-container nailthumb-image-titles-animated-onhover square flt">' + imgTag + "</div>" + description + "</div>");
+        $("#duplicate_upload_result").append('<div class="floated_img cls">'+ sigTag
+            + '<div class="nailthumb-container nailthumb-image-titles-animated-onhover square flt">'
+            + imgTag + "</div>" + description + "</div>");
     }
     jQuery(document).ready(function () {
 
@@ -307,7 +316,7 @@ function generatePathLink() {
         var folders = [];
        // debugger;
 //        $this.parent().parent().find('.pathlink').each(function () {
-//            folders.push($(this).attr('data-p1'))
+//            folders.push($(this).attr('base64Sig-p1'))
 //        });
         folders.push(p1);
         folders.push(p2);
@@ -317,7 +326,7 @@ function generatePathLink() {
 
 function getWithRMSE(param, rmse) {
     $.get("rest/hello/getThumbnail/", param.path, function (image) {
-        var template = "<img src=\"data:image;base64,{{data}}\" title=\" {{title}} \"/>";
+        var template = "<img src=\"data:image;base64,{{base64Sig}}\" title=\" {{title}} \"/>";
         var imgTag = Mustache.to_html(template, image);
         $("#duplicate_upload_result").prepend('<div class="floated_img"><div class="nailthumb-container nailthumb-image-titles-animated-onhover square">' + imgTag + "</div>" + rmse + "  " + image.title + "</div>");
         jQuery(document).ready(function () {
