@@ -4,8 +4,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -46,7 +44,7 @@ public class RestTest {
     protected ThumbStore tb;
     protected SimilarImageFinder si;
     protected DuplicateMediaFinder df;
-    protected DiskWatcher dw ;
+    protected DiskWatcher dw;
 
     public RestTest() {
         System.out.println("RestTest.RestTest()");
@@ -75,7 +73,7 @@ public class RestTest {
         si = new SimilarImageFinder(tb);
         df = new DuplicateMediaFinder(tb);
         try {
-            dw = new DiskWatcher(tb.getIndexedPaths().toArray(new String[] {}));
+            dw = new DiskWatcher(tb.getIndexedPaths().toArray(new String[]{}));
             dw.addListener(new DBDiskUpdater());
             dw.processEvents();
         } catch (IOException e) {
@@ -198,7 +196,22 @@ public class RestTest {
         }
 
         return Response.status(404).build();
+    }
 
+    @GET
+    @Path("getSignature/")
+    @Produces("image/jpg")
+    public Response getSignature(@QueryParam("path") String imageId) {
+        System.out.println("Signature : imageID " + imageId);
+        BufferedInputStream source = null;
+
+        MediaFileDescriptor mdf = tb.getMediaFileDescriptor(imageId);
+
+        final InputStream bigInputStream =
+                new ByteArrayInputStream(mdf.getDataAsByte());
+        return Response.status(200).entity(bigInputStream).build();
+
+        //return Response.status(404).build();
     }
 
 
@@ -230,6 +243,7 @@ public class RestTest {
         }
         return img;
     }
+
 
     @GET
     @Path("shrink/")
@@ -283,6 +297,8 @@ public class RestTest {
         Collection<MediaFileDescriptor> c = null;
         ArrayList<SimilarImage> al = null;
         File temp = null;
+        MediaFileDescriptor initialImage = null;
+
         try {
             InputStream source = bpe.getInputStream();
             Logger.getLogger().log("RestTest.findSimilar() received " + source);
@@ -301,6 +317,8 @@ public class RestTest {
             } finally {
                 fo.close();
             }
+
+            initialImage = tg.buildMediaDescriptor(temp);
             Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
         } catch (Exception e) {
             e.printStackTrace();
@@ -316,14 +334,21 @@ public class RestTest {
 
             String path = mdf.getPath();
 
-            String data = null;
+            String imgData = null;
+            String sigData = null;
             try {
                 FileInputStream f = new FileInputStream(new File(path));
                 try {
+                    //encode thumbnail
                     BufferedImage bf = tg.downScaleImage(ImageIO.read(f), 200, 200);
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     ImageIO.write(bf, "JPEG", out);
-                    data = Base64.encodeBase64String(out.toByteArray());
+                    imgData = Base64.encodeBase64String(out.toByteArray());
+                    //encode image signature
+                    out = new ByteArrayOutputStream();
+                    ImageIO.write(mdf.getSignatureAsImage(), "JPEG", out);
+
+                    sigData = Base64.encodeBase64String(out.toByteArray());
                 } finally {
                     f.close();
                 }
@@ -331,7 +356,7 @@ public class RestTest {
                 System.err.println("Err: File " + path + " not found");
             }
 
-            SimilarImage si = new SimilarImage(path, data, mdf.getRmse());
+            SimilarImage si = new SimilarImage(path, imgData, mdf.getRmse(), sigData);
             al.add(si);
             System.out.println(si);
 
@@ -344,16 +369,29 @@ public class RestTest {
             try {
                 json.put("path", al.get(i).path);
                 json.put("base64Data", al.get(i).base64Data);
+                json.put("base64Sig", al.get(i).base64Sig);
                 json.put("rmse", al.get(i).rmse);
                 mJSONArray.put(json);
             } catch (JSONException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
+
+        //prepare signature of original image
+        //TODO : create utility function
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+
+            ImageIO.write(initialImage.getSignatureAsImage(), "JPEG", out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         JSONObject responseDetailsJson = new JSONObject();
         try {
             responseDetailsJson.put("success", true);
-
+            responseDetailsJson.put("sourceSig", Base64.encodeBase64String(out.toByteArray()));
             responseDetailsJson.put("images", mJSONArray);
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -439,7 +477,7 @@ public class RestTest {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-       // System.out.println("RestTest.findGPSFromPath sending json " + responseDetailsJson);
+        // System.out.println("RestTest.findGPSFromPath sending json " + responseDetailsJson);
         return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
     }
 
@@ -461,18 +499,21 @@ public class RestTest {
         public String base64Data;
         @XmlElement
         public double rmse;
+        @XmlElement
+        public String base64Sig;
 
-        public SimilarImage(String path, String base64Data, double rmse) {
+        public SimilarImage(String path, String base64Data, double rmse, String base64Sig) {
             this.rmse = rmse;
             this.path = path;
             this.base64Data = base64Data;
+            this.base64Sig = base64Sig;
         }
     }
 
     public class DBDiskUpdater implements DiskListener {
 
         public void fileCreated(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileCreated " +p );
+            System.out.println("RestTest$DBDiskUpdater.fileCreated " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -481,7 +522,7 @@ public class RestTest {
         }
 
         public void fileModified(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileModified " +p);
+            System.out.println("RestTest$DBDiskUpdater.fileModified " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -490,14 +531,14 @@ public class RestTest {
         }
 
         public void fileDeleted(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileDeleted " +p);
+            System.out.println("RestTest$DBDiskUpdater.fileDeleted " + p);
 
-           // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
+            // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
             tb.deleteFromDatabase(p.toString());
         }
 
         public void folderCreated(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.folderCreated " +p);
+            System.out.println("RestTest$DBDiskUpdater.folderCreated " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -506,7 +547,7 @@ public class RestTest {
         }
 
         public void folderModified(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileModified " +p);
+            System.out.println("RestTest$DBDiskUpdater.fileModified " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -519,8 +560,6 @@ public class RestTest {
 
         }
     }
-
-
 
 
 }

@@ -124,6 +124,7 @@ public class MediaIndexer {
 
             data1 = new int[dest.getWidth() * dest.getHeight()];
             dest.getRGB(0, 0, dest.getWidth(), dest.getHeight(), data1, 0, dest.getWidth());
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -26,7 +26,6 @@
 //                    jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
 //                });
             };
-
         }(img));
         reader.readAsDataURL(this._handler._files[id]);
         // display the source image
@@ -46,7 +45,7 @@
     }
 
     function localFinished(id, name, json) {
-        uploadFinished(json.images);
+        uploadFinished(json.sourceSig , json.images);
         $(".qq-upload-list").children().remove();
     }
 

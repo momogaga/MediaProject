@@ -93,6 +93,8 @@ public class DuplicateFolderList {
 //            System.out.println("   ---  " + s);
             //}
 
+            File directory = null;
+
             String[] folders = new File(dfg.folder1).list();
             if (folders != null) {
                 dfg.setFilesInFolder1(folders.length);
@@ -101,6 +103,7 @@ public class DuplicateFolderList {
             if (folders != null) {
                 dfg.setFilesInFolder2(folders.length);
             }
+
             al.add(dfg);
             i++;
         }

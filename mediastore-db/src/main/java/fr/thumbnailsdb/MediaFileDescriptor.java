@@ -2,6 +2,7 @@ package fr.thumbnailsdb;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.sql.Connection;
 
@@ -192,6 +193,15 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         }
         return ba.toByteArray();
     }
+
+    public BufferedImage getSignatureAsImage() {
+        BufferedImage dest =  new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        dest.setRGB(0,0,10,10,data,0,10);
+
+        return dest;
+
+    }
+
 
     public String getMD5() {
         return md5Digest;

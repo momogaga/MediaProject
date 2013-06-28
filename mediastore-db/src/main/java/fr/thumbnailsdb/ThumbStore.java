@@ -571,6 +571,7 @@ public class ThumbStore {
                 p = res.getString("path");
             }
         } catch (SQLException e) {
+            System.err.println("Cannot find image with index " + index);
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         return p;
