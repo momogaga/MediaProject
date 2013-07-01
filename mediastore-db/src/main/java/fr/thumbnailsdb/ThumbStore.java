@@ -358,6 +358,17 @@ public class ThumbStore {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        if (preloadedDescriptorsExists()) {
+            System.out.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
+            //ts.getPreloadedDescriptors().add(id);
+            id.setConnection(connexion);
+            id.setId(getIndex(id.getPath()));
+            this.getPreloadedDescriptors().add(id);
+        }
+
+
+
+
     }
 
     public void updateToDB(MediaFileDescriptor id) {
@@ -383,6 +394,15 @@ public class ThumbStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        if (preloadedDescriptorsExists()) {
+            id.setConnection(connexion);
+            id.setId(getIndex(id.getPath()));
+            //remove it from the descriptors
+            getPreloadedDescriptors().remove(id);
+            getPreloadedDescriptors().add(id);
+        }
+
     }
 
     public int size() {
@@ -439,6 +459,24 @@ public class ThumbStore {
         if (mf!=null) {
           this.getPreloadedDescriptors().remove(mf);
         }
+    }
+
+
+    public int  getIndex(String path) {
+        ResultSet res = null;
+        Connection connexion = findResponsibleDB(path);
+        try {
+            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            psmnt.setString(1, path);
+            //		st = connexion.createStatement();
+            psmnt.execute();
+            res = psmnt.getResultSet();
+            res.next();
+            return res.getInt("id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+             return -1;
     }
 
     public ResultSet getFromDatabase(String path) {

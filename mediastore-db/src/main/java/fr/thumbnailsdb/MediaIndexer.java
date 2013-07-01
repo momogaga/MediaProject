@@ -192,19 +192,12 @@ public class MediaIndexer {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
                         //we need to update it
                         ts.updateToDB(id);
-                        if (ts.preloadedDescriptorsExists()) {
-                            //remove it from the descriptors
-                            ts.getPreloadedDescriptors().remove(id);
-                        }
+
                     }    else {
                         ts.saveToDB(id);
                     }
 
 
-                    if (ts.preloadedDescriptorsExists()) {
-                        System.out.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
-                        ts.getPreloadedDescriptors().add(id);
-                    }
 
 
                     if (log.isEnabled()) {
