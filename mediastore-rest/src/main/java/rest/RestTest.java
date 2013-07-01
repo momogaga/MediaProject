@@ -24,6 +24,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import fr.thumbnailsdb.*;
 import fr.thumbnailsdb.diskmonitor.DiskListener;
 import fr.thumbnailsdb.diskmonitor.DiskWatcher;
+import fr.thumbnailsdb.utils.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 

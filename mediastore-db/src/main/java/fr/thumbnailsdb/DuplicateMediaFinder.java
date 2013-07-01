@@ -1,9 +1,8 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.utils.Logger;
+
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 
 public class DuplicateMediaFinder {

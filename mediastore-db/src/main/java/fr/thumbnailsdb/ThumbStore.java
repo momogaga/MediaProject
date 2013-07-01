@@ -1,5 +1,7 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.utils.Logger;
+
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -93,43 +95,43 @@ public class ThumbStore {
         ResultSet tables = dbm.getTables(null, null, "IMAGES", null);
 
         if (tables.next()) {
-            System.out.println("ThumbStore.checkAndCreateTables() table IMAGES exists!");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table IMAGES exists!");
             checkOrAddColumns(dbm);
             // Table exists
         } else {
-            System.out.println("ThumbStore.checkAndCreateTables() table IMAGES does not exist, should create it");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table IMAGES does not exist, should create it");
             String table = "CREATE TABLE IMAGES(id  bigint identity(1,1),path varchar(256), size long, mtime long, md5 varchar(256), data blob,  lat double, lon double)";
             Statement st = connexion.createStatement();
             st.execute(table);
-            System.out.println("ThumbStore.checkAndCreateTables() table created!");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
         }
         //now we look for the path table
         tables = dbm.getTables(null, null, "PATHS", null);
         if (tables.next()) {
-            System.out.println("ThumbStore.checkAndCreateTables() table PATHS exists!");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table PATHS exists!");
             // Table exists
         } else {
-            System.out.println("ThumbStore.checkAndCreateTables() table PATHS does not exist, should create it");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table PATHS does not exist, should create it");
             // Table does not exist
             String table = "CREATE TABLE PATHS(path varchar(256),  PRIMARY KEY ( path ))";
             Statement st = connexion.createStatement();
             st.execute(table);
-            System.out.println("ThumbStore.checkAndCreateTables() table created!");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
         }
         //and  the version table
         tables = dbm.getTables(null, null, "VERSION", null);
         if (tables.next()) {
-            System.out.println("ThumbStore.checkAndCreateTables() table VERSION exists!");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table VERSION exists!");
             // Table exists
         } else {
-            System.out.println("ThumbStore.checkAndCreateTables() table VERSION does not exist, should create it");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table VERSION does not exist, should create it");
             // Table does not exist
             String table = "CREATE TABLE VERSION(version int)";
             Statement st = connexion.createStatement();
             st.execute(table);
             table = "INSERT into VERSION VALUES(" + CURRENT_VERSION + ")";
             st.execute(table);
-            System.out.println("ThumbStore.checkAndCreateTables() table created with version 0");
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created with version 0");
         }
 
         // now we check for version number and decides if an upgrade is required
@@ -141,7 +143,7 @@ public class ThumbStore {
             v = res.getInt("version");
         }
 
-        System.out.println("Database version is " + v);
+        Logger.getLogger().log("Database version is " + v);
         upgradeDatabase(connexion, v);
     }
 
@@ -156,21 +158,21 @@ public class ThumbStore {
         ResultSet rs = dbm.getColumns(null, null, "IMAGES", "LAT");
         if (!rs.next()) {
             //Column in table exist
-            System.out.println("Lat not found, updating table");
+            Logger.getLogger().log("Lat not found, updating table");
             Statement st = dbm.getConnection().createStatement();
             st.executeUpdate("ALTER TABLE IMAGES ADD lat double");
 
         }
         rs = dbm.getColumns(null, null, "IMAGES", "LON");
         if (!rs.next()) {
-            System.out.println("Lon not found, updating table");
+            Logger.getLogger().log("Lon not found, updating table");
             Statement st = dbm.getConnection().createStatement();
             st.executeUpdate("ALTER TABLE IMAGES ADD lon double");
         }
     }
 
     private void upgradeDatabase(Connection connection, int dbVersion) throws SQLException {
-        System.out.println("ThumbStore.upgradeDatabase started");
+        Logger.getLogger().log("ThumbStore.upgradeDatabase started");
 
         if (dbVersion < CURRENT_VERSION) {
             if (dbVersion == 0) {
@@ -185,7 +187,7 @@ public class ThumbStore {
             Statement st = connection.createStatement();
             String action = "Shutdown compact";
             st.execute(action);
-            System.out.println("ThumbStore.upgradeDatabase upgrade done please restart");
+            Logger.getLogger().log("ThumbStore.upgradeDatabase upgrade done please restart");
             System.exit(0);
         }
     }
@@ -202,9 +204,9 @@ public class ThumbStore {
         action = "CREATE TABLE IMAGES_tmp(id  bigint identity(1,1), path varchar(256), size long, mtime long, md5 varchar(256), data blob,  lat double, lon double)";
         st.execute(action);
         action = "INSERT INTO  IMAGES_TMP  (path,id, size,mtime,md5,data, lat, lon)  SELECT * from IMAGES";
-        System.out.println("ThumbStore.upgradeToV1 moving data to new table");
+        Logger.getLogger().log("ThumbStore.upgradeToV1 moving data to new table");
         st.execute(action);
-        System.out.println("ThumbStore.upgradeToV1 droping old table");
+        Logger.getLogger().log("ThumbStore.upgradeToV1 droping old table");
 
         action = "DROP table IMAGES";
         st.execute(action);
@@ -222,7 +224,7 @@ public class ThumbStore {
         // ON table_name (column_name)
         Statement st = connection.createStatement();
         String action = "CREATE UNIQUE INDEX path_index ON IMAGES(path)";
-        System.out.println("ThumbStore.upgradeToV2 creating Index");
+        Logger.getLogger().log("ThumbStore.upgradeToV2 creating Index");
         st.execute(action);
 
         action = "UPDATE VERSION SET version=2 WHERE version=1";
@@ -557,6 +559,12 @@ public class ThumbStore {
         // Statement sta;
         ResultSet res = null;
         String p = null;
+
+
+        if (c==null) {
+            Logger.getLogger().err("Thumbstore : Connection is NULL " );
+            return null;
+        }
         try {
             //  sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 

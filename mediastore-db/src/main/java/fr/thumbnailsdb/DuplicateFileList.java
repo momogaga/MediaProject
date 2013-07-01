@@ -1,5 +1,7 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.utils.Logger;
+
 import java.util.*;
 
 
