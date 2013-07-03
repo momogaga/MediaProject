@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -288,6 +291,55 @@ public class RestTest {
     }
 
 
+    @GET
+    @Path("trash/")
+    public Response moveToTrash(@QueryParam("path") String path) {
+        System.out.println("RestTest.moveToTrash() input_path " + path);
+        java.nio.file.Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        System.out.println("Current relative path is: " + s);
+        try {
+            this.moveToTrash(path,s);
+        }   catch (IOException e) {
+            e.printStackTrace();
+            return Response.status(500).build();
+        }
+        return Response.status(200).build(); //.entity(path).type("application/folder").build();
+    }
+
+    protected void moveToTrash(String path, String trashRoot) throws IOException {
+       //create a Trash folder if it does not exist
+
+        java.nio.file.Path trash = FileSystems.getDefault().getPath(trashRoot+"/trash");
+
+        if (!Files.exists(trash)) {
+            trash = Files.createDirectory(trash);
+        }
+        if (trash == null) {
+            Logger.getLogger().err("Error creating trash directory at " + trashRoot);
+            return;
+        }
+//        File f = new File(trashRoot+"/trash");
+//        if (!f.exists()) {
+//            if (!f.mkdir()) {
+//                Logger.getLogger().err("Error creating trash directory at " + trashRoot);
+//                return;
+//            }
+//        }
+
+        java.nio.file.Path source = FileSystems.getDefault().getPath(path);
+        String  sourceFilePath = source.getFileName().toString();
+        java.nio.file.Path trashedFileDest =       FileSystems.getDefault().getPath(trashRoot + "/trash/" + sourceFilePath);
+        System.out.println("RestTest.moveToTrash " + trashedFileDest);
+        java.nio.file.Files.move(source,trashedFileDest);
+
+
+
+
+    }
+
+
+
     @POST
     @Path("findSimilar/")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -357,7 +409,8 @@ public class RestTest {
                 System.err.println("Err: File " + path + " not found");
             }
 
-            SimilarImage si = new SimilarImage(path, imgData, mdf.getRmse(), sigData);
+            String folder = Utils.fileToDirectory(path);
+            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder),imgData, mdf.getRmse(), sigData);
             al.add(si);
             System.out.println(si);
 
@@ -368,6 +421,7 @@ public class RestTest {
         for (int i = 0; i < al.size(); i++) {
             JSONObject json = new JSONObject();
             try {
+                json.put("foldersize", al.get(i).folderSize);
                 json.put("path", al.get(i).path);
                 json.put("base64Data", al.get(i).base64Data);
                 json.put("base64Sig", al.get(i).base64Sig);
@@ -502,10 +556,13 @@ public class RestTest {
         public double rmse;
         @XmlElement
         public String base64Sig;
+        @XmlElement
+        public int folderSize;
 
-        public SimilarImage(String path, String base64Data, double rmse, String base64Sig) {
+        public SimilarImage(String path, int folderSize, String base64Data, double rmse, String base64Sig) {
             this.rmse = rmse;
             this.path = path;
+            this.folderSize=folderSize;
             this.base64Data = base64Data;
             this.base64Sig = base64Sig;
         }

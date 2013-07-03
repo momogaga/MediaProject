@@ -125,15 +125,16 @@ function getDuplicateFolderDetails(folder1, folder2) {
             f2:d[1][i]
         });
     }
-    var templateFiles = ' {{#files}} ' + '<div class="paths">{{f1}}   <a class="pathlink" href="#!"  data-p1="{{f1}}">[file]</a><br>' +
-        '{{f2}}   <a class="pathlink" href="#!"  data-p1="{{f2}}">[file]</a></div><br>' +
+    var templateFiles = ' {{#files}} ' + '<div class="paths">{{f1}}   <a class="pathlink" href="#!"  data-p1="{{f1}}">[file]</a> '+
+        '<a class="deletelink" href="#!"  data-p1="{{f1}}">[delete]</a>  <br>' +
+        '{{f2}}   <a class="pathlink" href="#!"  data-p1="{{f2}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2}}">[delete]</a></div><br>' +
         '{{/files}}';
     var htmlFiles = Mustache.to_html(templateFiles, tab);
     $('#duplicate-folders-details').children().remove();
     $('#duplicate-folders-details').append(htmlFiles);
     $(document).ready(function () {
         generatePathLink();
-
+        generateDeleteLink();
     });
 }
 
@@ -213,6 +214,13 @@ function callOpen(para1, para2) {
     $.get("rest/hello/open", {path:folders});
 }
 
+function callDelete(para1) {
+    //  debugger;
+    //var folders = [];
+    //.push(para1, para2);
+    $.get("rest/hello/trash", {path:para1});
+}
+
 
 function shrink() {
     var folders = getSelectedFolders();
@@ -264,14 +272,10 @@ function uploadFinished(sourceSignature, object) {
         var rmse = (image.rmse);
         var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}} "/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
-
         var sigTag=   "data:image;base64,"+ image.base64Sig;
-
-        description = '<div class="description flt"> Distance:' + rmse + '<br>  ' + toFolderAndFileLink(image.path) + '</a><br></div>'
-
         var descriptionDiv = document.createElement('div');
         descriptionDiv.className="description flt";
-        descriptionDiv.innerHTML='Distance:' + rmse + '<br>  ' + toFolderAndFileLink(image.path) + '</a><br>' ;
+        descriptionDiv.innerHTML='Distance:' + rmse + ', Files in folder:  '+   image.foldersize   + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>' ;
 
         var floatedDiv = document.createElement('div');
         floatedDiv.className="floated_img cls";
@@ -308,6 +312,20 @@ function generatePathLink() {
         callOpen(folders[0], folders[1]);
     });
 }
+
+function generateDeleteLink() {
+    $('.deletelink').click(function () {
+        var $this = $(this);
+        var p1 = $this.data('p1');
+    //    var p2 = $this.data('p2');
+     //   var folders = [];
+    //    folders.push(p1);
+    //    folders.push(p2);
+       // callOpen(folders[0], folders[1]);
+        callDelete(p1);
+    });
+}
+
 
 function getWithRMSE(param, rmse) {
     $.get("rest/hello/getThumbnail/", param.path, function (image) {

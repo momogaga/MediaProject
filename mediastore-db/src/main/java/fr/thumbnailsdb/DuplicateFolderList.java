@@ -95,14 +95,8 @@ public class DuplicateFolderList {
 
             File directory = null;
 
-            String[] folders = new File(dfg.folder1).list();
-            if (folders != null) {
-                dfg.setFilesInFolder1(folders.length);
-            }
-            folders = new File(dfg.folder2).list();
-            if (folders != null) {
-                dfg.setFilesInFolder2(folders.length);
-            }
+            dfg.setFilesInFolder1(Utils.folderSize(dfg.folder1));
+            dfg.setFilesInFolder2(Utils.folderSize(dfg.folder2));
 
             al.add(dfg);
             i++;
