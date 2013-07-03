@@ -33,6 +33,7 @@
         $("#duplicate_upload_result").children().remove();
         div_t = document.createElement("div");
         div_t.className = "nailthumb-container nailthumb-image-titles-animated-onhover square";
+        div_t.style.float="left";
         div_t.appendChild(img);
 
         $("#duplicate_upload_source").append(div_t);
@@ -68,7 +69,7 @@
 
 <div id="duplicate_upload_source" style="margin:10px 0px"></div>
 
-<div id="duplicate_upload_result" style="margin:10px 0px"></div>
+<div id="duplicate_upload_result" style="margin:10px 0px;clear:both"></div>
 
 <!--</body>-->
 <!--</html>-->

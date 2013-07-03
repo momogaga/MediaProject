@@ -12,7 +12,7 @@ public class Main {
 		if ("similar".equals(args[0])) {
 			SimilarImageFinder si = new SimilarImageFinder(tb);
 			String source = args[1];
-			si.prettyPrintSimilarResults(si.findSimilarMedia(source,10), 10);
+			//si.prettyPrintSimilarResults(si.findSimilarMedia(source,10), 10);
 		}
 		
 		if ("duplicate".equals(args[0])) {

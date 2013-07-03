@@ -2,206 +2,247 @@
 
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <link rel="stylesheet"
-          href="js/jquery-ui.css"/>
-    <link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+<meta charset="utf-8"/>
+<link rel="stylesheet"
+      href="js/jquery-ui.css"/>
+<link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>
+<link rel="stylesheet" href="css/bootstrap.min.css">
 
-    <script src="js/jquery-1.8.2.js"></script>
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/jquery.form.js"></script>
-    <script src="js/thumbstore.js"></script>
-    <script src="js/jquery.iframe-transport.js"></script>
+<script src="js/jquery-1.8.2.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.form.js"></script>
+<script src="js/thumbstore.js"></script>
+<script src="js/jquery.iframe-transport.js"></script>
 
-    <script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
-    <script src="js/mustache.js"></script>
+<script src="js/customCanvas.js"></script>
 
-
-    <script src="js/jquery.fileupload.js"></script>
-    <script src="js/jquery.fileupload-fp.js"></script>
-    <link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
-    <script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
-    <!--<script src="js/thumbstore.js" type="text/javascript"></script>-->
-
-    <!--<script src="js/jquery.exif.js"></script>-->
-
-    <script type="text/javascript" src="galleriffic-2.0/js/jquery.galleriffic.js"></script>
-    <link rel="stylesheet" href="galleriffic-2.0/css/galleriffic-1.css" type="text/css" />
-
-   <script src="js/jquery.ay-table-sort.js"></script>
-    <style>
-        table { table-layout: auto; border-collapse: collapse; width: 100%; }
-        thead { background: #b9c9fe; }
-        td,th { padding: 5px; }
-        tbody tr { border-top: 1px solid #fff; background: #e8edff; }
-
-        th.size { width: 10%; text-align: center}
-        td.files {text-align: center}
-        .authorship { margin-top: 20px; }
-
-        th.files { width: 10%; }
-
-        .paths {font-size: 12px;}
+<script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
+<script src="js/mustache.js"></script>
 
 
+<script src="js/jquery.fileupload.js"></script>
+<script src="js/jquery.fileupload-fp.js"></script>
+<link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
+<script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
+<!--<script src="js/thumbstore.js" type="text/javascript"></script>-->
 
-        tbody { border-top: 5px solid #fff; }
+<!--<script src="js/jquery.exif.js"></script>-->
 
-        thead th { text-align: left; cursor: pointer; }
-        th.ay-sort-asc span {
-            background: url("images/sort_up.png") right center no-repeat;
-            padding-right: 25px;
-            background-size: 15px 15px;
-        }
+<script type="text/javascript" src="galleriffic-2.0/js/jquery.galleriffic.js"></script>
+<link rel="stylesheet" href="galleriffic-2.0/css/galleriffic-1.css" type="text/css"/>
 
-        th.ay-sort-desc span {
-            background: url("images/sort_down.png") right center no-repeat;
-            padding-right: 25px;
-            background-size: 15px 15px;
-        }
+<script src="js/jquery.ay-table-sort.js"></script>
+<style>
+    table {
+        table-layout: auto;
+        border-collapse: collapse;
+        width: 100%;
+    }
 
-    </style>
+    thead {
+        background: #b9c9fe;
+    }
+
+    td, th {
+        padding: 5px;
+    }
+
+    tbody tr {
+        border-top: 1px solid #fff;
+        background: #e8edff;
+    }
+
+    th.size {
+        width: 10%;
+        text-align: center
+    }
+
+    td.files {
+        text-align: center
+    }
+
+    .authorship {
+        margin-top: 20px;
+    }
+
+    th.files {
+        width: 10%;
+    }
+
+    .paths {
+        font-size: 12px;
+    }
+
+    tbody {
+        border-top: 5px solid #fff;
+    }
+
+    thead th {
+        text-align: left;
+        cursor: pointer;
+    }
+
+    th.ay-sort-asc span {
+        background: url("images/sort_up.png") right center no-repeat;
+        padding-right: 25px;
+        background-size: 15px 15px;
+    }
+
+    th.ay-sort-desc span {
+        background: url("images/sort_down.png") right center no-repeat;
+        padding-right: 25px;
+        background-size: 15px 15px;
+    }
+
+</style>
 
 
-    <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJYZeuZ4jmifhLj-u4YrBIFv8X7K7dHe8&sensor=false">
-    </script>
+<script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJYZeuZ4jmifhLj-u4YrBIFv8X7K7dHe8&sensor=false">
+</script>
 
 
-    <style>
-        .ui-progressbar .ui-progressbar-value {
-            background-image: url(images/pbar-ani.gif);
-        }
+<style>
+    .ui-progressbar .ui-progressbar-value {
+        background-image: url(images/pbar-ani.gif);
+    }
 
-        .cls {
-            /*clear: both;*/
-            /*float : left;*/
-            display : inline-block;
-            width : 33%;
+    .cls {
+        /*clear: both;*/
+        /*float : left;*/
+        display: inline-block;
+        width: 33%;
 
-        }
-        .cls:nth-child(odd)		{ background-color:#eee; }
-        .cls:nth-child(even)		{ background-color:#fff; }
+    }
 
+    .cls:nth-child(odd) {
+        background-color: #eee;
+    }
 
+    .cls:nth-child(even) {
+        background-color: #fff;
+    }
 
-        .flt {
-            float: left;
-        }
+    .flt {
+        float: left;
+    }
 
-        .square {
-            width: 100px;
-            height: 100px;
-        }
+    .square {
+        width: 100px;
+        height: 100px;
+    }
 
-        .horiz {
-            width: 150px;
-            height: 90px;
-        }
+    .horiz {
+        width: 150px;
+        height: 90px;
+    }
 
-        .vert {
-            width: 100px;
-            height: 130px;
-        }
+    .vert {
+        width: 100px;
+        height: 130px;
+    }
 
-        .nailthumb-image-titles-bigger span.nailthumb-title {
-            background: none repeat scroll 0 0 rgba(0, 125, 0, 0.5);
-            font-size: 15px;
-            height: 30px;
-        }
+    .nailthumb-image-titles-bigger span.nailthumb-title {
+        background: none repeat scroll 0 0 rgba(0, 125, 0, 0.5);
+        font-size: 15px;
+        height: 30px;
+    }
 
-        .description {
-            padding-bottom: 10px;
-            word-wrap: break-word;
-            width: 90%;
-        }
+    .description {
+        padding-bottom: 10px;
+        word-wrap: break-word;
+        width: 90%;
+    }
 
-
-            /*remove border of thead tabs*/
-        .ui-widget-content {
-            border: none;
-        }
-
+        /*remove border of thead tabs*/
+    .ui-widget-content {
+        border: none;
+    }
 
         /* selected row input table*/
-        table.hover-table  {
-            border-collapse: collapse;
-        }
-        .hover-table tr {
-            background-color: #e8edff;
-            border-top: 1px solid #fff;
-        }
-        .hover-table tr:hover {
-            background-color: #b9c9fe;
-        }
-        .hover-table  th {
-            background-color: #9aaffe;
-        }
-        .hover-table  th, #example td {
-            padding: 3px 5px;
-        }
-        .hover-table  td:hover {
-            cursor: pointer;
-        }
-        .hover-table  thead {
-            background-color : #b9c9fe;
-        }
+    table.hover-table {
+        border-collapse: collapse;
+    }
+
+    .hover-table tr {
+        background-color: #e8edff;
+        border-top: 1px solid #fff;
+    }
+
+    .hover-table tr:hover {
+        background-color: #b9c9fe;
+    }
+
+    .hover-table  th {
+        background-color: #9aaffe;
+    }
+
+    .hover-table  th, #example td {
+        padding: 3px 5px;
+    }
+
+    .hover-table  td:hover {
+        cursor: pointer;
+    }
+
+    .hover-table  thead {
+        background-color: #b9c9fe;
+    }
 
 
-    </style>
+</style>
 
-    <script>
+<script>
 
-        //global variables
+    //global variables
 
-        jQuery.ajaxSettings.traditional = true;
+    jQuery.ajaxSettings.traditional = true;
 
-        $(function () {
-            $("#tabs").tabs({     cache:true,
-                        show:function (event, ui) {
-                            if (ui.index == 4) {
-                                    initialize();
-                                google.maps.event.trigger(map, 'resize');
-                            }
+    $(function () {
+        $("#tabs").tabs({     cache:true,
+                    show:function (event, ui) {
+                        if (ui.index == 4) {
+                            initialize();
+                            google.maps.event.trigger(map, 'resize');
                         }
                     }
-            );
-        })
-        ;
-        $(function () {
-            $("#progressbar").progressbar({
-                value:59
-            });
-        });
-//        $(function () {
-//            $("#accordion").accordion();
-//            $('#accordion-duplicate-folders').accordion();
-//        });
-        $(function () {
-            $('#fileupload').fileupload({
-                dataType:'json',
-                forceIframeTransport:true,
-                previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
-                fail:function (e, data) {
-                    alert("xxx" + e + " " + data);
-                    for (i in e) {
-                        console.log("-" + i + " " + e[i]);
-                    }
-                    for (i in data) {
-                        console.log("-" + i + " " + data[i]);
-                    }
-                },
-                hideDropzones:false,
-                done:function (e, data) {
-                    uploadFinished(data);
                 }
-
-            });
+        );
+    })
+    ;
+    $(function () {
+        $("#progressbar").progressbar({
+            value:59
         });
+    });
+    //        $(function () {
+    //            $("#accordion").accordion();
+    //            $('#accordion-duplicate-folders').accordion();
+    //        });
+    $(function () {
+        $('#fileupload').fileupload({
+            dataType:'json',
+            forceIframeTransport:true,
+            previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
+            fail:function (e, data) {
+                alert("xxx" + e + " " + data);
+                for (i in e) {
+                    console.log("-" + i + " " + e[i]);
+                }
+                for (i in data) {
+                    console.log("-" + i + " " + data[i]);
+                }
+            },
+            hideDropzones:false,
+            done:function (e, data) {
+                uploadFinished(data);
+            }
+
+        });
+    });
 
 
-    </script>
+</script>
 </head>
 <body>
 
@@ -211,6 +252,9 @@
             style="width:100%; border: 0; padding: 0; overflow-x: hidden; display: block" class="frame"></iframe>
 
 </div>
+
+
+
 
 
 <div id="tabs">
@@ -233,8 +277,9 @@
         </form>
 
 
-        <!--<div id="accordion"></div>-->            <div  style="width:70%;float:left">
-        <table class="hover-table" id="duplicate-file-table"></table>
+        <!--<div id="accordion"></div>-->
+        <div style="width:70%;float:left">
+            <table class="hover-table" id="duplicate-file-table"></table>
         </div>
         <!--<span id="duplicate_result"></span>-->
     </div>
@@ -244,8 +289,8 @@
 
             <input type="submit" value="get Folders">
         </form>
-        <div  style="width:65%;float:left">
-            <table class="hover-table" id="duplicate-folder-table" ></table>
+        <div style="width:65%;float:left">
+            <table class="hover-table" id="duplicate-folder-table"></table>
         </div>
         <!--<div id="duplicate-folders-details" style="width: 30% ; float:left"></div>-->
         <div id="duplicate-folders-details" style="width:35% ; height : 75% ;

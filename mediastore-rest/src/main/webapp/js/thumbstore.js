@@ -114,30 +114,6 @@ function toFolderAndFileLink(path) {
         '  <a class="pathlink" href="#!"  data-p1="' + folder + '">' + '  [open folder]</a>'
 }
 
-//function toDualFolderLink(path1, path2) {
-//    return  '  <a href="explorer://rest/hello/folder/?path1=' + path1 + '&path2=' + path2 + '">[folders]</a>'
-//}
-
-//function updateAccordion(output) {
-//
-//    $('#accordion').children().remove();
-//
-//    $('#accordion').append(output).accordion('destroy').accordion({
-//        collapsible:true,
-//        autoHeight:false,
-//        active:false,
-//        change:function (event, ui) {
-//            if ($(".nailthumb-container", ui.newContent).length == 0) {
-//                $.each($("[id=imagePath]", ui.newContent), function (index, base64Sig) {
-//                });
-//            }
-//        }
-//
-//    });
-//
-//}
-
-
 function getDuplicateFolderDetails(folder1, folder2) {
 
     var d = duplicateFolderDetails[folder1 + folder2];
@@ -204,12 +180,6 @@ function getDuplicateFolder() {
             val['filesInFolder2'] = (val['occurences'] * 100.0 / val['filesInFolder2']).toFixed(0);
 
             var rowTag = Mustache.to_html(template, val);
-//            html_table += rowTag
-//                + '<td class="paths"> <div id="folder1">' + toFolderLink(val['folder1']) + '</div> ' +
-//                '<div id="folder2">' + toFolderLink(val['folder2']) + ' ' +
-//                '</div>  </td>'
-//                + '</tr> ';
-
             html_table += rowTag
                 + '<td class="paths"> <div id="folder1">' + val['folder1'] + '</div> ' +
                 '<div id="folder2">' + val['folder2'] + ' '  +  toFolderLinks(val['folder1'], val['folder2'])  +
@@ -281,24 +251,43 @@ function prettyPrint(object) {
 
 function uploadFinished(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
-//      debugger;
-    var sourceSigHTML = '<img class="pathlink" src="data:image;base64,' +sourceSignature +'" height="100" width="100"/>';
-    $("#duplicate_upload_source").append(sourceSigHTML);
+    var sourceSigHTML = '<div  style="float:left"/><img class="pathlink" src="data:image;base64,' +sourceSignature +'" height="100" width="100"></div>';
+    var sourceSig = document.createElement('div');
+    sourceSig.style.float="left";
+    var sourceSigCanvas =new customCanvas("data:image;base64," +sourceSignature ,100,100);
+    sourceSig.appendChild(sourceSigCanvas.canvas);
+
+    document.getElementById("duplicate_upload_source").appendChild(sourceSig);
 
     for (f in object) {
         var image = object[f];
         var rmse = (image.rmse);
         var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}} "/>';
-        var templateSig =  '<img class="pathlink" src="data:image;base64,{{base64Sig}}" title="{{path}} height="100" width="100"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
-        var sigTag = Mustache.to_html(templateSig, image);
 
+        var sigTag=   "data:image;base64,"+ image.base64Sig;
 
         description = '<div class="description flt"> Distance:' + rmse + '<br>  ' + toFolderAndFileLink(image.path) + '</a><br></div>'
 
-        $("#duplicate_upload_result").append('<div class="floated_img cls">'+ sigTag
-            + '<div class="nailthumb-container nailthumb-image-titles-animated-onhover square flt">'
-            + imgTag + "</div>" + description + "</div>");
+        var descriptionDiv = document.createElement('div');
+        descriptionDiv.className="description flt";
+        descriptionDiv.innerHTML='Distance:' + rmse + '<br>  ' + toFolderAndFileLink(image.path) + '</a><br>' ;
+
+        var floatedDiv = document.createElement('div');
+        floatedDiv.className="floated_img cls";
+        var canv =new customCanvas( sigTag,100,100);
+        floatedDiv.appendChild(canv.canvas);
+
+        sourceSigCanvas.addOther(canv);
+
+        var imgDiv =   document.createElement('div');
+        imgDiv.className="nailthumb-container nailthumb-image-titles-animated-onhover square flt";
+        imgDiv.innerHTML=imgTag;
+        floatedDiv.appendChild(imgDiv);
+
+        floatedDiv.appendChild(descriptionDiv);
+
+        $("#duplicate_upload_result").append(floatedDiv);
     }
     jQuery(document).ready(function () {
 
@@ -314,10 +303,6 @@ function generatePathLink() {
         var p1 = $this.data('p1');
         var p2 = $this.data('p2');
         var folders = [];
-       // debugger;
-//        $this.parent().parent().find('.pathlink').each(function () {
-//            folders.push($(this).attr('base64Sig-p1'))
-//        });
         folders.push(p1);
         folders.push(p2);
         callOpen(folders[0], folders[1]);

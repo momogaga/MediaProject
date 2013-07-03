@@ -122,7 +122,6 @@ public class MediaIndexer {
             if (software) {
                 dest = this.downScaleImageToGray(source, 10, 10);
             }
-
             data1 = new int[dest.getWidth() * dest.getHeight()];
             dest.getRGB(0, 0, dest.getWidth(), dest.getHeight(), data1, 0, dest.getWidth());
 
@@ -167,21 +166,21 @@ public class MediaIndexer {
 
             if ((mf != null) && (f.lastModified() == mf.getMtime())) {
                 //TODO : process again if time difference
-                System.out.println("MediaIndexer.generateAndSave " + f);
-                System.out.println("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
-                System.out.println("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
-                System.out.println("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
+                Logger.getLogger().err("MediaIndexer.generateAndSave " + f);
+                Logger.getLogger().err("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
+                Logger.getLogger().err("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
+                Logger.getLogger().err("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
 
 
                 if (forceGPSUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
                     MetaDataFinder mdf = new MetaDataFinder(f);
                     double latLon[] = mdf.getLatLong();
-                    System.out.println("MediaIndexer.generateAndSave working on " + f);
+                    Logger.getLogger().err("MediaIndexer.generateAndSave working on " + f);
                     if (latLon != null) {
                         mfd.setLat(latLon[0]);
                         mfd.setLon(latLon[1]);
-                        System.out.println("MediaIndexer : forced update for GPS data for " + f);
+                        Logger.getLogger().err("MediaIndexer : forced update for GPS data for " + f);
                         ts.updateToDB(mfd);
                         updatedFiles++;
                     }
@@ -276,7 +275,7 @@ public class MediaIndexer {
             executorService.submit(new RunnableProcess(fd));
         } else {
             if (fd.isDirectory()) {
-                System.out.println("MediaIndexer.processMT processing () " + fd);
+                Logger.getLogger().err("MediaIndexer.processMT processing () " + fd);
                 String entries[] = fd.list();
                 if (entries != null) {
                     for (int i = 0; i < entries.length; i++) {
@@ -299,7 +298,7 @@ public class MediaIndexer {
 
     public void updateDB(List<String> al) {
         for (String s : al) {
-            System.out.println("MediaIndexer.updateDB updating " + s);
+            Logger.getLogger().err("MediaIndexer.updateDB updating " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);
             processMTRoot(s);
         }
