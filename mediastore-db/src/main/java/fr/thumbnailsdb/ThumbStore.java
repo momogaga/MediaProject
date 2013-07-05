@@ -456,7 +456,7 @@ public class ThumbStore {
         }
 
         //delete it from the cache
-        if (mf!=null) {
+        if ((mf!=null) && (this.preloadedDescriptorsExists())) {
           this.getPreloadedDescriptors().remove(mf);
         }
     }

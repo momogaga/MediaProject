@@ -1,4 +1,4 @@
-package fr.thumbnailsdb;
+package fr.thumbnailsdb.duplicate;
 
 import fr.thumbnailsdb.utils.Logger;
 

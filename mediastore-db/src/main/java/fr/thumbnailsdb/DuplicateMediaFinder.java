@@ -1,5 +1,11 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.MediaFileDescriptor;
+import fr.thumbnailsdb.PreloadedDescriptors;
+import fr.thumbnailsdb.ThumbStore;
+import fr.thumbnailsdb.duplicate.DuplicateFileGroup;
+import fr.thumbnailsdb.duplicate.DuplicateFileList;
+import fr.thumbnailsdb.duplicate.DuplicateFolderList;
 import fr.thumbnailsdb.utils.Logger;
 
 import java.sql.ResultSet;

@@ -115,27 +115,44 @@ function toFolderAndFileLink(path) {
 }
 
 function getDuplicateFolderDetails(folder1, folder2) {
-
     var d = duplicateFolderDetails[folder1 + folder2];
-   // console.log(d);
-    var tab = { files:[ ] };
+    var tab=[];
     for (var i = 0; i < d[0].length; ++i) {
-        tab.files.push({
+        tab.push({
             f1:d[0][i],
             f2:d[1][i]
         });
     }
-    var templateFiles = ' {{#files}} ' + '<div class="paths">{{f1}}   <a class="pathlink" href="#!"  data-p1="{{f1}}">[file]</a> '+
-        '<a class="deletelink" href="#!"  data-p1="{{f1}}">[delete]</a>  <br>' +
-        '{{f2}}   <a class="pathlink" href="#!"  data-p1="{{f2}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2}}">[delete]</a></div><br>' +
-        '{{/files}}';
+
+    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
+        + '<th class="paths ay-sort"><span>Paths</span></th>' +
+        '</tr></thead> <tbody>';
+
+    var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}" >'
+        + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
+        + '<td class="files">{{occurences}}</td>'
+        + '<td class="f1">{{filesInFolder1}}</td>'
+        + '<td class="f2">{{filesInFolder2}}</td>';
+
+    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}   <a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> '+
+        '<a class="deletelink" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
+        '{{f2.path}}   <a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
+        '{{/.}}';
     var htmlFiles = Mustache.to_html(templateFiles, tab);
-    $('#duplicate-folders-details').children().remove();
-    $('#duplicate-folders-details').append(htmlFiles);
+
+    html_table+=htmlFiles;
+    html_table+="</tbody>"
+
+    $('#duplicate-folder-details-table').children().remove();
+    $('#duplicate-folder-details-table').append(html_table);
     $(document).ready(function () {
+        $.ay.tableSort({target:$('#duplicate-folder-details-table'), debug:false});
         generatePathLink();
         generateDeleteLink();
     });
+
+
+
 }
 
 
@@ -154,7 +171,7 @@ function getSelectedFolders() {
 function getDuplicateFolder() {
 
     var folders = getSelectedFolders();
-    $('#duplicate-folders-details').children().remove();
+    $('#duplicate-folders-table-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
         + ' <th class="files ay-sort"><span>#Files</span></th>' +
@@ -186,12 +203,22 @@ function getDuplicateFolder() {
                 '<div id="folder2">' + val['folder2'] + ' '  +  toFolderLinks(val['folder1'], val['folder2'])  +
                 '</div>  </td>'
                 + '</tr> ';
+         //   debugger;
 
             var fileArray = new Array();
+//            fileArray[0] = {path:val['file1'][0].path, size:val['file1'][0].size} ;//val['file1'];
+//            fileArray[1] = {path:val['file2'][0].path, size:val['file2'][0].size};//val['file2'];
             fileArray[0] = val['file1'];
             fileArray[1] = val['file2'];
 
-            duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
+
+
+            //val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
+            //val['totalSize'] = val['totalSize'].toFixed(4);
+
+
+            //duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
+            duplicateFolderDetails[val['folder1'] + val['folder2']]=fileArray;
         });
         html_table += '</tbody>';
         //  debugger;

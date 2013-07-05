@@ -45,7 +45,7 @@ public class PreloadedDescriptors {
     }
 
     public void clear() {
-        this.clear();
+        this.list.clear();
     }
 
     public Iterator iterator() {

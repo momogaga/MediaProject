@@ -1,7 +1,8 @@
-package fr.thumbnailsdb;
+package fr.thumbnailsdb.duplicate;
+
+import fr.thumbnailsdb.Utils;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -41,12 +42,12 @@ public class DuplicateFolderList {
                         //folderWithDuplicates.put(couple, dfg + 1);
                         dfg.increase();
                         dfg.addSize(dg.fileSize);
-                        dfg.addFiles(dg.get(i), dg.get(j));
+                        dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
                     } else {
                         //   System.out.println(" Key not found, adding");
                         dfg = new DuplicateFolderGroup(dir1, dir2);
                         dfg.addSize(dg.fileSize);
-                        dfg.addFiles(dg.get(i), dg.get(j));
+                        dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
                         folderWithDuplicates.put(couple, dfg);
                     }
                 }

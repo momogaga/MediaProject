@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" style="height:100%">
 <head>
 <meta charset="utf-8"/>
 <link rel="stylesheet"
@@ -244,18 +244,17 @@
 
 </script>
 </head>
-<body>
+<body style="height:100%">
 
 
-<div id="header" style="padding:0">
+<div id="header" style="padding:0; height:5%">
     <iframe src="thumbstore_status.html" height="30"
             style="width:100%; border: 0; padding: 0; overflow-x: hidden; display: block" class="frame"></iframe>
 
 </div>
 
 
-
-<div id="tabs">
+<div id="tabs" style="height:95%; width:100%; position:relative; padding:0">
     <ul>
         <li><a href="thumbstore.html">ThumbStore controle</a></li>
         <li><a href="#tabs-2">Duplicate media</a></li>
@@ -282,18 +281,28 @@
         <!--<span id="duplicate_result"></span>-->
     </div>
 
-    <div id="tabs-folder">
+    <div id="tabs-folder" style="position: relative;height: 80%;padding:0">
+
         <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
 
             <input type="submit" value="get Folders">
         </form>
-        <div style="width:65%;float:left">
-            <table class="hover-table" id="duplicate-folder-table"></table>
+        <div class="container"
+             style=" overflow-y: scroll;height:60%; width:100%;padding:0">
+            <!--<div style="width:65%;float:left">-->
+            <div>
+                <table class="hover-table" id="duplicate-folder-table"></table>
+            </div>
         </div>
-        <!--<div id="duplicate-folders-details" style="width: 30% ; float:left"></div>-->
-        <div id="duplicate-folders-details" style="width:35% ; height : 75% ;
-        position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc"></div>
 
+        <!--<div id="duplicate-folders-details" style="width:35% ; height : 75% ;-->
+            <!--position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc">-->
+            <div id="duplicate-folders-details" style="width:100% ; height : 45% ;
+         overflow-y: auto; background-color : #d5cfcc;  border: solid 1px black;">
+
+                <table class="hover-table" id="duplicate-folder-details-table"></table>
+
+            </div>
 
     </div>
 

@@ -135,6 +135,9 @@ public class DiskWatcher {
         WatchEvent.Kind kind = event.kind();
 
         WatchEvent<Path> ev = cast(event);
+        if ((ev==null) || (ev.context()==null)) {
+            return;
+        }
         Path name = FileSystems.getDefault().getPath(path, ev.context().toString());
         //Path name = new Path(//ev.context().toAbsolutePath();
         //   System.out.println(new String(new byte[] {47,104,111,109,101,47,1,117,101,116,47,119,111,114,107,115,112,97,99,101,115,47,114,101,99,104,101,114,99,104,101,101,102,102,105,99,97,99,101,105,109,97,103,101,115,115,105,109,105,108,97,105,114,101,115,47,77,101,100,105,97,83,116,111,114,101}));

@@ -1,4 +1,4 @@
-package fr.thumbnailsdb;
+package fr.thumbnailsdb.duplicate;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,17 +31,17 @@ public class DuplicateFolderGroup {
     long totalSize;
 
     @XmlElement
-    ArrayList<String> file1 = new ArrayList<String>();
+    ArrayList<FileWithSize> file1 = new ArrayList<FileWithSize>();
 
     @XmlElement
-    ArrayList<String> file2 = new ArrayList<String>();
+    ArrayList<FileWithSize> file2 = new ArrayList<FileWithSize>();
 
 
-    public ArrayList<String> getFile1() {
+    public ArrayList<FileWithSize> getFile1() {
         return file1;
     }
 
-    public ArrayList<String> getFile2() {
+    public ArrayList<FileWithSize> getFile2() {
         return file2;
     }
 
@@ -58,9 +58,9 @@ public class DuplicateFolderGroup {
        //System.out.println("occurences was "+ (occurences-1) + " now " +occurences);
     }
 
-    public void addFiles(String f1, String f2) {
-       file1.add(f1);
-       file2.add(f2);
+    public void addFiles(String f1, String f2, long size) {
+       file1.add(new FileWithSize(f1,size));
+       file2.add(new FileWithSize(f2,size));
     }
 
     public void addSize(long s){

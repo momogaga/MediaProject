@@ -1,4 +1,4 @@
-package fr.thumbnailsdb;
+package fr.thumbnailsdb.duplicate;
 
 import java.io.File;
 import java.util.ArrayList;
