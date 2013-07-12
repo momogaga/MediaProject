@@ -83,13 +83,13 @@
     }
 
     th.ay-sort-asc span {
-        background: url("images/sort_up.png") right center no-repeat;
+        background: url("js/images/sort_up.png") right center no-repeat;
         padding-right: 25px;
         background-size: 15px 15px;
     }
 
     th.ay-sort-desc span {
-        background: url("images/sort_down.png") right center no-repeat;
+        background: url("js/images/sort_down.png") right center no-repeat;
         padding-right: 25px;
         background-size: 15px 15px;
     }
@@ -104,7 +104,7 @@
 
 <style>
     .ui-progressbar .ui-progressbar-value {
-        background-image: url(images/pbar-ani.gif);
+        background-image: url(js/images/pbar-ani.gif);
     }
 
     .cls {
@@ -192,6 +192,9 @@
 
 </style>
 
+
+<script src="bootstrap/js/bootstrap.js"/>
+
 <script>
 
     //global variables
@@ -254,18 +257,35 @@
 </div>
 
 
-<div id="tabs" style="height:95%; width:100%; position:relative; padding:0">
-    <ul>
-        <li><a href="thumbstore.html">ThumbStore controle</a></li>
-        <li><a href="#tabs-2">Duplicate media</a></li>
-        <li><a href="#tabs-folder">Duplicate folders</a></li>
-        <li><a href="drag.html">Drag'n'Drop</a></li>
-        <li><a href="grid.html">GPS</a></li>
+<ul class="nav nav-tabs" data-tabs="tabs">
+    <!--<li class="active"><a data-toggle="tab" href="thumbstore.html">ThumbStore controle</a></li>-->
+    <li class="active"><a data-toggle="tab" href="#tabs-1">ThumbStore controle</a></li>
 
-    </ul>
+    <li><a data-toggle="tab" href="#tabs-2">Duplicate media</a></li>
+    <li><a data-toggle="tab" href="#tabs-folder">Duplicate folders</a></li>
+    <!--<li><a data-toggle="tab" href="drag.html">Drag'n'Drop</a></li>-->
+    <li><a data-toggle="tab" href="#tabs-drag">Drag'n'Drop</a></li>
+    <li><a data-toggle="tab" href="grid.html">GPS</a></li>
+
+</ul>
 
 
-    <div id="tabs-2">
+<!--<div id="tabs" style="height:95%; width:100%; position:relative; padding:0">-->
+<!--<ul>-->
+<!--<li><a href="thumbstore.html">ThumbStore controle</a></li>-->
+<!--<li><a href="#tabs-2">Duplicate media</a></li>-->
+<!--<li><a href="#tabs-folder">Duplicate folders</a></li>-->
+<!--<li><a href="drag.html">Drag'n'Drop</a></li>-->
+<!--<li><a href="grid.html">GPS</a></li>-->
+
+<!--</ul>-->
+
+<div class="tab-content" style="height:100%">
+    <div class="tab-pane active" id="tabs-1">
+        <!--<a href="thumbstore.html"></a>-->
+    </div>
+
+    <div class="tab-pane" id="tabs-2">
         <form name="myform" action="rest/hello/identical" method="POST">
             <div align="center">
                 <br> <br> <input type=text size="25" value="5" name="max">
@@ -281,7 +301,7 @@
         <!--<span id="duplicate_result"></span>-->
     </div>
 
-    <div id="tabs-folder" style="position: relative;height: 80%;padding:0">
+    <div class="tab-pane" id="tabs-folder" style="position: relative;height: 80%">
 
         <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
 
@@ -296,17 +316,26 @@
         </div>
 
         <!--<div id="duplicate-folders-details" style="width:35% ; height : 75% ;-->
-            <!--position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc">-->
-            <div id="duplicate-folders-details" style="width:100% ; height : 45% ;
+        <!--position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc">-->
+        <div id="duplicate-folders-details" style="width:100% ; height : 45% ;
          overflow-y: auto; background-color : #d5cfcc;  border: solid 1px black;">
 
-                <table class="hover-table" id="duplicate-folder-details-table"></table>
+            <table class="hover-table" id="duplicate-folder-details-table"></table>
 
-            </div>
+        </div>
 
     </div>
 
+    <div class="tab-pane " id="tabs-drag">
+    </div>
+
+
 </div>
+
+<script>
+    $('#tabs-1').load('thumbstore.html');
+    $('#tabs-drag').load('drag.html');
+</script>
 
 
 </body>

@@ -94,7 +94,7 @@ public class DuplicateFolderList {
 //            System.out.println("   ---  " + s);
             //}
 
-            File directory = null;
+           // File directory = null;
 
             dfg.setFilesInFolder1(Utils.folderSize(dfg.folder1));
             dfg.setFilesInFolder2(Utils.folderSize(dfg.folder2));

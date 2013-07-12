@@ -4,7 +4,7 @@ public class Logger {
 
     private static Logger log = new Logger();
     private static boolean logEnabled = false;
-    private static boolean errEnabled = true;
+    private static boolean errEnabled = false;
 
 
     public static Logger getLogger() {

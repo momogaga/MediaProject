@@ -1,5 +1,26 @@
 package rest;
 
+import com.sun.jersey.multipart.BodyPartEntity;
+import com.sun.jersey.multipart.FormDataMultiPart;
+import com.sun.jersey.spi.resource.Singleton;
+import fr.thumbnailsdb.*;
+import fr.thumbnailsdb.diskmonitor.DiskListener;
+import fr.thumbnailsdb.diskmonitor.DiskWatcher;
+import fr.thumbnailsdb.duplicate.DuplicateFolderGroup;
+import fr.thumbnailsdb.duplicate.DuplicateFolderList;
+import fr.thumbnailsdb.utils.Logger;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import javax.imageio.ImageIO;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -9,37 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.imageio.ImageIO;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.sun.jersey.multipart.FormDataMultiPart;
-import fr.thumbnailsdb.*;
-import fr.thumbnailsdb.diskmonitor.DiskListener;
-import fr.thumbnailsdb.diskmonitor.DiskWatcher;
-import fr.thumbnailsdb.duplicate.DuplicateFolderGroup;
-import fr.thumbnailsdb.duplicate.DuplicateFolderList;
-import fr.thumbnailsdb.DuplicateMediaFinder;
-import fr.thumbnailsdb.utils.Logger;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-
-import com.sun.jersey.multipart.BodyPartEntity;
-
-import com.sun.jersey.spi.resource.Singleton;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import java.util.List;
 
 @Path("/hello")
 @Singleton
@@ -124,13 +115,34 @@ public class RestTest {
     }
 
 
+    protected String[] parseFolders(String json) {
+        String[] folders = null;
+        try {
+//            System.out.println("RestTest.getDuplicate  folder string " + json);
+            JSONObject paramString = new JSONObject(json);
+            System.out.println("RestTest.getDuplicate " +paramString);
+            JSONArray jArray = paramString.getJSONArray("folders");
+            folders = new String[jArray.length()];
+            for(int i = 0; i < jArray.length(); i++) {
+                folders[i] = jArray.getString(i);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+         return folders;
+    }
+
+
     @GET
     @Path("/identical")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getDuplicate(@QueryParam("max") String max, @QueryParam("folder") final java.util.List<String> obj) {
+    public Response getDuplicate(@QueryParam("max") String max, @QueryParam("folder") final String obj) {
+        String[] folders = this.parseFolders(obj);
+
+
         System.out.println("RestTest.getDuplicate " + obj);
         Status.getStatus().setStringStatus("Requesting duplicate media");
-        Collection dc = (Collection) df.computeDuplicateSets(df.findDuplicateMedia()).toCollection(Integer.parseInt(max), obj.toArray(new String[]{}));
+        Collection dc = (Collection) df.computeDuplicateSets(df.findDuplicateMedia()).toCollection(Integer.parseInt(max), folders);
         Status.getStatus().setStringStatus(Status.IDLE);
         return Response.status(200).entity(dc).build();
     }
@@ -139,11 +151,12 @@ public class RestTest {
     @GET
     @Path("/duplicateFolder")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getDuplicateFolder(@QueryParam("folder") final java.util.List<String> obj) {
+    public Response getDuplicateFolder(@QueryParam("folder") final String obj) {
+        String[] folders = this.parseFolders(obj);
         Logger.getLogger().log("RestTest.getDuplicateFolder " + obj);
         Status.getStatus().setStringStatus("Requesting duplicate folder list");
 
-        Collection<DuplicateFolderGroup> col = getDuplicateFolderGroup().asSortedCollection(obj.toArray(new String[]{}), 300);
+        Collection<DuplicateFolderGroup> col = getDuplicateFolderGroup().asSortedCollection(folders, 300);
         Logger.getLogger().log("RestTest.getDuplicateFolder sending results of size " + col.size());
         Status.getStatus().setStringStatus(Status.IDLE);
 
@@ -224,8 +237,11 @@ public class RestTest {
 
     @GET
     @Path("open/")
-    public Response openPath(@QueryParam("path") final java.util.List<String> obj) {
-        for (String path : obj) {
+    public Response openPath(@QueryParam("path") final String obj) {
+        String[] folders = parseFolders(obj);
+
+
+        for (String path : folders) {
             System.out.println("RestTest.openPath2 " + path);
             File file = new File(path);
             Desktop desktop = Desktop.getDesktop();

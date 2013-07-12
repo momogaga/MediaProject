@@ -17,6 +17,7 @@ function getIndexedPaths(div) {
     $.get("rest/hello/paths", function (data) {
         var val = 1;
         var cbh = document.getElementById('db_paths');
+     //   data.push("toto");
         for (i in data) {
             var cb = document.createElement('input');
             cb.type = 'checkbox';
@@ -45,7 +46,7 @@ function getDuplicate() {
     $.get(
         "rest/hello/identical",
         {
-            folder:folders,
+            folder:JSON.stringify(folders), //folders,
             max:$("input[name=max]").val()
         },
         function (data) {
@@ -158,14 +159,22 @@ function getDuplicateFolderDetails(folder1, folder2) {
 
 function getSelectedFolders() {
     var inputs = $("input[name=folder]");
+    //debugger;
+    //console.log($("#db_paths").serializeArray());
+    var result={}
     var folders = [];
+   // debugger;
     for (i = 0; i < inputs.length; i++) {
         if (inputs[i].checked) {
             folders.push(inputs[i].value);
         }
 
     }
-    return folders;
+ //   folders.push("toto");
+    result.folders=folders;
+    return result;
+   // return folders;
+    //return $("input[name=folder]").serializeArray();
 }
 
 function getDuplicateFolder() {
@@ -187,8 +196,11 @@ function getDuplicateFolder() {
         + '<td class="f1">{{filesInFolder1}}</td>'
         + '<td class="f2">{{filesInFolder2}}</td>';
 
+
+   // debugger;
     $.getJSON('rest/hello/duplicateFolder', {
-        folder:folders
+        folder: JSON.stringify(folders)
+         //$.param(folders)
     }, function (data) {
         $.each(data, function (key, val) {
             val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
@@ -236,9 +248,17 @@ function getDuplicateFolder() {
 }
 function callOpen(para1, para2) {
     //  debugger;
+    var result={}
     var folders = [];
-    folders.push(para1, para2);
-    $.get("rest/hello/open", {path:folders});
+    if (para1!=null) {
+        folders.push(para1);
+    }
+    if (para2!=null) {
+        folders.push( para2);
+    }
+
+    result.folders=folders;
+    $.getJSON("rest/hello/open", {path:JSON.stringify(result)});
 }
 
 function callDelete(para1) {
