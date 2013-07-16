@@ -159,6 +159,9 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
     // }
 
     public String getPath() {
+        if (path==null) {
+            return     ThumbStore.getPath(this.connection, this.id);
+        }
         return path;
     }
 

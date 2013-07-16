@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 @Path("/hello")
@@ -45,7 +46,7 @@ public class RestTest {
     protected DiskWatcher dw;
 
     public RestTest() {
-        System.out.println("RestTest.RestTest()");
+       // System.out.println("RestTest.RestTest()");
 
         File f = new File(dbFileName);
         if (f.exists()) {
@@ -75,7 +76,7 @@ public class RestTest {
             dw.addListener(new DBDiskUpdater());
             dw.processEvents();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger().err("Could not register path");
         }
 
 
@@ -120,16 +121,16 @@ public class RestTest {
         try {
 //            System.out.println("RestTest.getDuplicate  folder string " + json);
             JSONObject paramString = new JSONObject(json);
-            System.out.println("RestTest.getDuplicate " +paramString);
+            System.out.println("RestTest.getDuplicate " + paramString);
             JSONArray jArray = paramString.getJSONArray("folders");
             folders = new String[jArray.length()];
-            for(int i = 0; i < jArray.length(); i++) {
+            for (int i = 0; i < jArray.length(); i++) {
                 folders[i] = jArray.getString(i);
             }
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-         return folders;
+        return folders;
     }
 
 
@@ -318,8 +319,8 @@ public class RestTest {
         String s = currentRelativePath.toAbsolutePath().toString();
         System.out.println("Current relative path is: " + s);
         try {
-            this.moveToTrash(path,s);
-        }   catch (IOException e) {
+            this.moveToTrash(path, s);
+        } catch (IOException e) {
             e.printStackTrace();
             return Response.status(500).build();
         }
@@ -327,9 +328,9 @@ public class RestTest {
     }
 
     protected void moveToTrash(String path, String trashRoot) throws IOException {
-       //create a Trash folder if it does not exist
+        //create a Trash folder if it does not exist
 
-        java.nio.file.Path trash = FileSystems.getDefault().getPath(trashRoot+"/trash");
+        java.nio.file.Path trash = FileSystems.getDefault().getPath(trashRoot + "/trash");
 
         if (!Files.exists(trash)) {
             trash = Files.createDirectory(trash);
@@ -347,16 +348,13 @@ public class RestTest {
 //        }
 
         java.nio.file.Path source = FileSystems.getDefault().getPath(path);
-        String  sourceFilePath = source.getFileName().toString();
-        java.nio.file.Path trashedFileDest =       FileSystems.getDefault().getPath(trashRoot + "/trash/" + sourceFilePath);
+        String sourceFilePath = source.getFileName().toString();
+        java.nio.file.Path trashedFileDest = FileSystems.getDefault().getPath(trashRoot + "/trash/" + sourceFilePath);
         System.out.println("RestTest.moveToTrash " + trashedFileDest);
-        java.nio.file.Files.move(source,trashedFileDest);
-
-
+        java.nio.file.Files.move(source, trashedFileDest);
 
 
     }
-
 
 
     @POST
@@ -429,7 +427,7 @@ public class RestTest {
             }
 
             String folder = Utils.fileToDirectory(path);
-            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder),imgData, mdf.getRmse(), sigData);
+            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getRmse(), sigData);
             al.add(si);
             System.out.println(si);
 
@@ -512,9 +510,9 @@ public class RestTest {
 
         JSONObject responseDetailsJson = new JSONObject();
         try {
-            responseDetailsJson.put("lat", coo[0]);
+            responseDetailsJson.put("lat", coo==null? 0 :coo[0]);
 
-            responseDetailsJson.put("lon", coo[1]);
+            responseDetailsJson.put("lon",  coo==null? 0 :coo[1]);
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -565,6 +563,37 @@ public class RestTest {
     }
 
 
+    @GET
+    @Path("getAll/")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getAll() {
+        PreloadedDescriptors pd = tb.getPreloadedDescriptors();
+        //ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(pd.size());
+        Iterator<MediaFileDescriptor> it = pd.iterator();
+        JSONArray mJSONArray = new JSONArray(pd.size());
+        int i =0;
+        while (it.hasNext() && i < 10000) {
+            i++;
+            JSONObject json = new JSONObject();
+            MediaFileDescriptor mfd = it.next();
+            try {
+//                json.put("foldersize", al.get(i).folderSize);
+                json.put("path", mfd.getPath());
+                //json.put("base64Data", al.get(i).base64Data);
+                //json.put("base64Sig", al.get(i).base64Sig);
+                //json.put("rmse", al.get(i).rmse);
+                json.put("size", mfd.getSize());
+                mJSONArray.put(json);
+            } catch (JSONException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+
+        // ArrayList<String> al = tb.getAllWithGPS();
+        return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
+    }
+
+
     @XmlRootElement
     public class SimilarImage {
         @XmlElement
@@ -581,7 +610,7 @@ public class RestTest {
         public SimilarImage(String path, int folderSize, String base64Data, double rmse, String base64Sig) {
             this.rmse = rmse;
             this.path = path;
-            this.folderSize=folderSize;
+            this.folderSize = folderSize;
             this.base64Data = base64Data;
             this.base64Sig = base64Sig;
         }
@@ -590,7 +619,7 @@ public class RestTest {
     public class DBDiskUpdater implements DiskListener {
 
         public void fileCreated(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileCreated " + p);
+            Logger.getLogger().log("RestTest$DBDiskUpdater.fileCreated " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -599,7 +628,7 @@ public class RestTest {
         }
 
         public void fileModified(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileModified " + p);
+            Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -608,14 +637,14 @@ public class RestTest {
         }
 
         public void fileDeleted(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileDeleted " + p);
+            Logger.getLogger().log("RestTest$DBDiskUpdater.fileDeleted " + p);
 
             // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
             tb.deleteFromDatabase(p.toString());
         }
 
         public void folderCreated(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.folderCreated " + p);
+            Logger.getLogger().log("RestTest$DBDiskUpdater.folderCreated " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {
@@ -624,7 +653,7 @@ public class RestTest {
         }
 
         public void folderModified(java.nio.file.Path p) {
-            System.out.println("RestTest$DBDiskUpdater.fileModified " + p);
+            Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
             try {
                 new MediaIndexer(tb).processMT(new File(p.toString()));
             } catch (IOException e) {

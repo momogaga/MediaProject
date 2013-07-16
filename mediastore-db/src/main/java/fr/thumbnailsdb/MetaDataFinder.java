@@ -9,6 +9,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDescriptor;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
+import fr.thumbnailsdb.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class MetaDataFinder {
 
         for (Directory directory : metadata.getDirectories()) {
             for (Tag tag : directory.getTags()) {
-                System.out.println(tag);
+                Logger.getLogger().log(tag.toString());
             }
         }
 
@@ -74,14 +75,14 @@ public class MetaDataFinder {
         String result = "";
         GpsDirectory directory = metadata.getDirectory(GpsDirectory.class);
         if (directory != null && directory.getTags().size() > 2) {
-//         //   System.out.println("---- " + file + " ----");
+//         //   Logger.getLogger().log("---- " + file + " ----");
             for (Tag tag : directory.getTags()) {
 
                 result+=tag + "\n";
             }
         }
 
-        System.out.println("MetaDataFinder.getGPS file : " + file + " has coordinates " + result);
+        Logger.getLogger().log("MetaDataFinder.getGPS file : " + file + " has coordinates " + result);
 
        return result;
 
@@ -91,21 +92,21 @@ public class MetaDataFinder {
         if (metadata == null) {
             return null;
         }
-        System.out.println("MetaDataFinder.getLatLon processing file : " + file );
+        Logger.getLogger().log("MetaDataFinder.getLatLon processing file : " + file );
         GpsDirectory directory = metadata.getDirectory(GpsDirectory.class);
         if (directory != null && directory.getTags().size() > 2) {
-//         //   System.out.println("---- " + file + " ----");
+//         //   Logger.getLogger().log("---- " + file + " ----");
 //            for (Tag tag : directory.getTags()) {
-//                System.out.println(tag);
+//                Logger.getLogger().log(tag);
 //            }
 //            double lat = getAsDecimalDegree(directory.getDescription(2));
 //            double lon = getAsDecimalDegree(directory.getDescription(4));
-////            System.out.println(lat+", " +lon );
+////            Logger.getLogger().log(lat+", " +lon );
            GeoLocation gl =  directory.getGeoLocation();
              double lat =     gl.getLatitude();
             double lon = gl.getLongitude();
 
-            System.out.println("MetaDataFinder.getLatLon file : " + file + " has coordinates {" + lat + "," + lon+"}");
+            Logger.getLogger().log("MetaDataFinder.getLatLon file : " + file + " has coordinates {" + lat + "," + lon+"}");
 
             return new double[]{lat, lon};
         } else {
@@ -123,9 +124,9 @@ public class MetaDataFinder {
         double decimaldms = 0;
         temp = co.split("[°]|[\"]|[\']");
         for (int i = 0; i < temp.length; i++) {
-//                System.out.println("degree : "+temp[0]);
-//                System.out.println("minutes : "+temp[1]);
-//                System.out.println("second : "+temp[2]);
+//                Logger.getLogger().log("degree : "+temp[0]);
+//                Logger.getLogger().log("minutes : "+temp[1]);
+//                Logger.getLogger().log("second : "+temp[2]);
 
             String deg = temp[0];
             double ndeg = Double.parseDouble(deg);
@@ -150,13 +151,13 @@ public class MetaDataFinder {
 //            mdf.processMT(new File(args[0]));
 //        } else {
 
-        System.out.println(mdf.hasGPSData());
+      //  Logger.getLogger().log(mdf.hasGPSData().toString());
         mdf.printTags();
-        System.out.println(mdf.getDate());
-        System.out.println(mdf.getGPS());
+        Logger.getLogger().log(mdf.getDate());
+        Logger.getLogger().log(mdf.getGPS());
         double ll[] = mdf.getLatLong();
-        System.out.println("Latitude " + ll[0]);
-        System.out.println("Longitude " + ll[1]);
+        Logger.getLogger().log("Latitude " + ll[0]);
+        Logger.getLogger().log("Longitude " + ll[1]);
 //        }
     }
 }

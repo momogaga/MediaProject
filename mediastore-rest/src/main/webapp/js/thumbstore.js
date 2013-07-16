@@ -17,7 +17,7 @@ function getIndexedPaths(div) {
     $.get("rest/hello/paths", function (data) {
         var val = 1;
         var cbh = document.getElementById('db_paths');
-     //   data.push("toto");
+        //   data.push("toto");
         for (i in data) {
             var cb = document.createElement('input');
             cb.type = 'checkbox';
@@ -61,9 +61,10 @@ function getDuplicate() {
             for (i in data) {
                 data[i]['occurences'] = data[i].al.length;
                 data[i]['fileSize'] = data[i]['fileSize'] / 1024 / 1024;
+                data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
-                    rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '</div> ';
+                    rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '<a class="deletelink" href="#!"  data-p1="' + data[i].al[f] + '">[delete]</a> </div> ';
                 }
                 html_table += rowTag + '</td></tr> ';
             }
@@ -117,7 +118,7 @@ function toFolderAndFileLink(path) {
 
 function getDuplicateFolderDetails(folder1, folder2) {
     var d = duplicateFolderDetails[folder1 + folder2];
-    var tab=[];
+    var tab = [];
     for (var i = 0; i < d[0].length; ++i) {
         tab.push({
             f1:d[0][i],
@@ -135,14 +136,14 @@ function getDuplicateFolderDetails(folder1, folder2) {
         + '<td class="f1">{{filesInFolder1}}</td>'
         + '<td class="f2">{{filesInFolder2}}</td>';
 
-    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}   <a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> '+
+    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}   <a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
         '<a class="deletelink" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
         '{{f2.path}}   <a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
         '{{/.}}';
     var htmlFiles = Mustache.to_html(templateFiles, tab);
 
-    html_table+=htmlFiles;
-    html_table+="</tbody>"
+    html_table += htmlFiles;
+    html_table += "</tbody>"
 
     $('#duplicate-folder-details-table').children().remove();
     $('#duplicate-folder-details-table').append(html_table);
@@ -151,31 +152,71 @@ function getDuplicateFolderDetails(folder1, folder2) {
         generatePathLink();
         generateDeleteLink();
     });
-
-
-
 }
 
+function buildAllTable(array) {
+    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
+        + '<th class="paths ay-sort"><span>Paths</span></th>' +
+        '</tr></thead> <tbody>';
+}
 
 function getSelectedFolders() {
     var inputs = $("input[name=folder]");
     //debugger;
     //console.log($("#db_paths").serializeArray());
-    var result={}
+    var result = {}
     var folders = [];
-   // debugger;
+    // debugger;
     for (i = 0; i < inputs.length; i++) {
         if (inputs[i].checked) {
             folders.push(inputs[i].value);
         }
 
     }
- //   folders.push("toto");
-    result.folders=folders;
+    //   folders.push("toto");
+    result.folders = folders;
     return result;
-   // return folders;
+    // return folders;
     //return $("input[name=folder]").serializeArray();
 }
+
+function getAll() {
+    $.getJSON('rest/hello/getAll', {
+
+        //$.param(folders)
+    }, function (data) {
+        buildAllTable(data);
+     //   debugger;
+    });
+}
+
+function buildAllTable(array) {
+    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
+        + '<th class="paths ay-sort"><span>Paths</span></th>' +
+        '</tr></thead> <tbody>';
+
+    var template = ' {{#.}} ' + ' <tr>'
+        + '<td class="size"> {{size}}</td>'
+        + '<td class="path">{{path}}<a class="pathlink" href="#!"  data-p1="{{path}}">[file]</a> ' +
+        '<a class="deletelink" href="#!"  data-p1="{{path}}">[delete]</a> </td></tr>' + '{{/.}}';
+
+
+    var htmlFiles = Mustache.to_html(template, array);
+
+    html_table += htmlFiles;
+    html_table += "</tbody>"
+
+    $('#all-table').children().remove();
+    $('#all-table').append(html_table);
+    $(document).ready(function () {
+        $.ay.tableSort({target:$('#all-table'), debug:false});
+        generatePathLink();
+        generateDeleteLink();
+    });
+
+
+}
+
 
 function getDuplicateFolder() {
 
@@ -197,10 +238,10 @@ function getDuplicateFolder() {
         + '<td class="f2">{{filesInFolder2}}</td>';
 
 
-   // debugger;
+    // debugger;
     $.getJSON('rest/hello/duplicateFolder', {
-        folder: JSON.stringify(folders)
-         //$.param(folders)
+        folder:JSON.stringify(folders)
+        //$.param(folders)
     }, function (data) {
         $.each(data, function (key, val) {
             val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
@@ -212,10 +253,10 @@ function getDuplicateFolder() {
             var rowTag = Mustache.to_html(template, val);
             html_table += rowTag
                 + '<td class="paths"> <div id="folder1">' + val['folder1'] + '</div> ' +
-                '<div id="folder2">' + val['folder2'] + ' '  +  toFolderLinks(val['folder1'], val['folder2'])  +
+                '<div id="folder2">' + val['folder2'] + ' ' + toFolderLinks(val['folder1'], val['folder2']) +
                 '</div>  </td>'
                 + '</tr> ';
-         //   debugger;
+            //   debugger;
 
             var fileArray = new Array();
 //            fileArray[0] = {path:val['file1'][0].path, size:val['file1'][0].size} ;//val['file1'];
@@ -224,13 +265,12 @@ function getDuplicateFolder() {
             fileArray[1] = val['file2'];
 
 
-
             //val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
             //val['totalSize'] = val['totalSize'].toFixed(4);
 
 
             //duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
-            duplicateFolderDetails[val['folder1'] + val['folder2']]=fileArray;
+            duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
         });
         html_table += '</tbody>';
         //  debugger;
@@ -248,16 +288,16 @@ function getDuplicateFolder() {
 }
 function callOpen(para1, para2) {
     //  debugger;
-    var result={}
+    var result = {}
     var folders = [];
-    if (para1!=null) {
+    if (para1 != null) {
         folders.push(para1);
     }
-    if (para2!=null) {
-        folders.push( para2);
+    if (para2 != null) {
+        folders.push(para2);
     }
 
-    result.folders=folders;
+    result.folders = folders;
     $.getJSON("rest/hello/open", {path:JSON.stringify(result)});
 }
 
@@ -265,6 +305,19 @@ function callDelete(para1) {
     //  debugger;
     //var folders = [];
     //.push(para1, para2);
+    debugger;
+
+    jQuery.each($(".path"), function (key, value) {
+       debugger;
+        if (value.childNodes[0].nodeValue==para1) {
+         value.style.textDecoration = "line-through";
+        }
+    });
+//    jQuery.each($('[data-p1*="'+para1+'"]'),
+//        function (key, value) {
+//            value.style.textDecoration="line-through";
+//        });
+
     $.get("rest/hello/trash", {path:para1});
 }
 
@@ -306,10 +359,10 @@ function prettyPrint(object) {
 
 function uploadFinished(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
-    var sourceSigHTML = '<div  style="float:left"/><img class="pathlink" src="data:image;base64,' +sourceSignature +'" height="100" width="100"></div>';
+    var sourceSigHTML = '<div  style="float:left"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
     var sourceSig = document.createElement('div');
-    sourceSig.style.float="left";
-    var sourceSigCanvas =new customCanvas("data:image;base64," +sourceSignature ,100,100);
+    sourceSig.style.float = "left";
+    var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
     sourceSig.appendChild(sourceSigCanvas.canvas);
 
     document.getElementById("duplicate_upload_source").appendChild(sourceSig);
@@ -317,23 +370,23 @@ function uploadFinished(sourceSignature, object) {
     for (f in object) {
         var image = object[f];
         var rmse = (image.rmse);
-        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}} "/>';
+        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
-        var sigTag=   "data:image;base64,"+ image.base64Sig;
+        var sigTag = "data:image;base64," + image.base64Sig;
         var descriptionDiv = document.createElement('div');
-        descriptionDiv.className="description flt";
-        descriptionDiv.innerHTML='Distance:' + rmse + ', Files in folder:  '+   image.foldersize   + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>' ;
+        descriptionDiv.className = "description flt";
+        descriptionDiv.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
 
         var floatedDiv = document.createElement('div');
-        floatedDiv.className="floated_img cls";
-        var canv =new customCanvas( sigTag,100,100);
+        floatedDiv.className = "floated_img cls";
+        var canv = new customCanvas(sigTag, 100, 100);
         floatedDiv.appendChild(canv.canvas);
 
         sourceSigCanvas.addOther(canv);
 
-        var imgDiv =   document.createElement('div');
-        imgDiv.className="nailthumb-container nailthumb-image-titles-animated-onhover square flt";
-        imgDiv.innerHTML=imgTag;
+        var imgDiv = document.createElement('div');
+        imgDiv.className = "nailthumb-container nailthumb-image-titles-animated-onhover square flt";
+        imgDiv.innerHTML = imgTag;
         floatedDiv.appendChild(imgDiv);
 
         floatedDiv.appendChild(descriptionDiv);
@@ -342,7 +395,7 @@ function uploadFinished(sourceSignature, object) {
     }
     jQuery(document).ready(function () {
 
-           generatePathLink();
+        generatePathLink();
         jQuery('.nailthumb-container').nailthumb();
         jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
     });
@@ -364,11 +417,11 @@ function generateDeleteLink() {
     $('.deletelink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');
-    //    var p2 = $this.data('p2');
-     //   var folders = [];
-    //    folders.push(p1);
-    //    folders.push(p2);
-       // callOpen(folders[0], folders[1]);
+        //    var p2 = $this.data('p2');
+        //   var folders = [];
+        //    folders.push(p1);
+        //    folders.push(p2);
+        // callOpen(folders[0], folders[1]);
         callDelete(p1);
     });
 }

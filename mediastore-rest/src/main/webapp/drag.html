@@ -1,6 +1,35 @@
 <!--<link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>-->
+<!---->
+
+<script src="js/jquery.fileupload.js"></script>
+<script src="js/jquery.fileupload-fp.js"></script>
+<link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
+<script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
 
 <script>
+
+    $(function () {
+        $('#fileupload').fileupload({
+            dataType:'json',
+            forceIframeTransport:true,
+            previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
+            fail:function (e, data) {
+                //alert("xxx" + e + " " + data);
+                for (i in e) {
+                    console.log("-" + i + " " + e[i]);
+                }
+                for (i in data) {
+                    console.log("-" + i + " " + data[i]);
+                }
+            },
+            hideDropzones:false,
+            done:function (e, data) {
+                uploadFinished(data);
+            }
+
+        });
+    });
+
     function createUploader() {
         var uploader = new qq.FileUploader({
             element:document.getElementById('file-uploader-demo1'),

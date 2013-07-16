@@ -12,13 +12,7 @@ import java.util.concurrent.TimeUnit;
 import static java.nio.file.StandardWatchEventKinds.*;
 import static java.nio.file.LinkOption.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: fhuet
- * Date: 11/06/13
- * Time: 18:08
- * To change this template use File | Settings | File Templates.
- */
+
 public class DiskWatcher {
 
     private final int FILE_CREATED = 0;

@@ -226,11 +226,8 @@ public class ThumbStore {
         String action = "CREATE UNIQUE INDEX path_index ON IMAGES(path)";
         Logger.getLogger().log("ThumbStore.upgradeToV2 creating Index");
         st.execute(action);
-
         action = "UPDATE VERSION SET version=2 WHERE version=1";
         st.execute(action);
-
-
     }
 
 
@@ -593,7 +590,7 @@ public class ThumbStore {
         return p;
     }
 
-    public String getPath(Connection c, int index) {
+    public static String getPath(Connection c, int index) {
         // Statement sta;
         ResultSet res = null;
         String p = null;
@@ -854,7 +851,7 @@ public class ThumbStore {
     }
 
 
-    protected PreloadedDescriptors getPreloadedDescriptors() {
+    public PreloadedDescriptors getPreloadedDescriptors() {
         if (preloadedDescriptors == null) {
             long ti = System.currentTimeMillis();
             Status.getStatus().setStringStatus("Building descriptors list");
