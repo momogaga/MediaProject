@@ -35,20 +35,22 @@ public class DuplicateFolderList {
                 for (int j = i + 1; j < dg.size(); j++) {
                     String dir1 = Utils.fileToDirectory(dg.get(i));
                     String dir2 = Utils.fileToDirectory(dg.get(j));
-                    String couple = dir1 + " <-> " + dir2;
-                    DuplicateFolderGroup dfg = folderWithDuplicates.get(couple);
-                    if (dfg != null) {
-                        //     System.out.println(" Key found, incrementing");
-                        //folderWithDuplicates.put(couple, dfg + 1);
-                        dfg.increase();
-                        dfg.addSize(dg.fileSize);
-                        dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
-                    } else {
-                        //   System.out.println(" Key not found, adding");
-                        dfg = new DuplicateFolderGroup(dir1, dir2);
-                        dfg.addSize(dg.fileSize);
-                        dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
-                        folderWithDuplicates.put(couple, dfg);
+                    if ((dir1 != null) && (dir2 != null)) {
+                        String couple = dir1 + " <-> " + dir2;
+                        DuplicateFolderGroup dfg = folderWithDuplicates.get(couple);
+                        if (dfg != null) {
+                            //     System.out.println(" Key found, incrementing");
+                            //folderWithDuplicates.put(couple, dfg + 1);
+                            dfg.increase();
+                            dfg.addSize(dg.fileSize);
+                            dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
+                        } else {
+                            //   System.out.println(" Key not found, adding");
+                            dfg = new DuplicateFolderGroup(dir1, dir2);
+                            dfg.addSize(dg.fileSize);
+                            dfg.addFiles(dg.get(i), dg.get(j), dg.fileSize);
+                            folderWithDuplicates.put(couple, dfg);
+                        }
                     }
                 }
             }
@@ -90,11 +92,11 @@ public class DuplicateFolderList {
         int i = 0;
         while (it.hasNext() && i < max) {
             DuplicateFolderGroup dfg = it.next();
-           // for (String s : new File(dfg.folder1).list()) {
+            // for (String s : new File(dfg.folder1).list()) {
 //            System.out.println("   ---  " + s);
             //}
 
-           // File directory = null;
+            // File directory = null;
 
             dfg.setFilesInFolder1(Utils.folderSize(dfg.folder1));
             dfg.setFilesInFolder2(Utils.folderSize(dfg.folder2));

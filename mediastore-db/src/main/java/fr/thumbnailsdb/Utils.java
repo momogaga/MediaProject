@@ -32,6 +32,8 @@ public class Utils {
 
 
     public static String fileToDirectory(String n) {
+        if (n ==null) return null;
+
         int folderIndex = n.lastIndexOf('/');
         if (folderIndex < 0) {
             //it's probably a windows path

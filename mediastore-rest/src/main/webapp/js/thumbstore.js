@@ -51,8 +51,8 @@ function getDuplicate() {
         },
         function (data) {
             var i = 1;
-            var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-                + ' <th class="files ay-sort"><span>#Files</span></th>  <th class="paths ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
+            var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
+                + ' <th class="ay-sort"><span>#Files</span></th>  <th class="ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
 
             var template = ' <tr >'
                 + '<td class="size"><a href="#"  onclick=""> {{fileSize}}</a></td>'
@@ -126,8 +126,8 @@ function getDuplicateFolderDetails(folder1, folder2) {
         });
     }
 
-    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + '<th class="paths ay-sort"><span>Paths</span></th>' +
+    var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
+        + '<th class="ay-sort"><span>Paths</span></th>' +
         '</tr></thead> <tbody>';
 
     var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}" >'
@@ -136,9 +136,9 @@ function getDuplicateFolderDetails(folder1, folder2) {
         + '<td class="f1">{{filesInFolder1}}</td>'
         + '<td class="f2">{{filesInFolder2}}</td>';
 
-    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}   <a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
+    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}<a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
         '<a class="deletelink" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
-        '{{f2.path}}   <a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
+        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
         '{{/.}}';
     var htmlFiles = Mustache.to_html(templateFiles, tab);
 
@@ -153,12 +153,12 @@ function getDuplicateFolderDetails(folder1, folder2) {
         generateDeleteLink();
     });
 }
-
-function buildAllTable(array) {
-    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + '<th class="paths ay-sort"><span>Paths</span></th>' +
-        '</tr></thead> <tbody>';
-}
+//
+//function buildAllTable(array) {
+//    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
+//        + '<th class="paths ay-sort"><span>Paths</span></th>' +
+//        '</tr></thead> <tbody>';
+//}
 
 function getSelectedFolders() {
     var inputs = $("input[name=folder]");
@@ -186,7 +186,7 @@ function getAll() {
         //$.param(folders)
     }, function (data) {
         buildAllTable(data);
-     //   debugger;
+        //   debugger;
     });
 }
 
@@ -197,7 +197,7 @@ function buildAllTable(array) {
 
     var template = ' {{#.}} ' + ' <tr>'
         + '<td class="size"> {{size}}</td>'
-        + '<td class="path">{{path}}<a class="pathlink" href="#!"  data-p1="{{path}}">[file]</a> ' +
+        + '<td class="paths">{{path}}<a class="pathlink" href="#!"  data-p1="{{path}}">[file]</a> ' +
         '<a class="deletelink" href="#!"  data-p1="{{path}}">[delete]</a> </td></tr>' + '{{/.}}';
 
 
@@ -223,11 +223,11 @@ function getDuplicateFolder() {
     var folders = getSelectedFolders();
     $('#duplicate-folders-table-details').children().remove();
 
-    var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + ' <th class="files ay-sort"><span>#Files</span></th>' +
-        '<th class="paths ay-sort"><span>&#37;F1</span></th>' +
-        '<th class="paths ay-sort"><span>&#37;F2</span></th>' +
-        '<th class="paths ay-sort"><span>Paths</span></th>' +
+    var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
+        + ' <th class="ay-sort"><span>#Files</span></th>' +
+        '<th class="ay-sort"><span>&#37;F1</span></th>' +
+        '<th class="ay-sort"><span>&#37;F2</span></th>' +
+        '<th class="ay-sort"><span>Paths</span></th>' +
         '</tr></thead> <tbody>';
 
 
@@ -307,12 +307,16 @@ function callDelete(para1) {
     //.push(para1, para2);
     debugger;
 
-    jQuery.each($(".path"), function (key, value) {
-       debugger;
-        if (value.childNodes[0].nodeValue==para1) {
-         value.style.textDecoration = "line-through";
-        }
-    });
+
+    $(".paths").contents().filter(function () {
+        return this.nodeValue == para1
+    }).wrap('<div style="float:left; text-decoration:line-through"/>');
+//    jQuery.each($(".paths"), function (key, value) {
+//       debugger;
+//        if (value.childNodes[0].nodeValue==para1) {
+//         value.style.textDecoration = "line-through";
+//        }
+//    });
 //    jQuery.each($('[data-p1*="'+para1+'"]'),
 //        function (key, value) {
 //            value.style.textDecoration="line-through";
