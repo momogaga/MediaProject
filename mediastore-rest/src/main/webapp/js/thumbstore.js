@@ -182,7 +182,7 @@ function getSelectedFolders() {
 
 function getAll() {
     $.getJSON('rest/hello/getAll', {
-
+        filter:$("input[name=filter]").val()
         //$.param(folders)
     }, function (data) {
         buildAllTable(data);
@@ -259,17 +259,9 @@ function getDuplicateFolder() {
             //   debugger;
 
             var fileArray = new Array();
-//            fileArray[0] = {path:val['file1'][0].path, size:val['file1'][0].size} ;//val['file1'];
-//            fileArray[1] = {path:val['file2'][0].path, size:val['file2'][0].size};//val['file2'];
             fileArray[0] = val['file1'];
             fileArray[1] = val['file2'];
 
-
-            //val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
-            //val['totalSize'] = val['totalSize'].toFixed(4);
-
-
-            //duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
             duplicateFolderDetails[val['folder1'] + val['folder2']] = fileArray;
         });
         html_table += '</tbody>';
@@ -311,16 +303,6 @@ function callDelete(para1) {
     $(".paths").contents().filter(function () {
         return this.nodeValue == para1
     }).wrap('<div style="float:left; text-decoration:line-through"/>');
-//    jQuery.each($(".paths"), function (key, value) {
-//       debugger;
-//        if (value.childNodes[0].nodeValue==para1) {
-//         value.style.textDecoration = "line-through";
-//        }
-//    });
-//    jQuery.each($('[data-p1*="'+para1+'"]'),
-//        function (key, value) {
-//            value.style.textDecoration="line-through";
-//        });
 
     $.get("rest/hello/trash", {path:para1});
 }

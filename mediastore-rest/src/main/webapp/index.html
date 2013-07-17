@@ -20,7 +20,6 @@
 <script src="js/mustache.js"></script>
 
 
-
 <!--<script src="js/jquery.exif.js"></script>-->
 
 <script type="text/javascript" src="galleriffic-2.0/js/jquery.galleriffic.js"></script>
@@ -213,16 +212,19 @@
             value:59
         });
     });
-    //        $(function () {
-    //            $("#accordion").accordion();
-    //            $('#accordion-duplicate-folders').accordion();
-    //        });
-
+    $(document).ready(function() {
+        $('.textarea').keydown(function() {
+            if (event.keyCode == 13) {
+                this.form.submit();
+                return false;
+            }
+        });
+    });
 
 
 </script>
 </head>
-<body style="height:100%">
+<body style="height:100%; overflow-y:hidden">
 
 
 <div id="header" style="padding:0; height:5%">
@@ -265,7 +267,7 @@
     <div class="tab-pane" id="tabs-2">
         <form name="myform" action="rest/hello/identical" method="POST">
             <div align="center">
-                <br> <br> <input type=text size="25" value="5" name="max">
+                <br> <br> <input class="textarea" type=text size="25" value="5" name="max">
                 <br> <a href="javascript: getDuplicate()">Search</a>
             </div>
         </form>
@@ -303,16 +305,17 @@
         </div>
 
     </div>
-    <div class="tab-pane" id="tabs-all">
+    <div class="tab-pane" id="tabs-all" style="height:100%">
         <form name="input_duplicate_folders" action="javascript:getAll()">
-
+            <input class="textarea" type=text size="25" value="" name="filter">
             <input type="submit" value="Get All">
         </form>
-
-        <div>
-            <table class="hover-table" id="all-table"></table>
+        <div class="container"
+             style=" overflow-y: scroll;height:75%; width:100%;padding:0">
+            <div>
+                <table class="hover-table" id="all-table"></table>
+            </div>
         </div>
-
 
     </div>
 

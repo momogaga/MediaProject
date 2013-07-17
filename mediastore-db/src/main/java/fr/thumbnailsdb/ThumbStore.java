@@ -556,6 +556,30 @@ public class ThumbStore {
         return null;
     }
 
+    public ArrayList<MediaFileDescriptor> getFromDB(String filter) {
+        ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
+
+        String query = "SELECT * FROM IMAGES WHERE LCASE(path) LIKE LCASE(\'%"+filter+"%\')";
+     //   MultipleResultSet mrs = new MultipleResultSet();
+        for (Connection connection : getConnections()) {
+            //mrs.add(connection, this.getAllInDataBase(connection));
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res =  sta.executeQuery(query);
+               // mrs.add(connection,r);
+                while (res.next()) {
+                    list.add(getCurrentMediaFileDescriptor(res));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+
     public String getPath(int[] data) {
         Statement sta;
         ResultSet res = null;

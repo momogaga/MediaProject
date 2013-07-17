@@ -46,7 +46,7 @@ public class RestTest {
     protected DiskWatcher dw;
 
     public RestTest() {
-       // System.out.println("RestTest.RestTest()");
+        // System.out.println("RestTest.RestTest()");
 
         File f = new File(dbFileName);
         if (f.exists()) {
@@ -510,9 +510,9 @@ public class RestTest {
 
         JSONObject responseDetailsJson = new JSONObject();
         try {
-            responseDetailsJson.put("lat", coo==null? 0 :coo[0]);
+            responseDetailsJson.put("lat", coo == null ? 0 : coo[0]);
 
-            responseDetailsJson.put("lon",  coo==null? 0 :coo[1]);
+            responseDetailsJson.put("lon", coo == null ? 0 : coo[1]);
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -566,32 +566,51 @@ public class RestTest {
     @GET
     @Path("getAll/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getAll() {
-        PreloadedDescriptors pd = tb.getPreloadedDescriptors();
-        //ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(pd.size());
+    public Response getAll(@QueryParam("filter") String filter) {
+        long t0 = System.currentTimeMillis();
+        ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter);
+        long t1 = System.currentTimeMillis();
+        System.out.println("RestTest.getAll with filter " + filter + "  took " + (t1-t0) + " ms" );
         Iterator<MediaFileDescriptor> it = pd.iterator();
         JSONArray mJSONArray = new JSONArray(pd.size());
-        int i =0;
+        int i = 0;
         while (it.hasNext() && i < 10000) {
             i++;
             JSONObject json = new JSONObject();
             MediaFileDescriptor mfd = it.next();
-            try {
-//                json.put("foldersize", al.get(i).folderSize);
-                json.put("path", mfd.getPath());
-                //json.put("base64Data", al.get(i).base64Data);
-                //json.put("base64Sig", al.get(i).base64Sig);
-                //json.put("rmse", al.get(i).rmse);
-                json.put("size", mfd.getSize());
-                mJSONArray.put(json);
-            } catch (JSONException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+         //   if (mfd.getPath().contains(filter)) {
+                try {
+                    json.put("path", mfd.getPath());
+                    json.put("size", mfd.getSize());
+                    mJSONArray.put(json);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        // ArrayList<String> al = tb.getAllWithGPS();
+       // }
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
+//    public Response getAll(@QueryParam("filter") String filter) {
+//        PreloadedDescriptors pd = tb.getPreloadedDescriptors();
+//        Iterator<MediaFileDescriptor> it = pd.iterator();
+//        JSONArray mJSONArray = new JSONArray(pd.size());
+//        int i = 0;
+//        while (it.hasNext() && i < 10000) {
+//            i++;
+//            JSONObject json = new JSONObject();
+//            MediaFileDescriptor mfd = it.next();
+//            if (mfd.getPath().contains(filter)) {
+//                try {
+//                    json.put("path", mfd.getPath());
+//                    json.put("size", mfd.getSize());
+//                    mJSONArray.put(json);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
+//    }
 
 
     @XmlRootElement
