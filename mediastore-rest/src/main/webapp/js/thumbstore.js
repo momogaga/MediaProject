@@ -104,7 +104,7 @@ function toFolderLinks(path1, path2) {
 }
 
 
-function toFolderAndFileLink(path) {
+function getFolder(path) {
     var n = path.lastIndexOf('/');
     if (n == -1) {
         //ok, maybe it's a windows path
@@ -112,8 +112,18 @@ function toFolderAndFileLink(path) {
     }
     //  var file = path.substring(n + 1);
     var folder = path.substring(0, n);
-    return path + '  <a class="pathlink" href="#!"  data-p1="' + path + '">' + '  [open file]</a> ' +
-        '  <a class="pathlink" href="#!"  data-p1="' + folder + '">' + '  [open folder]</a>'
+    return folder;
+}
+function toFolderAndFileLink(path) {
+    var folder = getFolder(path);
+    return path + '<a class="pathlink" href="#!"  data-p1="' + path + '">' + '  [file]</a> ' +
+        '  <a class="pathlink" href="#!"  data-p1="' + folder + '">' + '  [folder]</a>'
+}
+
+
+function toLinks(path) {
+  return toFolderAndFileLink(path) + '<a class="deletelink" href="#!"  data-p1="'+path+'">[delete]</a>'
+    + '<a class="thumbnaillink" href="#!"  data-p1="'+path+'">[thumbnail]</a>'
 }
 
 function getDuplicateFolderDetails(folder1, folder2) {
@@ -195,15 +205,11 @@ function buildAllTable(array) {
         + '<th class="paths ay-sort"><span>Paths</span></th>' +
         '</tr></thead> <tbody>';
 
-    var template = ' {{#.}} ' + ' <tr>'
-        + '<td class="size"> {{size}}</td>'
-        + '<td class="paths">{{path}}<a class="pathlink" href="#!"  data-p1="{{path}}">[file]</a> ' +
-        '<a class="deletelink" href="#!"  data-p1="{{path}}">[delete]</a> </td></tr>' + '{{/.}}';
-
-
-    var htmlFiles = Mustache.to_html(template, array);
-
-    html_table += htmlFiles;
+    for (i in array) {
+         html_table+= '<tr>'
+             + '<td class="size">'+ array[i].size+'</td>'
+             + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
+     }
     html_table += "</tbody>"
 
     $('#all-table').children().remove();
@@ -212,9 +218,8 @@ function buildAllTable(array) {
         $.ay.tableSort({target:$('#all-table'), debug:false});
         generatePathLink();
         generateDeleteLink();
+        generateThumbnailLink();
     });
-
-
 }
 
 
@@ -294,17 +299,21 @@ function callOpen(para1, para2) {
 }
 
 function callDelete(para1) {
-    //  debugger;
-    //var folders = [];
-    //.push(para1, para2);
-    debugger;
-
-
     $(".paths").contents().filter(function () {
         return this.nodeValue == para1
     }).wrap('<div style="float:left; text-decoration:line-through"/>');
 
     $.get("rest/hello/trash", {path:para1});
+}
+
+function callThumbnail(source,p1) {
+    //remove previous image
+    if ($("img", source).length ==0 ) {
+        //no previous image, add thumbnail
+        $(source).append('<img src="rest/hello/getThumbnail?path=' + p1+'"/>');
+    }                       else {
+        $("img", source).remove();
+    }
 }
 
 
@@ -403,12 +412,15 @@ function generateDeleteLink() {
     $('.deletelink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');
-        //    var p2 = $this.data('p2');
-        //   var folders = [];
-        //    folders.push(p1);
-        //    folders.push(p2);
-        // callOpen(folders[0], folders[1]);
         callDelete(p1);
+    });
+}
+
+function generateThumbnailLink() {
+    $('.thumbnaillink').click(function () {
+        var $this = $(this);
+        var p1 = $this.data('p1');
+        callThumbnail($this,p1);
     });
 }
 

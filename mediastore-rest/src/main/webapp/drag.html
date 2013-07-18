@@ -6,6 +6,7 @@
 <link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
 <script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
 
+
 <script>
 
     $(function () {
@@ -38,8 +39,6 @@
             debug:false,
             onSubmit:localSubmit,
             onComplete:localFinished
-//            ,
-//            extraDropzones: [qq.getByClass(document, 'qq-upload-extra-drop-area')[0]]
         });
     }
 
@@ -52,10 +51,7 @@
 
             return function (evt) {
                 theImg.src = evt.target.result;
-//                jQuery(document).ready(function () {
-//                    jQuery('.nailthumb-container').nailthumb();
-//                    jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
-//                });
+
             };
         }(img));
         reader.readAsDataURL(this._handler._files[id]);
@@ -64,7 +60,7 @@
         $("#duplicate_upload_result").children().remove();
         div_t = document.createElement("div");
         div_t.className = "nailthumb-container nailthumb-image-titles-animated-onhover square";
-        div_t.style.float="left";
+        div_t.style.float = "left";
         div_t.appendChild(img);
 
         $("#duplicate_upload_source").append(div_t);
@@ -77,7 +73,7 @@
     }
 
     function localFinished(id, name, json) {
-        uploadFinished(json.sourceSig , json.images);
+        uploadFinished(json.sourceSig, json.images);
         $(".qq-upload-list").children().remove();
     }
 
@@ -94,8 +90,6 @@
         <!-- or put a simple form for upload here -->
     </noscript>
 </div>
-
-
 
 
 <div id="duplicate_upload_source" style="margin:10px 0px"></div>

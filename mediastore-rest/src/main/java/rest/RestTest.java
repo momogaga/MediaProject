@@ -183,10 +183,8 @@ public class RestTest {
             json.put("file1", group.getFile1());
             json.put("file2", group.getFile2());
         } catch (JSONException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
-
         return Response.status(200).entity(json).build();
     }
 
@@ -194,7 +192,7 @@ public class RestTest {
     @Path("getThumbnail/")
     @Produces("image/jpg")
     public Response getThumbnail(@QueryParam("path") String imageId) {
-        System.out.println("Thubnail : imageID " + imageId);
+//        System.out.println("Thubnail : imageID " + imageId);
         BufferedInputStream source = null;
         try {
 
@@ -213,9 +211,8 @@ public class RestTest {
                     new ByteArrayInputStream(imgData);
             return Response.status(200).entity(bigInputStream).build();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
         return Response.status(404).build();
     }
 

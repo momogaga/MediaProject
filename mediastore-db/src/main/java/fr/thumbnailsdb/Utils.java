@@ -39,8 +39,6 @@ public class Utils {
             //it's probably a windows path
             folderIndex = n.lastIndexOf('\\');
         }
-        // File file = new File(n);
-//            //File parentDir = file.getParentFile(); // to get the parent dir
         return n.substring(0, folderIndex);//file.getParent(); // to get the parent dir name
     }
 
@@ -49,7 +47,13 @@ public class Utils {
 
         String[] folders = new File(folder).list();
         if (folders != null) {
-            return folders.length;
+            int total =0;
+            for (String s : folders) {
+                if (isValideImageName(s) || isValideVideoName(s)) {
+                    total++;
+                }
+            }
+            return total;
         } else {
             return 0;
         }
