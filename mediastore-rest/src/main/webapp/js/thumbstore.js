@@ -354,9 +354,12 @@ function prettyPrint(object) {
 
 function uploadFinished(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
-    var sourceSigHTML = '<div  style="float:left"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
+    var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
     var sourceSig = document.createElement('div');
     sourceSig.style.float = "left";
+    //sourceSig.style.marginLeft="10px";
+    sourceSig.className="signatureDiv";
+
     var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
     sourceSig.appendChild(sourceSigCanvas.canvas);
 
@@ -374,8 +377,13 @@ function uploadFinished(sourceSignature, object) {
 
         var floatedDiv = document.createElement('div');
         floatedDiv.className = "floated_img cls";
+      //  floatedDiv.style.marginLeft="10px";
+
+        var canvDiv = document.createElement('div');
         var canv = new customCanvas(sigTag, 100, 100);
-        floatedDiv.appendChild(canv.canvas);
+        canvDiv.appendChild(canv.canvas);
+        canvDiv.className="signatureDiv";
+
 
         sourceSigCanvas.addOther(canv);
 
@@ -383,6 +391,7 @@ function uploadFinished(sourceSignature, object) {
         imgDiv.className = "nailthumb-container nailthumb-image-titles-animated-onhover square flt";
         imgDiv.innerHTML = imgTag;
         floatedDiv.appendChild(imgDiv);
+        floatedDiv.appendChild(canvDiv);
 
         floatedDiv.appendChild(descriptionDiv);
 

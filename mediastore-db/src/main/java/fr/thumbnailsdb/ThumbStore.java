@@ -21,7 +21,7 @@ import javax.swing.JLabel;
 public class ThumbStore {
 
     protected static String DEFAULT_DB = "localDB";
-    protected static int CURRENT_VERSION = 2;
+    protected static int CURRENT_VERSION = 3;
 
 
     //This is used as a cache of preloaded descriptors
@@ -183,6 +183,10 @@ public class ThumbStore {
                 upgradeToV2(connection);
             }
 
+            if (dbVersion == 2) {
+                upgradeToV3(connection);
+            }
+
 
             Statement st = connection.createStatement();
             String action = "Shutdown compact";
@@ -229,6 +233,21 @@ public class ThumbStore {
         action = "UPDATE VERSION SET version=2 WHERE version=1";
         st.execute(action);
     }
+
+
+    private void upgradeToV3(Connection connection) throws SQLException {
+        //ok we need to upgrade the DB to the next version
+        //This one includes an index for the path
+        //CREATE INDEX index_name
+        // ON table_name (column_name)
+        Statement st = connection.createStatement();
+        String action = "CREATE  INDEX md5_index ON IMAGES(md5)";
+        Logger.getLogger().log("ThumbStore.upgradeToV3 creating Index for MD5");
+        st.execute(action);
+        action = "UPDATE VERSION SET version=3 WHERE version=2";
+        st.execute(action);
+    }
+
 
 
     /**
@@ -547,11 +566,17 @@ public class ThumbStore {
 
     public ResultSet getAllInDataBase(Connection connexion) {
         Statement sta;
+        long t0= System.currentTimeMillis();
         try {
             sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             return sta.executeQuery("SELECT * FROM IMAGES");
+//            return sta.executeQuery("SELECT path,data,id,md5,size,COUNT(md5) FROM IMAGES GROUP BY path,md5 HAVING ( COUNT(md5) > 1 )");
+
         } catch (SQLException e) {
             e.printStackTrace();
+        }          finally{
+            long t1 = System.currentTimeMillis();
+            System.out.println("ThumbStore.getAllInDataBase took " + (t1-t0) + " ms");
         }
         return null;
     }
@@ -922,7 +947,6 @@ public class ThumbStore {
                                 if (SimilarImageFinder.USE_FULL_PATH) {
                                     imd.setPath(path);
                                 }
-
                                 imd.setId(id);
                                 imd.setData(idata);
                                 imd.setSize(size);

@@ -392,7 +392,7 @@ public class RestTest {
         }
 
         long t1 = System.currentTimeMillis();
-        c = si.findSimilarMedia(temp.getAbsolutePath(), 10);
+        c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
         long t2 = System.currentTimeMillis();
         System.out.println("Found similar files " + c.size() + " took " + (t2 - t1) + "ms");
 
@@ -564,6 +564,7 @@ public class RestTest {
     @Path("getAll/")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getAll(@QueryParam("filter") String filter) {
+        Status.getStatus().setStringStatus("Requesting all media with filter : " + filter);
         long t0 = System.currentTimeMillis();
         ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter);
         long t1 = System.currentTimeMillis();
@@ -585,6 +586,7 @@ public class RestTest {
                 }
             }
        // }
+        Status.getStatus().setStringStatus(Status.IDLE);
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
 //    public Response getAll(@QueryParam("filter") String filter) {
