@@ -5,12 +5,9 @@ import fr.thumbnailsdb.utils.Logger;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.*;
 import java.util.*;
 
@@ -290,7 +287,6 @@ public class ThumbStore {
             while (res.next()) {
                 String s = res.getString("path");
                 paths.add(s);
-                //   System.out.println("getIndexedPaths(connexion) path found " + s);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -357,21 +353,14 @@ public class ThumbStore {
             psmnt.setLong(2, id.getSize());
             psmnt.setLong(3, id.getMtime());
 
-            // convert the int[] array to byte[] array
-            ByteArrayOutputStream ba = new ByteArrayOutputStream();
-            ObjectOutputStream oi = new ObjectOutputStream(ba);
-            oi.writeObject(id.getData());
-            oi.close();
+
 
             psmnt.setString(4, id.getMD5());
-            psmnt.setBytes(5, ba.toByteArray());
+            psmnt.setBytes(5, Utils.toByteArray(id.getData()));
             psmnt.setDouble(6, id.getLat());
             psmnt.setDouble(7, id.getLon());
             psmnt.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         if (preloadedDescriptorsExists()) {
@@ -617,13 +606,8 @@ public class ThumbStore {
                 PreparedStatement psmnt;
                 psmnt = connexion.prepareStatement("SELECT path from IMAGES WHERE data=(?)");
 
-                // convert the int[] array to byte[] array
-                ByteArrayOutputStream ba = new ByteArrayOutputStream();
-                ObjectOutputStream oi = new ObjectOutputStream(ba);
-                oi.writeObject(data);
-                oi.close();
 
-                psmnt.setBytes(1, ba.toByteArray());
+                psmnt.setBytes(1,Utils.toByteArray(data));
                 psmnt.execute();
                 res = psmnt.getResultSet();
 
@@ -632,8 +616,6 @@ public class ThumbStore {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
         return p;

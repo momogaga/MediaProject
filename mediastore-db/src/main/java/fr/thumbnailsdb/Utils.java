@@ -1,9 +1,6 @@
 package fr.thumbnailsdb;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +32,7 @@ public class Utils {
 
 
     public static String fileToDirectory(String n) {
-        if (n ==null) return null;
+        if (n == null) return null;
 
         int folderIndex = n.lastIndexOf('/');
         if (folderIndex < 0) {
@@ -50,7 +47,7 @@ public class Utils {
 
         String[] folders = new File(folder).list();
         if (folders != null) {
-            int total =0;
+            int total = 0;
             for (String s : folders) {
                 if (isValideImageName(s) || isValideVideoName(s)) {
                     total++;
@@ -62,7 +59,7 @@ public class Utils {
         }
     }
 
-    public static int[] toIntArray(byte[] d)  {
+    public static int[] toIntArray(byte[] d) {
         int[] idata = null;
         if (d != null) {
             ObjectInputStream oi = null;
@@ -72,9 +69,24 @@ public class Utils {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();             }
+                e.printStackTrace();
+            }
 
         }
         return idata;
+    }
+
+    public static byte[] toByteArray(int[] data) {
+        ByteArrayOutputStream ba = new ByteArrayOutputStream();
+        ObjectOutputStream oi = null;
+        try {
+            oi = new ObjectOutputStream(ba);
+            oi.writeObject(data);
+            oi.close();
+            return ba.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
