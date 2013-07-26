@@ -63,8 +63,7 @@ public class SimilarImageFinder {
                         String path = res.getString("path");
                         byte[] d = res.getBytes("data");
                         if (d != null) {
-                            ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                            int[] idata = (int[]) oi.readObject();
+                            int[] idata = Utils.toIntArray(d);
                             if (idata != null) {
 
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
@@ -75,10 +74,6 @@ public class SimilarImageFinder {
                         }
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (IOException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
@@ -101,8 +96,7 @@ public class SimilarImageFinder {
                         String path = res.getString("path");
                         byte[] d = res.getBytes("data");
                         if (d != null) {
-                            ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                            int[] idata = (int[]) oi.readObject();
+                            int[] idata = Utils.toIntArray(d);
                             if (idata != null) {
 
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
@@ -113,10 +107,6 @@ public class SimilarImageFinder {
                         }
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (IOException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }

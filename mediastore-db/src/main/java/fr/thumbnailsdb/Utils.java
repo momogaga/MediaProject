@@ -1,6 +1,9 @@
 package fr.thumbnailsdb;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,4 +62,19 @@ public class Utils {
         }
     }
 
+    public static int[] toIntArray(byte[] d)  {
+        int[] idata = null;
+        if (d != null) {
+            ObjectInputStream oi = null;
+            try {
+                oi = new ObjectInputStream(new ByteArrayInputStream(d));
+                idata = (int[]) oi.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();             }
+
+        }
+        return idata;
+    }
 }

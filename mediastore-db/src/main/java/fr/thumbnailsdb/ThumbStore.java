@@ -763,26 +763,13 @@ public class ThumbStore {
             // id = new ImageDescriptor();
             String path = res.getString("path");
             byte[] d = res.getBytes("data");
-            int[] idata = null;
-            if (d != null) {
-                ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                idata = (int[]) oi.readObject();
-            } else {
-                System.err.println("xxxx");
-            }
+            int[] idata = Utils.toIntArray(d);
             String md5 = res.getString("md5");
             long mtime = res.getLong("mtime");
             long size = res.getLong("size");
             id = new MediaFileDescriptor(path, size, mtime, idata, md5);
             // }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block             get
             e.printStackTrace();
         }
         return id;
@@ -795,13 +782,7 @@ public class ThumbStore {
             ResultSet res = getFromDatabase(path);
             if (res.next()) {
                 byte[] d = res.getBytes("data");
-                int[] idata = null;
-                if (d != null) {
-                    ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                    idata = (int[]) oi.readObject();
-                } else {
-                    System.err.println("xxxx");
-                }
+                int[] idata = Utils.toIntArray(d);
                 String md5 = res.getString("md5");
                 long mtime = res.getLong("mtime");
                 long size = res.getLong("size");
@@ -809,12 +790,6 @@ public class ThumbStore {
             }
         } catch (SQLException e) {
 
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return id;
@@ -940,8 +915,7 @@ public class ThumbStore {
                         String md5 = res.getString("md5");
                         long size = res.getLong("size");
                         if (d != null) {
-                            ObjectInputStream oi = new ObjectInputStream(new ByteArrayInputStream(d));
-                            int[] idata = (int[]) oi.readObject();
+                            int[] idata = Utils.toIntArray(d);
                             if (path != null && md5 != null) {
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
                                 if (SimilarImageFinder.USE_FULL_PATH) {
@@ -961,11 +935,7 @@ public class ThumbStore {
                     }
                     currentConnection++;
                 } catch (SQLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();
                 }
             }
 

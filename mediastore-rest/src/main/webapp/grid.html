@@ -107,7 +107,6 @@
         reader.readAsDataURL(this._handler._files[id]);
         // display the source image
         $("#duplicate_gps_source").children().remove();
-//        $("#duplicate_upload_result").children().remove();
         div_t = document.createElement("div");
         div_t.className = "nailthumb-container nailthumb-image-titles-animated-onhover square";
         div_t.appendChild(img);
@@ -179,11 +178,7 @@
         var infowindow = new google.maps.InfoWindow();
         geocoder.geocode({'latLng':latlon}, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
-//                var addresses = "";
                 if (results[0]) {
-//                for (s in results) {
-//                    addresses += results[s].formatted_address + "<br><br>";
-//                }
                 $("#big_picture").append(results[0].formatted_address) ;
                 }
             }
@@ -205,7 +200,6 @@
                 mapOptions);
         google.maps.event.addListener(map, 'tilesloaded', function () {
             google.maps.event.trigger(map, 'resize');
-            //map.setCenter(mapOptions.center);
         });
     }
 
@@ -218,46 +212,17 @@
             for (i in data) {
                 output += '<li>'
                 output += '<a  href="#" onclick="javascript: getGPSFromPath(this, \'' + encodeURIComponent(data[i]) + '\')">';
-//                output += '<a  href="javascript: getGPSFromPath(\'' + data[i].replace(/\\/g,"\\\\") + '\')">';
-
-                //  var path = 'c:\toto\titi\tata\'.replace(/\\/g,"\\\\");
-//                output += '<a  href="javascript: getGPSFromPath(\''+ path + '\')">';
-
                 output += '<img src="rest/hello/getThumbnail?path=' + data[i] + '" alt="Title #1"/>';
                 output += '</a>';
                 output += '</li>';
             }
-
-            //    output += '<li>       <a class="thumb" name="leaf" href="http://farm4.static.flickr.com/3261/2538183196_8baf9a8015.jpg" title="Title #0">                    <img src="http://farm4.static.flickr.com/3261/2538183196_8baf9a8015_s.jpg" alt="Title #0" />                                                                                              </a>                    <div class="caption">                    <div class="download">                    <a href="http://farm4.static.flickr.com/3261/2538183196_8baf9a8015_b.jpg">Download Original</a>                    </div>            <div class="image-title">Title #0</div>            <div class="image-desc">Description</div>                    </div>                    </li>';
-
             output += '</ul>';
 
             $('.imggrid_display').children().remove();
             $('.imggrid_display').append(output);
         });
     }
-    //            $(document).ready(function () {
-    //                // Initialize Minimal Galleriffic Gallery
-    //                $('#thumbs').galleriffic({
-    //                    numThumbs:3 ,
-    //                    enableTopPager:            true,
-    //                    enableBottomPager:         true,
-    //                    maxPagesToShow:            7,
-    //                    imageContainerSel:         '#slideshow',
-    //                    controlsContainerSel:      '#controls',
-    //                    captionContainerSel:       '#caption',
-    //                    loadingContainerSel:       '#loading',
-    //                    renderSSControls:          true,
-    //                    renderNavControls:         true,
-    //                    playLinkText:              'Play Slideshow',
-    //                    pauseLinkText:             'Pause Slideshow',
-    //                    prevLinkText:              '&lsaquo; Previous Photo',
-    //                    nextLinkText:              'Next Photo &rsaquo;',
-    //                    nextPageLinkText:          'Next &rsaquo;',
-    //                    prevPageLinkText:          '&lsaquo; Prev',
-    //                    enableHistory:             true
-    //                });
-    //            });
+
 </script>
 
 <div id="file-uploader-gps">
@@ -275,29 +240,6 @@
 </div>
 
 <div class="imggrid_display" style="float:left">
-    <!--<ul class="imggrid">-->
-    <!--<li>-->
-    <!--<a  id="col1" href="rest/hello/getImage?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/gg_gps.jpg"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/gg_gps.jpg"></a>-->
-    <!--</li>-->
-    <!--<li><a  id="col2" href="#"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/GPS_location_stamped_with_GPStamper.jpg"></a>-->
-    <!--</li>-->
-    <!--<li><a  id="col3" href="#"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/Extracted jpg_26-05-2011_0207.jpg"></a>-->
-    <!--</li>-->
-
-    <!--<li>-->
-    <!--<a  href="rest/hello/getImage?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/gg_gps.jpg"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/gg_gps.jpg"></a>-->
-    <!--</li>-->
-    <!--<li><a  href="#"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/GPS_location_stamped_with_GPStamper.jpg"></a>-->
-    <!--</li>-->
-    <!--<li><a   href="#"><img-->
-    <!--src="rest/hello/getThumbnail?path=/home/fhuet/workspaces/rechercheefficaceimagessimilaires/surfjavacl/RESTfulSimilar/gps/Extracted jpg_26-05-2011_0207.jpg"></a>-->
-    <!--</li>-->
-    <!--</ul>-->
 </div>
 
 <div id="big_picture" style="width:300px; height:500px; font-size:0.875em; font-style:italic;float:left; background-color: #c6c0bd"></div>
