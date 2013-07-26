@@ -59,10 +59,12 @@
         $("#duplicate_upload_source").children().remove();
         $("#duplicate_upload_result").children().remove();
         div_t = document.createElement("div");
-        div_t.className = "nailthumb-container nailthumb-image-titles-animated-onhover square";
+        div_t.className = "smallImage";
         div_t.style.float = "left";
         div_t.appendChild(img);
 
+
+        //<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}" style="height:auto; width:auto; max-width:100px; max-height:100px;"/>
         $("#duplicate_upload_source").append(div_t);
         jQuery(document).ready(function () {
             jQuery('.nailthumb-container').nailthumb();
@@ -73,7 +75,8 @@
     }
 
     function localFinished(id, name, json) {
-        uploadFinished(json.sourceSig, json.images);
+      //  uploadFinished(json.sourceSig, json.images);
+        displaySimilarImages(json.sourceSig, json.images);
         $(".qq-upload-list").children().remove();
     }
 
@@ -94,7 +97,9 @@
 
 <div id="duplicate_upload_source" style="margin:10px 10px"></div>
 
-<div id="duplicate_upload_result" style="margin:10px 10px;clear:both; height:80%%; overflow-y:auto"></div>
+<!--<div style="margin-left:20px" >-->
+<div id="duplicate_upload_result" style="margin-left:auto; margin-right:auto ; clear:both; height:80%; width:95%; overflow-x:hidden; overflow-y:auto"></div>
+<!--</div>-->
 
 <!--</body>-->
 <!--</html>-->

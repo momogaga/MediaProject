@@ -64,7 +64,7 @@ function getDuplicate() {
                 data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
-                    rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + '<a class="deletelink" href="#!"  data-p1="' + data[i].al[f] + '">[delete]</a> </div> ';
+                    rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + ' ' + toDeleteLink(data[i].al[f]) + '</div> ';
                 }
                 html_table += rowTag + '</td></tr> ';
             }
@@ -85,22 +85,31 @@ function updateDuplicateTable(table, html_table) {
         generatePathLink();
     });
 }
-
-
-function toDirectLink(path) {
-    return '<a  class="pathlink" href="#!' + path + '">[path]</a>'
-}
+//
+//
+//function toDirectLink(path) {
+//    return '<a  class="pathlink" href="#!' + path + '">[path]</a>'
+//}
 
 function toFolderLink(path) {
-    var a1 = '  <a class="pathlink" href="#!"  data-p1="' + path + '">';
-    var a2 = ' [folder] <a>';
-    return path + a1 + a2;
+    var a1 = '  <a class="pathlink btn-mini btn-info" href="#!"  data-p1="' + path + '">';
+    var a2 = 'folder<a>';
+    return  a1 + a2;
+}
+
+function toFileLink(path) {
+    return  '<a class="pathlink btn-mini btn-primary" href="#!"  data-p1="' + path + '">file</a>'
 }
 
 function toFolderLinks(path1, path2) {
-    var a1 = '  <a class="pathlink" href="#!"  data-p1="' + path1 + '" data-p2="' + path2 + '">';
+    var a1 = '  <a class="pathlink btn-mini btn-info" href="#!"  data-p1="' + path1 + '" data-p2="' + path2 + '">';
     var a2 = ' [folders] <a>';
     return  a1 + a2;
+}
+
+function toThumbnailLink(path) {
+ //   debugger;
+   return   '<a class="thumbnaillink btn-mini btn-info" href="#!"  data-p1="'+path+'">thumbnail</a>';
 }
 
 
@@ -116,14 +125,18 @@ function getFolder(path) {
 }
 function toFolderAndFileLink(path) {
     var folder = getFolder(path);
-    return path + '<a class="pathlink" href="#!"  data-p1="' + path + '">' + '  [file]</a> ' +
-        '  <a class="pathlink" href="#!"  data-p1="' + folder + '">' + '  [folder]</a>'
+    return path + '  ' +  toFileLink(path) +  ' '  +
+        toFolderLink(folder);
 }
 
+function toDeleteLink(path){
+    return '<a class="deletelink  btn-mini btn-danger" href="#!"  data-p1="'+path+'">delete</a>';
+}
 
 function toLinks(path) {
-  return toFolderAndFileLink(path) + '<a class="deletelink" href="#!"  data-p1="'+path+'">[delete]</a>'
-    + '<a class="thumbnaillink" href="#!"  data-p1="'+path+'">[thumbnail]</a>'
+  return toFolderAndFileLink(path)  + ' '
+    + toThumbnailLink(path) + ' '+ toDeleteLink(path);
+
 }
 
 function getDuplicateFolderDetails(folder1, folder2) {
@@ -146,13 +159,20 @@ function getDuplicateFolderDetails(folder1, folder2) {
         + '<td class="f1">{{filesInFolder1}}</td>'
         + '<td class="f2">{{filesInFolder2}}</td>';
 
-    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}<a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
-        '<a class="deletelink" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
-        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
-        '{{/.}}';
-    var htmlFiles = Mustache.to_html(templateFiles, tab);
+//    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}<a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
+//        '<a class="deletelink  btn btn-warning" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
+//        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
+//        '{{/.}}';
+    var templateFiles = '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}'+  toFileLink("{{f1.path}}")        +
+        toDeleteLink("{{f1.path}}") +  '<br>' +
+        '{{f2.path}}' + toFileLink("{{f2.path}}")  +    toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
+    for (i in tab) {
+        var htmlFiles = Mustache.to_html(templateFiles, tab[i]);
+        html_table += htmlFiles;
+    }
 
-    html_table += htmlFiles;
+
+
     html_table += "</tbody>"
 
     $('#duplicate-folder-details-table').children().remove();
@@ -209,6 +229,7 @@ function buildAllTable(array) {
          html_table+= '<tr>'
              + '<td class="size">'+ array[i].size+'</td>'
              + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
+     //   debugger;
      }
     html_table += "</tbody>"
 
@@ -352,7 +373,60 @@ function prettyPrint(object) {
     }
 }
 
-function uploadFinished(sourceSignature, object) {
+//function uploadFinished(sourceSignature, object) {
+//    $('#duplicate_upload_result').children().remove();
+//    var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
+//    var sourceSig = document.createElement('div');
+//    sourceSig.style.float = "left";
+//    //sourceSig.style.marginLeft="10px";
+//    sourceSig.className="signatureDiv";
+//
+//    var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
+//    sourceSig.appendChild(sourceSigCanvas.canvas);
+//
+//    document.getElementById("duplicate_upload_source").appendChild(sourceSig);
+//
+//    for (f in object) {
+//        var image = object[f];
+//        var rmse = (image.rmse);
+//        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
+//        var imgTag = Mustache.to_html(templateThumbnail, image);
+//        var sigTag = "data:image;base64," + image.base64Sig;
+//        var descriptionDiv = document.createElement('div');
+//        descriptionDiv.className = "description flt";
+//        descriptionDiv.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
+//
+//        var floatedDiv = document.createElement('div');
+//        floatedDiv.className = "floated_img cls";
+//      //  floatedDiv.style.marginLeft="10px";
+//
+//        var canvDiv = document.createElement('div');
+//        var canv = new customCanvas(sigTag, 100, 100);
+//        canvDiv.appendChild(canv.canvas);
+//        canvDiv.className="signatureDiv";
+//
+//
+//        sourceSigCanvas.addOther(canv);
+//
+//        var imgDiv = document.createElement('div');
+//        imgDiv.className = "nailthumb-container nailthumb-image-titles-animated-onhover square flt";
+//        imgDiv.innerHTML = imgTag;
+//        floatedDiv.appendChild(imgDiv);
+//        floatedDiv.appendChild(canvDiv);
+//
+//        floatedDiv.appendChild(descriptionDiv);
+//
+//        $("#duplicate_upload_result").append(floatedDiv);
+//    }
+//    jQuery(document).ready(function () {
+//        generatePathLink();
+//        jQuery('.nailthumb-container').nailthumb();
+//        jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+//    });
+//}
+
+
+function displaySimilarImages(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
     var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
     var sourceSig = document.createElement('div');
@@ -365,45 +439,113 @@ function uploadFinished(sourceSignature, object) {
 
     document.getElementById("duplicate_upload_source").appendChild(sourceSig);
 
+    var ul = document.createElement('ul');
+    ul.className="thumbnails";
+
+
     for (f in object) {
+        //we want to build elements with the following form
+//        <li class="span4">
+//            <div class="thumbnail">
+//                <div class="container">
+//                    <div class="row">
+//                        <div class="span2">
+//                           '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>'
+//                        </div>
+//                        <div class="span2" >
+//                           canvas
+//                        </div>
+//                    </div>
+//                </div>
+//            </div>
+//            <div class="caption">description </div>
+//           </div>
+//        </li>
+
+
+        var li = document.createElement('li');
+        li.className="span4";
+
+
+        var thumb=document.createElement('div');
+        thumb.className="thumbnail";
+
+        var container = document.createElement('div');
+        container.className="container";
+
+        var row = document.createElement('div');
+        row.className="row";
+
+
+        var spanImg = document.createElement('div');
+        spanImg.className="span2";
+
+        var spanSig = document.createElement('div');
+        spanSig.className="span2";
+
+        var caption = document.createElement('div');
+        caption.className="caption";
+        caption.style.wordWrap="break-word"
+
         var image = object[f];
         var rmse = (image.rmse);
-        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
+        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}" style="height:auto; width:auto; max-width:100px; max-height:100px;"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
+        spanImg.innerHTML=imgTag;
+
+        row.appendChild(spanImg);
+        row.appendChild(spanSig);
+
+        container.appendChild(row);
+
+        thumb.appendChild(container);
+
+
+         li.appendChild(thumb);
+        li.appendChild(caption);
+        //build the description
+
         var sigTag = "data:image;base64," + image.base64Sig;
-        var descriptionDiv = document.createElement('div');
-        descriptionDiv.className = "description flt";
-        descriptionDiv.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
-
-        var floatedDiv = document.createElement('div');
-        floatedDiv.className = "floated_img cls";
-      //  floatedDiv.style.marginLeft="10px";
-
-        var canvDiv = document.createElement('div');
         var canv = new customCanvas(sigTag, 100, 100);
-        canvDiv.appendChild(canv.canvas);
-        canvDiv.className="signatureDiv";
-
-
+        spanSig.appendChild(canv.canvas);
         sourceSigCanvas.addOther(canv);
 
-        var imgDiv = document.createElement('div');
-        imgDiv.className = "nailthumb-container nailthumb-image-titles-animated-onhover square flt";
-        imgDiv.innerHTML = imgTag;
-        floatedDiv.appendChild(imgDiv);
-        floatedDiv.appendChild(canvDiv);
+        caption.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
 
-        floatedDiv.appendChild(descriptionDiv);
 
-        $("#duplicate_upload_result").append(floatedDiv);
+//        $('#duplicate_upload_result').append(li);
+        ul.appendChild(li)
+
     }
-    jQuery(document).ready(function () {
 
+
+//    $('#duplicate_upload_result').wrap('<ul class="thumbnails"/>');
+    $('#duplicate_upload_result').append(ul);
+
+//    $('#duplicate_upload_result').append('</ul>');
+    jQuery(document).ready(function () {
         generatePathLink();
         jQuery('.nailthumb-container').nailthumb();
         jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+        equalHeight($(".caption"));
     });
 }
+
+
+function equalHeight(group) {
+    tallest = 0;
+                                 debugger;
+    group.each(function() {
+        thisHeight = $(this).height();
+        if(thisHeight > tallest) {
+            tallest = thisHeight;
+        }
+    });
+    debugger;
+    group.each(function() { $(this).height(tallest); });
+}
+
+
 
 function generatePathLink() {
     $('.pathlink').click(function () {
