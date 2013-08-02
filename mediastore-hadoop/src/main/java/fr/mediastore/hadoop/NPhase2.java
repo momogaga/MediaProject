@@ -1,4 +1,4 @@
-/*
+package fr.mediastore.hadoop;/*
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
  * EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER
  * PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
@@ -125,7 +125,7 @@ public class NPhase2 extends Configured implements Tool {
 
 	static int printUsage() {
 		System.out
-				.println("NPhase1 [-m <maps>] [-r <reduces>] [-p <numberOfPartitions>] "
+				.println("fr.mediastore.hadoop.NPhase1 [-m <maps>] [-r <reduces>] [-p <numberOfPartitions>] "
 						+ "[-k <knn>] " + "<input> <output>");
 		ToolRunner.printGenericCommandUsage(System.out);
 		return -1;
@@ -140,7 +140,7 @@ public class NPhase2 extends Configured implements Tool {
 	 */
 	public int run(String[] args) throws Exception {
 		JobConf conf = new JobConf(getConf(), NPhase2.class);
-		conf.setJobName("NPhase2");
+		conf.setJobName("fr.mediastore.hadoop.NPhase2");
 
 		conf.setMapperClass(MapClass.class);
 		conf.setOutputKeyClass(Text.class);
@@ -205,5 +205,5 @@ public class NPhase2 extends Configured implements Tool {
 		int res = ToolRunner.run(new Configuration(), new NPhase2(), args);
 		System.exit(res);
 	}
-} // NPhase2
+} // fr.mediastore.hadoop.NPhase2
 

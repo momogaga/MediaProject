@@ -1,17 +1,16 @@
+package fr.mediastore.hadoop;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.ByteWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.ObjectWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
 
 public class NPhase1Value implements WritableComparable<NPhase1Value>,
 		Serializable {
@@ -74,7 +73,7 @@ public class NPhase1Value implements WritableComparable<NPhase1Value>,
 	@Override
 	public void write(DataOutput out) throws IOException {
 		new Text(recordID).write(out);
-		// System.out.println("NPhase1Value.write() recordID " + recordID );
+		// System.out.println("fr.mediastore.hadoop.NPhase1Value.write() recordID " + recordID );
 		new IntWritable(this.getCoordinates().size()).write(out);
 
 		for (float[] t : this.getCoordinates()) {
@@ -97,12 +96,12 @@ public class NPhase1Value implements WritableComparable<NPhase1Value>,
 		Text tex = new Text();
 		tex.readFields(in);
 		recordID = tex.toString();
-		// System.out.println("NPhase1Value.readFields() recordID " + recordID
+		// System.out.println("fr.mediastore.hadoop.NPhase1Value.readFields() recordID " + recordID
 		// );
 		IntWritable intw = new IntWritable();
 		intw.readFields(in);
 		int size = intw.get();
-		// System.out.println("NPhase1Value.readFields() " + size);
+		// System.out.println("fr.mediastore.hadoop.NPhase1Value.readFields() " + size);
 		ArrayList<float[]> al = new ArrayList<float[]>();
 		for (int i = 0; i < size; i++) {
 			float[] t = new float[64];
@@ -126,8 +125,8 @@ public class NPhase1Value implements WritableComparable<NPhase1Value>,
 
 //	@Override
 //	public boolean equals(Object o) {
-//		if (o instanceof NPhase1Value) {
-//			NPhase1Value np1v = (NPhase1Value) o;
+//		if (o instanceof fr.mediastore.hadoop.NPhase1Value) {
+//			fr.mediastore.hadoop.NPhase1Value np1v = (fr.mediastore.hadoop.NPhase1Value) o;
 //			return recordID.equals(np1v.recordID)
 //					&& coordinates.equals(np1v.coordinates)
 //					&& fileID.equals(np1v.fileID);
@@ -181,7 +180,7 @@ public class NPhase1Value implements WritableComparable<NPhase1Value>,
 
 	@Override
 	public int compareTo(NPhase1Value np1v) {
-//		System.out.println("NPhase1Value.compareTo()");
+//		System.out.println("fr.mediastore.hadoop.NPhase1Value.compareTo()");
 		return 1;
 	}
 

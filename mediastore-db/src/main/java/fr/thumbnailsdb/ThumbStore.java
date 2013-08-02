@@ -824,7 +824,7 @@ public class ThumbStore {
 
     }
 
-    public void dump() {
+    public void dump(boolean p) {
         String select = "SELECT path,id,data FROM IMAGES";
         Statement st;
         for (Connection connexion : getConnections()) {
@@ -837,9 +837,12 @@ public class ThumbStore {
                     byte[] d = res.getBytes("data");
                     if (d != null) {
                         String data = null;
-                        if ((data = Utils.byteArrayToImg(d)) != null) {
-//                         System.err.println(path + "," + i + "," + data);
-                            System.err.println(i + "," + data);
+                        if ((data = Utils.byteArrayToBase64Img(d)) != null) {
+                            if (p) {
+                                System.out.println(path + "," + data);
+                            } else {
+                                System.out.println(i+  "," + data);
+                            }
 
                         }
                     }
@@ -882,10 +885,10 @@ public class ThumbStore {
                         processed++;
                         processedSinceLastTick++;
 
-                        if (processedSinceLastTick>=increment) {
+                        if (processedSinceLastTick >= increment) {
                             pb.tick(processed);
                             Status.getStatus().setStringStatus("Building descriptors list  " + pb.getPercent() + "%");
-                            processedSinceLastTick=0;
+                            processedSinceLastTick = 0;
                         }
 //                        }
                         String path = null;

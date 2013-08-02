@@ -1,4 +1,4 @@
-
+package fr.mediastore.hadoop;
 
 import java.io.*;
 import java.lang.*;

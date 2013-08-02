@@ -94,30 +94,46 @@ public class Utils {
     }
 
 
-    public static String byteArrayToImg(byte[] data) {
+    public static String byteArrayToBase64Img(byte[] data) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-      //  ImageIO.write(bf, "JPEG", out);
-        //imgData = Base64.encodeBase64String(out.toByteArray());
-        //encode image signature
-      //  out = new ByteArrayOutputStream();
-        BufferedImage dest =  new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        BufferedImage dest = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
 //
         //we check we have a correct number of entries in the array, to avoid NPE
         int[] tab = toIntArray(data);
-        if (tab!=null) {
-            dest.setRGB(0,0,10,10,tab,0,10);
+        //TODO : check if we really need to build an image
+        // or we can simply use the int[]
+        if (tab != null) {
+            dest.setRGB(0, 0, 10, 10, tab, 0, 10);
             try {
                 ImageIO.write(dest, "JPEG", out);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
-
             return Base64.encodeBase64String(out.toByteArray());
-        }   else {
+        } else {
             return null;
         }
-        //System.out.println("Utils.byteArrayToImg data size " + tab.length);
-
     }
+
+    public static int[] base64ImgToIntArray(String base) {
+        byte[] tmp = Base64.decodeBase64(base);
+
+        int[] target = new int[10 * 10];
+        ByteArrayInputStream bi = new ByteArrayInputStream(tmp);
+
+        try {
+            BufferedImage image = ImageIO.read(bi);
+            if (image != null) {
+                image.getRGB(0, 0, 10, 10, target, 0, 10);
+            }    else {
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        return target;
+    }
+
 
 }

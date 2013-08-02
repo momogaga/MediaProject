@@ -104,6 +104,9 @@ public class ImageComparator {
     }
 
     public static double compareRGBUsingRMSE(int[] img1, int[] img2) {
+        if (img1== null || img2==null) {
+            return Double.MAX_VALUE;
+        }
         double total=0;
         for (int i = 0; i < img1.length; i++) {
             int grey1 = (img1[i] >>> 16) & 0xFF;

@@ -1,3 +1,5 @@
+package fr.mediastore.hadoop;
+
 import org.shiftone.cache.Cache;
 import org.shiftone.cache.CacheConfiguration;
 import org.shiftone.cache.CacheFactory;

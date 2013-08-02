@@ -1,9 +1,9 @@
+package fr.mediastore.hadoop;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -11,31 +11,37 @@ import org.apache.hadoop.io.WritableComparable;
 
 public class ImageDescriptor implements WritableComparable<ImageDescriptor> {
 
-	protected String path;
 	protected long descriptorsOffset;
+    protected String path;
 //	protected long descriptorsSize;
 
 	
 	public ImageDescriptor() {}
 	
-	public ImageDescriptor(String path, long descriptorsOffset) //,
+	public ImageDescriptor(String path,  long descriptorsOffset) //,
 //			long descriptorsSize) {
 	{
 		super();
-		this.path = path;
+
 		this.descriptorsOffset = descriptorsOffset;
-//		this.descriptorsSize = descriptorsSize;
-	}
+        this.path = path;
+    }
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
-		Text tex = new Text();
-		tex.readFields(in);
-		path = tex.toString();
+
+//		Text tex = new Text();
+//		tex.readFields(in);
+	//	path = tex.toString();
 		
 		LongWritable lw = new LongWritable();
 		lw.readFields(in);
 		descriptorsOffset= lw.get();
+
+        Text t = new Text();
+        t.readFields(in);
+
+        this.path = t.toString();
 		
 //		lw = new LongWritable();
 //		lw.readFields(in);
@@ -47,24 +53,19 @@ public class ImageDescriptor implements WritableComparable<ImageDescriptor> {
 
 	@Override
 	public void write(DataOutput out) throws IOException {
-		new Text(path).write(out);
+
 		new LongWritable(this.descriptorsOffset).write(out);
+        new Text(this.path).write(out);
 
 //		new LongWritable(this.descriptorsSize).write(out);
 	}
 
 	@Override
 	public int compareTo(ImageDescriptor o) {
-		return path.compareTo(o.getPath());
+		return  path.compareTo(o.getPath());
 	}
 
-	public String getPath() {
-		return path;
-	}
 
-	public void setPath(String path) {
-		this.path = path;
-	}
 
 	public long getDescriptorsOffset() {
 		return descriptorsOffset;
@@ -73,6 +74,10 @@ public class ImageDescriptor implements WritableComparable<ImageDescriptor> {
 	public void setDescriptorsOffset(long descriptorsOffset) {
 		this.descriptorsOffset = descriptorsOffset;
 	}
+
+    public String getPath() {
+        return this.path;
+    }
 
 //	public long getDescriptorsSize() {
 //		return descriptorsSize;

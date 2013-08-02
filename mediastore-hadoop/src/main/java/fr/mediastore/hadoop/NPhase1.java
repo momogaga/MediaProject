@@ -1,4 +1,4 @@
-/*
+package fr.mediastore.hadoop;/*
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
  * EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER
  * PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
@@ -9,14 +9,14 @@
  * OR CORRECTION.
  */
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import fr.thumbnailsdb.ImageComparator;
+import fr.thumbnailsdb.Utils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -61,14 +61,11 @@ public class NPhase1 extends Configured implements Tool {
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	public static class MapClass extends
 			Mapper<LongWritable, Text, IntWritable, ImageDescriptor> {
 
 		private int numberOfPartition;
-		private int dimension;
 
-		// scale used for ????
 		private int scale = 1;
 		private int fileId = 0;
 		private String inputFile;
@@ -85,9 +82,9 @@ public class NPhase1 extends Configured implements Tool {
 			// mapTaskId = job.get("mapred.task.id");
 			numberOfPartition = configuration.getInt("numberOfPartition", 20);
 
-			dimension = configuration.getInt("dimension", 64);
+			//dimension = configuration.getInt("dimension", 64);
 
-			System.out.println("NPhase1.MapClass.setup() number of partitions "
+			System.out.println("fr.mediastore.hadoop.NPhase1.MapClass.setup() number of partitions "
 					+ numberOfPartition);
 
 			recIdOffset = 0;
@@ -100,7 +97,7 @@ public class NPhase1 extends Configured implements Tool {
 			else if (inputFile.indexOf("inner") != -1)
 				fileId = 1;
 			else {
-				System.out.println("Invalid input file source@NPhase1");
+				System.out.println("Invalid input file source@fr.mediastore.hadoop.NPhase1");
 				System.exit(-1);
 			}
 		} // configure
@@ -110,54 +107,28 @@ public class NPhase1 extends Configured implements Tool {
 		 */
 		public void map(LongWritable key, Text value, Context context)
 				throws IOException {
-			String[] parts = value.toString().split(";");
-			// String[] descriptors;
-			String recId = parts[0];
-			String recIdInt = (recId);
+            //values are id,base64Data or path,id,base64Data
+			String[] parts = value.toString().split(",");
+            String recId = null;
+            String path = null;
+            ImageDescriptor imgDes = null;
+            long offset = 0;
 
-			// long length = 0;
-			// for(int i =1;i<parts.length;i++) {
-			// parts.length;
-			//
-			// }
-			// ArrayList<float[]> coordList = new ArrayList<float[]>();
-			// float[] coord;
-			// TODO : blinder le parsing pour gerer erreurs, lignes vides...
-			// for (int j = 1; j < parts.length; j++) {
-			// coord = new float[dimension];
-			// descriptors = parts[j].split(",");
-			// for (int i = 0; i < descriptors.length; i++) {
-			//
-			// coord[i] = Float.parseFloat(descriptors[i]);
-			// }
-			// coordList.add(coord);
-			// }
+
+                recId= parts[0];
+                offset = key.get() + recId.length()+1;
+                imgDes = new ImageDescriptor(recId, offset);// , 0);
+
+
+			//String recIdInt = (recId);
 
 			int partID;
 			int groupID;
-			// float[] converted = new float[dimension];
-			// int compteur=0;
-			//
-			// float[] tmp_coord = new float[dimension];
-			// for (float[] coordonnes : coordList) {
-			// for (int i = 0; i < dimension; i++) {
-			// tmp_coord[i] = coordonnes[i];
-			// converted[i] = (int) tmp_coord[i];
-			// tmp_coord[i] -= converted[i];
-			// converted[i] *= scale;
-			//
-			// converted[i] += (tmp_coord[i] * scale);
-			// }
-			//
-			// // Use scaled data sets
-			// for (int i = 0; i < dimension; i++)
-			// coordonnes[i] = (float) converted[i];
-			// }
 
-			if (recIdInt == null || recIdInt.isEmpty()) {
-				System.exit(-1);
-			}
-			ImageDescriptor imgDes = new ImageDescriptor(recId, key.get() + recId.length()+1);// , 0);
+//			if (recId == null || recId.isEmpty()) {
+//				System.exit(-1);
+//			}
+
 
 			partID = r.nextInt(numberOfPartition);
 			groupID = 0;
@@ -177,19 +148,14 @@ public class NPhase1 extends Configured implements Tool {
 				}
 
 				IntWritable mapKey = new IntWritable(groupID);
-				// System.out.println("NPhase1.MapClass.map()" + mapKey + " "
-				// + np1v.getRecordID());
-				// compteur++;
 				try {
-					System.out.println("NPhase1.MapClass.map() " + mapKey
-							+ "  " + imgDes.getPath() + " "
-							+ imgDes.getDescriptorsOffset());
+//					System.out.println("fr.mediastore.hadoop.NPhase1.MapClass.map() " + mapKey
+//							+ "  " + imgDes.getPath() + " "
+//							+ imgDes.getDescriptorsOffset());
 					context.write(mapKey, imgDes);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				// System.out.println("NPhase1.MapClass.map()" + " " +
-				// compteur);
 			}
 
 		} // map
@@ -202,20 +168,20 @@ public class NPhase1 extends Configured implements Tool {
 			extends
 			org.apache.hadoop.mapreduce.Reducer<IntWritable, ImageDescriptor, NullWritable, Text> {
 
-		private int bufferSize = 8 * 1024 * 1024;
+		//private int bufferSize = 8 * 1024 * 1024;
 		// private MultipleOutputs mos;
 
 		private LocalDirAllocator lDirAlloc = new LocalDirAllocator(
 				"mapred.local.dir");
 		private FSDataOutputStream out;
-		private FileSystem localFs;
-		private FileSystem lfs;
-		private Path file1;
-		private Path file2;
+//		private FileSystem localFs;
+//		private FileSystem lfs;
+//		private Path file1;
+//		private Path file2;
 
-		private int numberOfPartition;
+	//	private int numberOfPartition;
 		private int dimension;
-		private int blockSize;
+	//	private int blockSize;
 		private int knn;
 		private float distmin;
 
@@ -230,10 +196,10 @@ public class NPhase1 extends Configured implements Tool {
 		// String inputName = conf.get("map.input.file");
 
 		public void setup(Context c) {
-			numberOfPartition = c.getConfiguration().getInt(
-					"numberOfPartition", 2);
+		//	numberOfPartition = c.getConfiguration().getInt(
+		//			"numberOfPartition", 2);
 			dimension = c.getConfiguration().getInt("dimension", 2);
-			blockSize = c.getConfiguration().getInt("blockSize", 1024);
+		//	blockSize = c.getConfiguration().getInt("blockSize", 1024);
 			knn = c.getConfiguration().getInt("knn", 20);
 			distmin = c.getConfiguration().getFloat("distmin", (float) 0.1);
 			// self_join = Boolean.valueOf(job.get("self_join"));
@@ -248,49 +214,16 @@ public class NPhase1 extends Configured implements Tool {
 
 		}
 
-		protected void extractDescriptorsFromString(String descriptors,
-				ArrayList<float[]> descriptorsList) {
-
-//			System.out.println("NPhase1.Reduce.extractDescriptorsFromString() working on  " + descriptors);
-			
-			String[] descriptorsArray = descriptors.split(";");
-			String[] valeurs;
-			float[] desc;
-			// for each descriptor
-			for (int i = 0; i < descriptorsArray.length; i++) {
-//				System.out.println("NPhase1.Reduce.extractDescriptorsFromString()        processing substring " + descriptorsArray[i]);
-
-				desc = new float[dimension];
-				valeurs = descriptorsArray[i].split(",");
-				// for each value in the descriptor
-				for (int j = 0; j < dimension; j++) {
-					//System.out.println("NPhase1.Reduce.extractDescriptorsFromString() "+valeurs);
-					try {
-						desc[j] = Float.valueOf(valeurs[j]);
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-					}
-				}
-				descriptorsList.add(desc);
-			}
-		}
-
-		// protected String toReduceOutput(ImageDescriptor source) {
-		// StringBuilder line = null;
-		// line = new StringBuilder(source.getPath().toString());
-		// line.append(";");
-		// line.append(source.getDescriptorsOffset());
-		// return line.toString();
-		// }
-
 		public void reduce(IntWritable key, Iterable<ImageDescriptor> values,
 				Context context) {
 			ArrayList<ImageDescriptor> al = new ArrayList<ImageDescriptor>();
 
+            int doneSinceLastProgress=0;
+
 			if (NPhase1.caching) {
-				System.out.println("NPhase1.Reduce.reduce() caching Enabled");
+				System.out.println("fr.mediastore.hadoop.NPhase1.Reduce.reduce() caching Enabled");
 			} else {
-				System.out.println("NPhase1.Reduce.reduce() caching Disabled");
+				System.out.println("fr.mediastore.hadoop.NPhase1.Reduce.reduce() caching Disabled");
 			}
 			
 			FSDataInputStream in = null;
@@ -299,108 +232,40 @@ public class NPhase1 extends Configured implements Tool {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			// BufferedReader brd
-			// = new BufferedReader(new InputStreamReader(in));
-
-			// synchronized (al) {
 			ImageDescriptor v = null;
-			// int index = 0;
 
 			for (ImageDescriptor tmp : values) {
 				v = new ImageDescriptor(tmp.getPath(),
 						tmp.getDescriptorsOffset()); // ,
-				// tmp.getDescriptorsSize());
-
 				al.add(v);
 
 			}
 
 			ImageDescriptor[] tab = al.toArray(new ImageDescriptor[] {});
-//			System.out.println("NPhase1.Reduce.reduce() comparing "
-//					+ tab.length + "  images");
-
+//            System.out.println("NPhase1$Reduce.reduce key: " + key);
+            System.out.println("NPhase1$Reduce.reduce Nb imageDescriptors: " + tab.length);
 			for (int i = 0; i < tab.length - 1; i++) {
 				// StringBuilder line = null;
 				ImageDescriptor source = tab[i];
-				System.out.println("NPhase1.Reduce.reduce() done " + i
+
+				System.out.println("fr.mediastore.hadoop.NPhase1.Reduce.reduce() done " + i
 						* 100 / (tab.length - 1) + " %");
 				for (int j = i + 1; j < tab.length; j++) {				
 					ImageDescriptor cible = tab[j];
-					if (!source.getPath().equals(cible.getPath())) {
+                    if (!source.getPath().equals(cible.getPath())) {
 						computeDistance(source, cible, in, context);
-
 					}
+                    if (doneSinceLastProgress++>1000) {
+                        context.progress();
+                        doneSinceLastProgress=0;
+                        System.out.println("  --- done 1000");
+                    }
 
 				}
 			}
 
 		}
 
-		// public void reduce(IntWritable key, Iterator<NPhase1Value> values,
-		// OutputCollector<NullWritable, Text> output, Reporter reporter)
-		// throws IOException {
-		// String algorithm = "nested_loop";
-		// String prefix_dir = algorithm + "-"
-		// + Integer.toString(numberOfPartition) + "-"
-		// + key.toString();
-		//
-		// try {
-		// file1 = lDirAlloc.getLocalPathForWrite(prefix_dir + "/"
-		// + "outer", jobinfo);
-		// file2 = lDirAlloc.getLocalPathForWrite(prefix_dir + "/"
-		// + "inner", jobinfo);
-		// lfs.create(file1);
-		// lfs.create(file2);
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
-		//
-		// String outerTable = file1.toString();
-		// String innerTable = file2.toString();
-		//
-		// generateIntermediateFile(values, reporter, outerTable, innerTable);
-		//
-		// FileReader frForR = new FileReader(outerTable);
-		// BufferedReader brForR = new BufferedReader(frForR, bufferSize);
-		//
-		// // initialize for R
-		// int number = blockSize;
-		// boolean flag = true;
-		// String parts[] = null;
-		//
-		// while (flag) {
-		// // Read a block of R
-		// for (int ii = 0; ii < number; ii++) {
-		// String line = brForR.readLine();
-		// if (line == null) {
-		// flag = false; // Going to end
-		// number = ii;
-		// break;
-		// }
-		//
-		// parts = line.split("\\|");
-		//
-		// String[] first = parts[0].split(";");
-		// String[] second = parts[1].split(";");
-		//
-		// String id1 = first[0];
-		// String id2 = second[0];
-		//
-		// ArrayList<float[]> descriptorsList = new ArrayList<float[]>();
-		// ArrayList<float[]> descriptorsList2 = new ArrayList<float[]>();
-		//
-		// extractDescriptors(first, descriptorsList);
-		// extractDescriptors(second, descriptorsList2);
-		//
-		// computeDistance(id1, id2, descriptorsList,
-		// descriptorsList2, reporter, output);
-		//
-		// }
-		//
-		// brForR.close();
-		// frForR.close();
-		// }// reduce
-		// }
 
 		protected float distance(float[] desc1, float[] desc2) {
 
@@ -414,11 +279,12 @@ public class NPhase1 extends Configured implements Tool {
 
 		}
 
-		protected ArrayList<float[]> extractDescriptors(ImageDescriptor img,
-				FSDataInputStream in, Context context) {
-			ArrayList<float[]> descriptorsList = null;
+		protected int[]  extractBase64(ImageDescriptor img,
+                                       FSDataInputStream in, Context context) {
+			//ArrayList<float[]> descriptorsList = null;
+            int[] base64 = null;
 
-			//System.out.println("NPhase1.Reduce.extractDescriptors()");
+			//System.out.println("fr.mediastore.hadoop.NPhase1.Reduce.extractBase64()");
 			if (NPhase1.caching) {
 				if (NPhase1.cache == null) {
 					// cache for 100 entries, maximum 1000 secondes between
@@ -426,58 +292,31 @@ public class NPhase1 extends Configured implements Tool {
 					cache = new LfuCacheFactory().newInstance("descriptors",
 							1000 * 1000, 500);
 				}
-				
-				descriptorsList = (ArrayList<float[]>) cache.getObject(img
-						.getPath());
+
+                base64 = (int[]) cache.getObject(img.getPath());
 			}
 
 			// either no caching or not found in cache
-			if (!NPhase1.caching || descriptorsList == null) {
-				descriptorsList = new ArrayList<float[]>();
-				String dSource = null;
+			if (!NPhase1.caching || base64 == null) {
+//				base64 = new String(); // = new ArrayList<float[]>();
+				//String dSource = null;
 				try {
 					in.seek(img.getDescriptorsOffset());
 					LineReader ln = new LineReader(in);
 					Text t = new Text();
 					ln.readLine(t);
-					dSource = t.toString();
+					base64 = Utils.base64ImgToIntArray(t.toString());
 				
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
-				try {
-					extractDescriptorsFromString(dSource, descriptorsList);
-
-				} catch (IndexOutOfBoundsException e) {
-					System.out
-							.println("NPhase1.Reduce.computeDistance() ERROR ");
-					System.out.println("  >>> Img1 ");
-					System.out.println("              Path " + img.getPath());
-					System.out.println("              Offset "
-							+ img.getDescriptorsOffset());
-
-					throw e;
-				} catch (NumberFormatException e) {
-					System.out
-							.println("NPhase1.Reduce.computeDistance() ERROR ");
-					System.out.println("  >>> Img1 ");
-					System.out.println("              Path " + img.getPath());
-					System.out.println("              Offset "
-							+ img.getDescriptorsOffset());
-
-					throw e;
-				}
 				if (NPhase1.caching) {
-					System.out
-							.println("NPhase1.Reduce.extractDescriptors() adding img "
-									+ img.getPath() + " to cache");
-					// add it to the cache
-					cache.addObject(img.path, descriptorsList);
+					cache.addObject(img.getPath(), base64);
 				}
 			}
 
-			return descriptorsList;
+			return base64;
 
 		}
 
@@ -485,56 +324,80 @@ public class NPhase1 extends Configured implements Tool {
 				ImageDescriptor cible, FSDataInputStream in, Context context) {
 
 
-			ArrayList<float[]> descriptorsList1 = this.extractDescriptors(
-					source, in, context);
-			ArrayList<float[]> descriptorsList2 = this.extractDescriptors(
-					cible, in, context);
+            int[] b1 = this.extractBase64(source,in,context);
+            int[] b2 = this.extractBase64(cible,in,context);
+
+//            System.out.println("NPhase1$Reduce.computeDistance");
+//            System.out.println("      "  + b1);
+//            System.out.println("      " + b2);
+            double result = ImageComparator.compareRGBUsingRMSE(b1,b2);
+
+            if (result < 20) {
+                try {
 
 
+                    context.write(NullWritable.get(), new Text(source.getPath()    +
+                                ";" + cible.getPath()));
 
-			int cpt = 0;
-			boolean iMatch = false;
-			boolean dMatch = false;
-			Iterator<float[]> i1 = descriptorsList1.iterator();
-			Iterator<float[]> i2 = descriptorsList2.iterator();
-			while ((!iMatch) && i1.hasNext()) {
-				dMatch = false;
-				float[] d1tmp = i1.next();
-
-				while ((!dMatch) && i2.hasNext()) {
-					float[] d2tmp = (float[]) i2.next();
-					float distance = distance(d1tmp, d2tmp);
-//					 System.out.println("NPhase1.Reduce.computeDistance() "
-//					 + distance + " compare to " + distmin);
-
-					if (distance < distmin) {
-//						 System.out
-//						 .println("NPhase1.Reduce.computeDistance() it 's a match!");
-						cpt++;
-						dMatch = true;
-					}
-				}
-				context.progress();
-				if (cpt >= knn) {
-					iMatch = true;
-				}
-			}
-
-			if (iMatch) {
-//				 System.out
-//				 .println("NPhase1.Reduce.computeDistance() found match...");
-
-				try {
-					context.write(NullWritable.get(), new Text(source.getPath()
-							+ ";" + cible.getPath()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
+                } catch (IOException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+//
+//
+//
+//			ArrayList<float[]> descriptorsList1 = this.extractBase64(
+//					source, in, context);
+//			ArrayList<float[]> descriptorsList2 = this.extractBase64(
+//					cible, in, context);
+//
+//
+//
+//			int cpt = 0;
+//			boolean iMatch = false;
+//			boolean dMatch = false;
+//			Iterator<float[]> i1 = descriptorsList1.iterator();
+//			Iterator<float[]> i2 = descriptorsList2.iterator();
+//			while ((!iMatch) && i1.hasNext()) {
+//				dMatch = false;
+//				float[] d1tmp = i1.next();
+//
+//				while ((!dMatch) && i2.hasNext()) {
+//					float[] d2tmp = (float[]) i2.next();
+//					float distance = distance(d1tmp, d2tmp);
+////					 System.out.println("fr.mediastore.hadoop.NPhase1.Reduce.computeDistance() "
+////					 + distance + " compare to " + distmin);
+//
+//					if (distance < distmin) {
+////						 System.out
+////						 .println("fr.mediastore.hadoop.NPhase1.Reduce.computeDistance() it 's a match!");
+//						cpt++;
+//						dMatch = true;
+//					}
+//				}
+//				context.progress();
+//				if (cpt >= knn) {
+//					iMatch = true;
+//				}
+//			}
+//
+//			if (iMatch) {
+////				 System.out
+////				 .println("fr.mediastore.hadoop.NPhase1.Reduce.computeDistance() found match...");
+//
+//				try {
+//					context.write(NullWritable.get(), new Text(source.getPath()
+//							+ ";" + cible.getPath()));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//
+//			}
 
 		}
 
@@ -542,7 +405,7 @@ public class NPhase1 extends Configured implements Tool {
 
 	static int printUsage() {
 		System.out
-				.println("NPhase1 [-m <maps>] [-r <reduces>] [-p <numberOfPartitions>] "
+				.println("fr.mediastore.hadoop.NPhase1 [-m <maps>]  [-p <numberOfPartitions>] "
 						+ "[-d <dimension>] [-k <knn>] [-b <blockSize(#records) for R>] "
 						+ "<input (R)> <input (S)> <output>");
 		ToolRunner.printGenericCommandUsage(System.out);
@@ -579,7 +442,8 @@ public class NPhase1 extends Configured implements Tool {
 		for (int i = 0; i < args.length; ++i) {
 			try {
 				if ("-m".equals(args[i])) {
-					// job.setNumMapTasks(Integer.parseInt(args[++i]));
+//					job.setNumMapTasks(Integer.parseInt(args[++i]));
+
 					// job.set
 					++i;
 				} else if ("-r".equals(args[i])) {
@@ -627,7 +491,7 @@ public class NPhase1 extends Configured implements Tool {
 			printUsage();
 		}
 
-		// conf.set
+		// conf.set                            i
 
 		JobConf j = new JobConf(conf);
 //		j.setProfileEnabled(true);
@@ -636,7 +500,7 @@ public class NPhase1 extends Configured implements Tool {
 		Job job = new Job(j);
 		job.setJarByClass(NPhase1.class);
 
-		// JobConf conf = new JobConf(getConf(), NPhase1.class);
+		// JobConf conf = new JobConf(getConf(), fr.mediastore.hadoop.NPhase1.class);
 		job.setJobName("k-NN");
 
 		job.setMapperClass(MapClass.class);
@@ -648,13 +512,13 @@ public class NPhase1 extends Configured implements Tool {
 		//job.setPartitionerClass(CustomPartitioner.class);
 
 		System.out
-				.println("NPhase1.run() base input path " + other_args.get(0));
+				.println("fr.mediastore.hadoop.NPhase1.run() base input path " + other_args.get(0));
 
 		FileInputFormat.setInputPaths(job, other_args.get(0));
-		System.out.println("NPhase1.run() added input path "
+		System.out.println("fr.mediastore.hadoop.NPhase1.run() added input path "
 				+ other_args.get(1));
 
-		System.out.println("NPhase1.runPhase1() numberOfPartition "
+		System.out.println("fr.mediastore.hadoop.NPhase1.runPhase1() numberOfPartition "
 				+ numberOfPartition);
 
 		FileInputFormat.addInputPaths(job, other_args.get(1));
@@ -670,10 +534,8 @@ public class NPhase1 extends Configured implements Tool {
 		job.setJarByClass(FilterJob.class);
 		job.setMapperClass(FilterJob.MapClass.class);
 
-		// JobConf conf = new JobConf(getConf(), NPhase1.class);
-		job.setJobName("FilterJob");
+		job.setJobName("fr.mediastore.hadoop.FilterJob");
 
-		// job.setMapperClass(MapClass.class);
 		job.setReducerClass(FilterJob.Reduce.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
@@ -685,12 +547,6 @@ public class NPhase1 extends Configured implements Tool {
 		job.waitForCompletion(true);
 	}
 
-//	public static void main(String[] args) {
-//		String s = "-0.0012639377,-0.08363894,0.011720599,0.12380912,-0.0043550776,-0.15456437,0.019112818,0.2302905,-0.0059964005,-0.15439224,0.018115638,0.279309,-0.003414073,-0.08780366,0.009913056,0.15411445,0.005390352,0.21767016,0.020114267,0.28834185,0.0073008505,0.25002965,0.029023599,0.38225776,0.008156657,0.324282,0.02163628,0.42275402,0.0046608243,0.2029813,0.013675922,0.25636438,-9.726192E-4,0.057943948,0.012827009,0.070217974,7.3538657E-4,0.056297794,0.013096964,0.07263991,0.0042800177,0.06851089,0.013990093,0.083124265,0.0034941018,0.04230504,0.011397576,0.053576782,-3.6762032E-4,-8.461042E-4,0.0063354084,0.007923602,-0.0011041741,-0.0018139697,0.009770969,0.010604993,0.0011212057,-0.0052185166,0.008805678,0.012670101,0.0016470777,-0.0032559421,0.006813939,0.008711953";
-//		Reduce r = new Reduce();
-//		ArrayList descriptorsList = new ArrayList(); 
-//		r.extractDescriptorsFromString(s, descriptorsList);
-//	}
 	
 	
 	public static void main(String[] args) throws Exception {
@@ -698,4 +554,4 @@ public class NPhase1 extends Configured implements Tool {
 		System.exit(res);
 	}
 
-} // NPhase1
+} // fr.mediastore.hadoop.NPhase1

@@ -1,3 +1,4 @@
+package fr.mediastore.hadoop;
 
 import java.util.Comparator;
 
