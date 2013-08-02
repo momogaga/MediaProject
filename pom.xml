@@ -11,7 +11,8 @@
 
     <modules>
         <module>mediastore-db</module>
-        <module>mediastore-rest</module> 
+        <module>mediastore-rest</module>
+        <module>mediastore-hadoop</module>
     </modules>
 
     <repositories>
@@ -21,10 +22,22 @@
             <url>http://download.java.net/maven/2/</url>
             <layout>default</layout>
         </repository>
+        <repository>
+            <id>repo</id>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>file://${project.basedir}/repository</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
+
         <repository>
             <id>cloudbees-private-release-repository</id>
             <name>CloudBees</name>

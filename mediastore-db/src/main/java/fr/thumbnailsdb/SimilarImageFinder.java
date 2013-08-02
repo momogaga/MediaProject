@@ -2,11 +2,11 @@ package fr.thumbnailsdb;
 
 import fr.thumbnailsdb.bktree.BKTree;
 import fr.thumbnailsdb.bktree.RMSEDistance;
+import fr.thumbnailsdb.utils.ProgressBar;
 import fr.thumbnailsdb.vptree.VPTree;
 import fr.thumbnailsdb.vptree.VPTreeBuilder;
 import fr.thumbnailsdb.vptree.distances.VPRMSEDistance;
 
-import javax.print.attribute.standard.Media;
 import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +20,6 @@ public class SimilarImageFinder {
     protected static boolean USE_FULL_PATH = false;
 
     protected ThumbStore thumbstore;
-
 
 
     protected BKTree<MediaFileDescriptor> bkTree;// = new BKTree<String>(new RMSEDistance());
@@ -42,7 +41,7 @@ public class SimilarImageFinder {
             //we have to add the path to the selected images
             for (MediaFileDescriptor mfd : result) {
                 int index = mfd.getId();
-               // System.out.println("SimilarImageFinder.findSimilarMedia ID is " + index);
+                // System.out.println("SimilarImageFinder.findSimilarMedia ID is " + index);
                 String path = thumbstore.getPath(mfd.getConnection(), index);
                 mfd.setPath(path);
             }
@@ -123,16 +122,15 @@ public class SimilarImageFinder {
     }
 
 
-
     protected Collection<MediaFileDescriptor> findSimilarImage(MediaFileDescriptor id, int max) {
 
-        PriorityQueue<MediaFileDescriptor> queue = new PriorityQueue<MediaFileDescriptor>(max, new Comparator<MediaFileDescriptor>(){
+        PriorityQueue<MediaFileDescriptor> queue = new PriorityQueue<MediaFileDescriptor>(max, new Comparator<MediaFileDescriptor>() {
             //	@Override
             public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
                 double e1 = o1.getRmse();
                 double e2 = o2.getRmse();
                 //Sorted in reverse order
-                return Double.compare(e2,e1);
+                return Double.compare(e2, e1);
             }
         });
 //        TreeSet<MediaFileDescriptor> tree = new TreeSet<MediaFileDescriptor>(new Comparator<MediaFileDescriptor>() {
@@ -152,34 +150,43 @@ public class SimilarImageFinder {
         Status.getStatus().setStringStatus(Status.FIND_SIMILAR);
         int size = thumbstore.getPreloadedDescriptors().size();
         int processed = 0;
-        ProgressBar pb = new ProgressBar();
-        int increment = size / 20;
-        int i = 0;
-        int step = 0;
-        if (increment == 0) {
-            increment = 1;
-        }
+        ProgressBar pb = new ProgressBar(0, size, size / 100);
+        //  int increment = size / 20;
+        //int i = 0;
+//        int step = 0;
+//        if (increment == 0) {
+//            increment = 1;
+//        }
+        int increment = size / 100;
 
+        int processedSinceLastTick = 0;
 
         while (it.hasNext()) {
             MediaFileDescriptor current = it.next();
-            processed++;
+            //processed++;
             //  String path = current.getPath();
             int[] idata = current.getData();
-            if (idata==null) {
+            if (idata == null) {
                 continue;
             }
 //            double rmse = ImageComparator.compareARGBUsingRMSE(id.getData(), idata);
             double rmse = ImageComparator.compareRGBUsingRMSE(id.getData(), idata);
+//
+//            if (i > increment) {
+//                i = 0;
+//                step++;
+//                if (pb != null) {
+//                    pb.update(step, 20);
+//                }
+            processed++;
+            processedSinceLastTick++;
 
-            if (i > increment) {
-                i = 0;
-                step++;
-                if (pb != null) {
-                    pb.update(step, 20);
-                }
-                Status.getStatus().setStringStatus(Status.FIND_SIMILAR + " " + (processed * 100 / size) + "%");
+            if (processedSinceLastTick >= increment) {
+                pb.tick(processed);
+                Status.getStatus().setStringStatus(Status.FIND_SIMILAR + " " + pb.getPercent() + "%");
+                processedSinceLastTick = 0;
             }
+//            }
             //System.out.println("Processed " + processed);
 
             //TODO : WTF do we re-create a mediafiledescriptor here
@@ -227,21 +234,21 @@ public class SimilarImageFinder {
                 imd.setId(current.getId());
                 queue.add(imd);
             }
-            i++;
+          //  i++;
         }
 
         System.out.println("SimilarImageFinder.findSimilarImage resulting queue has size " + queue.size());
         Status.getStatus().setStringStatus(Status.IDLE);
 
-        MediaFileDescriptor[] arr = queue.toArray(new MediaFileDescriptor[] {});
+        MediaFileDescriptor[] arr = queue.toArray(new MediaFileDescriptor[]{});
         Arrays.sort(arr, new Comparator<MediaFileDescriptor>() {
-                public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-                    double e1 = o1.getRmse();
-                    double e2 = o2.getRmse();
-                    //Sorted in  order
-                    return Double.compare(e1,e2);
-                }
-           });
+            public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
+                double e1 = o1.getRmse();
+                double e2 = o2.getRmse();
+                //Sorted in  order
+                return Double.compare(e1, e2);
+            }
+        });
 
         //return tree;
         return Arrays.asList(arr);

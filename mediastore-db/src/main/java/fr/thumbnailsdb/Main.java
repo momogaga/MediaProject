@@ -3,9 +3,9 @@ package fr.thumbnailsdb;
 public class Main {
 
 	public static void mediaAction(String dbPath, String[] args) {
-		System.out.println("Main.mediaAction() db " + dbPath);
+		System.err.println("Main.mediaAction() db " + dbPath);
 		for (int i = 0; i < args.length; i++) {
-			System.out.println("    " + args[i]);
+			System.err.println("    " + args[i]);
 		}
 		ThumbStore tb = new ThumbStore(dbPath);
 
@@ -24,7 +24,7 @@ public class Main {
 	}
 
 	public static void dbAction(String dbPath, String[] args) {
-		System.out.println("Main.dbAction() db " + dbPath);
+		System.err.println("Main.dbAction() db " + dbPath);
 		for (int i = 0; i < args.length; i++) {
 			System.out.println("    " + args[i]);
 		}
@@ -103,7 +103,7 @@ public class Main {
 					i++;
 					db = args[i];
 					i++;
-					System.out.println("Database is " + db);
+					System.err.println("Database is " + db);
 				} else if ("db".equals(args[i])) {
 					i++;
 					String[] newArgs = new String[args.length - i];

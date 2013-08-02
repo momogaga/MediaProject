@@ -1,13 +1,12 @@
 package fr.thumbnailsdb;
 
 import fr.thumbnailsdb.utils.Logger;
+import fr.thumbnailsdb.utils.ProgressBar;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
@@ -22,7 +21,7 @@ public class ThumbStore {
 
 
     //This is used as a cache of preloaded descriptors
-    protected PreloadedDescriptors  preloadedDescriptors;
+    protected PreloadedDescriptors preloadedDescriptors;
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -36,7 +35,7 @@ public class ThumbStore {
         if (path == null) {
             path = DEFAULT_DB;
         }
-        System.out.println("ThumbStore.ThumbStore() using " + path + " as DB");
+        System.err.println("ThumbStore.ThumbStore() using " + path + " as DB");
         this.addDB(path);
     }
 
@@ -48,11 +47,11 @@ public class ThumbStore {
             checkAndCreateTables(c);
             ArrayList<String> paths = getIndexedPaths(c);
             if (paths.size() == 0) {
-                System.out.println("ThumbStore.addDB found empty db");
+                System.err.println("ThumbStore.addDB found empty db");
                 connexions.put("", c);
             } else {
                 for (String s : paths) {
-                    System.out.println("ThumbStore.addDB path : " + s + " with db : " + c);
+                    System.err.println("ThumbStore.addDB path : " + s + " with db : " + c);
                     connexions.put(s, c);
                 }
             }
@@ -246,7 +245,6 @@ public class ThumbStore {
     }
 
 
-
     /**
      * Add the path to the list of indexed pathsOfDBOnDisk
      * An empty database is used or the first one found
@@ -264,8 +262,8 @@ public class ThumbStore {
             connexion = connexions.values().iterator().next();
         }
         connexions.put(path, connexion);
-        System.out.println("ThumbStore.addIndexPath no db storing information for path " + path + "  found");
-        System.out.println("ThumbStore.addIndexPath using " + connexion);
+        System.err.println("ThumbStore.addIndexPath no db storing information for path " + path + "  found");
+        System.err.println("ThumbStore.addIndexPath using " + connexion);
 
         try {
             PreparedStatement psmnt;
@@ -354,7 +352,6 @@ public class ThumbStore {
             psmnt.setLong(3, id.getMtime());
 
 
-
             psmnt.setString(4, id.getMD5());
             psmnt.setBytes(5, Utils.toByteArray(id.getData()));
             psmnt.setDouble(6, id.getLat());
@@ -364,14 +361,12 @@ public class ThumbStore {
             e.printStackTrace();
         }
         if (preloadedDescriptorsExists()) {
-            System.out.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
+            System.err.println("MediaIndexer.generateAndSave Adding to preloaded descriptors " + id);
             //ts.getPreloadedDescriptors().add(id);
             id.setConnection(connexion);
             id.setId(getIndex(id.getPath()));
             this.getPreloadedDescriptors().add(id);
         }
-
-
 
 
     }
@@ -390,7 +385,7 @@ public class ThumbStore {
             psmnt.setBytes(4, id.getDataAsByte());
             psmnt.setString(5, id.getMD5());
 
-            System.out.println("ThumbStore.updateToDB lat : " + id.getLat());
+            System.err.println("ThumbStore.updateToDB lat : " + id.getLat());
             psmnt.setDouble(6, id.getLat());
             psmnt.setDouble(7, id.getLon());
             psmnt.setString(8, id.getPath());
@@ -448,7 +443,7 @@ public class ThumbStore {
 
     public void deleteFromDatabase(String path) {
 
-        System.out.println("ThumbStore.deleteFromDatabase " + path);
+        System.err.println("ThumbStore.deleteFromDatabase " + path);
         //this.dump();
         MediaFileDescriptor mf = this.getMediaFileDescriptor(path);
         ResultSet res = this.getFromDatabase(path);
@@ -461,13 +456,13 @@ public class ThumbStore {
         }
 
         //delete it from the cache
-        if ((mf!=null) && (this.preloadedDescriptorsExists())) {
-          this.getPreloadedDescriptors().remove(mf);
+        if ((mf != null) && (this.preloadedDescriptorsExists())) {
+            this.getPreloadedDescriptors().remove(mf);
         }
     }
 
 
-    public int  getIndex(String path) {
+    public int getIndex(String path) {
         ResultSet res = null;
         Connection connexion = findResponsibleDB(path);
         try {
@@ -481,7 +476,7 @@ public class ThumbStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-             return -1;
+        return -1;
     }
 
     public ResultSet getFromDatabase(String path) {
@@ -531,7 +526,7 @@ public class ThumbStore {
                 res = sta.executeQuery("SELECT * FROM IMAGES WHERE lat <> 0 OR lon <>0");
 
                 while (res.next()) {
-                    // System.out.println("getAllWithGPS adding  " + res.getString("path"));
+                    // System.err.println("getAllWithGPS adding  " + res.getString("path"));
                     al.add(res.getString("path").replaceAll("\\\\", "\\\\\\\\"));
                 }
 
@@ -555,7 +550,7 @@ public class ThumbStore {
 
     public ResultSet getAllInDataBase(Connection connexion) {
         Statement sta;
-        long t0= System.currentTimeMillis();
+        long t0 = System.currentTimeMillis();
         try {
             sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             return sta.executeQuery("SELECT * FROM IMAGES");
@@ -563,9 +558,9 @@ public class ThumbStore {
 
         } catch (SQLException e) {
             e.printStackTrace();
-        }          finally{
+        } finally {
             long t1 = System.currentTimeMillis();
-            System.out.println("ThumbStore.getAllInDataBase took " + (t1-t0) + " ms");
+            System.err.println("ThumbStore.getAllInDataBase took " + (t1 - t0) + " ms");
         }
         return null;
     }
@@ -573,15 +568,15 @@ public class ThumbStore {
     public ArrayList<MediaFileDescriptor> getFromDB(String filter) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
 
-        String query = "SELECT * FROM IMAGES WHERE LCASE(path) LIKE LCASE(\'%"+filter+"%\')";
-     //   MultipleResultSet mrs = new MultipleResultSet();
+        String query = "SELECT * FROM IMAGES WHERE LCASE(path) LIKE LCASE(\'%" + filter + "%\')";
+        //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
             //mrs.add(connection, this.getAllInDataBase(connection));
             Statement sta;
             try {
                 sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                ResultSet res =  sta.executeQuery(query);
-               // mrs.add(connection,r);
+                ResultSet res = sta.executeQuery(query);
+                // mrs.add(connection,r);
                 while (res.next()) {
                     list.add(getCurrentMediaFileDescriptor(res));
                 }
@@ -607,7 +602,7 @@ public class ThumbStore {
                 psmnt = connexion.prepareStatement("SELECT path from IMAGES WHERE data=(?)");
 
 
-                psmnt.setBytes(1,Utils.toByteArray(data));
+                psmnt.setBytes(1, Utils.toByteArray(data));
                 psmnt.execute();
                 res = psmnt.getResultSet();
 
@@ -627,14 +622,11 @@ public class ThumbStore {
         String p = null;
 
 
-        if (c==null) {
-            Logger.getLogger().err("Thumbstore : Connection is NULL " );
+        if (c == null) {
+            Logger.getLogger().err("Thumbstore : Connection is NULL ");
             return null;
         }
         try {
-            //  sta = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-
-
             PreparedStatement psmnt;
 
             psmnt = c.prepareStatement("SELECT path from IMAGES WHERE id=(?)");
@@ -678,20 +670,20 @@ public class ThumbStore {
     public void fix() {
         ArrayList<ResultSet> results = this.getAllInDataBases().getResultSets();
         MediaFileDescriptor id = null;
-        System.out.println("ThumbStore.fix() BD has " + this.size() + " entries");
+        System.err.println("ThumbStore.fix() BD has " + this.size() + " entries");
         for (ResultSet all : results) {
             try {
                 while (all.next()) {
                     id = getCurrentMediaFileDescriptor(all);
                     if (Utils.isValideImageName(id.path)) {
                         if (id.getData() == null || id.getMD5() == null) {
-                            System.out.println("ThumbStore.fix() " + id.getPath() + " has null data ord md5");
+                            System.err.println("ThumbStore.fix() " + id.getPath() + " has null data ord md5");
                             all.deleteRow();
                         }
                     }
                     if (Utils.isValideVideoName(id.path)) {
                         if (id.getMD5() == null) {
-                            System.out.println("ThumbStore.fix() " + id.getPath() + " has null md5");
+                            System.err.println("ThumbStore.fix() " + id.getPath() + " has null md5");
                             all.deleteRow();
                         }
                     }
@@ -729,7 +721,7 @@ public class ThumbStore {
                         all.deleteRow();
                     }
                 }
-                System.out.println("ThumbStore.shrink() has deleted  " + i + " records");
+                System.err.println("ThumbStore.shrink() has deleted  " + i + " records");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -760,7 +752,7 @@ public class ThumbStore {
     public MediaFileDescriptor getMediaFileDescriptor(String path) {
         MediaFileDescriptor id = null;
         try {
-            // System.out.println("path is " + path);
+            // System.err.println("path is " + path);
             ResultSet res = getFromDatabase(path);
             if (res.next()) {
                 byte[] d = res.getBytes("data");
@@ -796,16 +788,16 @@ public class ThumbStore {
     }
 
     public void test() {
-        System.out.println("ThumbStore.test() reading descriptor from disk ");
+        System.err.println("ThumbStore.test() reading descriptor from disk ");
         MediaIndexer tg = new MediaIndexer(this);
         String s = "/user/fhuet/desktop/home/workspaces/rechercheefficaceimagessimilaires/images/test.jpg";
         MediaFileDescriptor id = tg.buildMediaDescriptor(new File(s));
-        System.out.println("ThumbStore.test() writting to database");
+        System.err.println("ThumbStore.test() writting to database");
         // id.data=null;
         // id.mtime=0;
         saveToDB(id);
         // updateToDB(id);
-        System.out.println("ThumbStore.test() dumping entries");
+        System.err.println("ThumbStore.test() dumping entries");
         String select = "SELECT * FROM IMAGES";
         Statement st;
         for (Connection connexion : getConnections()) {
@@ -816,7 +808,7 @@ public class ThumbStore {
                 while (res.next()) {
                     String i = res.getString("path");
                     byte[] d = res.getBytes("data");
-                    System.out.println(i + " has data " + d + " and mtime " + res.getLong("mtime"));
+                    System.err.println(i + " has data " + d + " and mtime " + res.getLong("mtime"));
                 }
 
             } catch (SQLException e) {
@@ -824,27 +816,34 @@ public class ThumbStore {
             }
         }
 
-        System.out.println("Testing update ");
+        System.err.println("Testing update ");
         id.data = null;
         id.mtime = 0;
         updateToDB(id);
-        System.out.println("ThumbStore.test() dumping entries");
+        System.err.println("ThumbStore.test() dumping entries");
 
     }
 
     public void dump() {
-        String select = "SELECT * FROM IMAGES";
+        String select = "SELECT path,id,data FROM IMAGES";
         Statement st;
         for (Connection connexion : getConnections()) {
             try {
                 st = connexion.createStatement();
-
                 ResultSet res = st.executeQuery(select);
                 while (res.next()) {
-                    String i = res.getString("path");
-                    System.out.println(i + " has mtime " + res.getLong("mtime"));
-                }
+                    String path = res.getString("path");
+                    int i = res.getInt("id");
+                    byte[] d = res.getBytes("data");
+                    if (d != null) {
+                        String data = null;
+                        if ((data = Utils.byteArrayToImg(d)) != null) {
+//                         System.err.println(path + "," + i + "," + data);
+                            System.err.println(i + "," + data);
 
+                        }
+                    }
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -861,18 +860,17 @@ public class ThumbStore {
         if (preloadedDescriptors == null) {
             long ti = System.currentTimeMillis();
             Status.getStatus().setStringStatus("Building descriptors list");
-            ProgressBar pb = new ProgressBar();
             int dbSize = size();
+            ProgressBar pb = new ProgressBar(0, dbSize, dbSize / 100);
             preloadedDescriptors = new PreloadedDescriptors(dbSize, new Comparator<MediaFileDescriptor>() {
                 public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
                     return o1.getMD5().compareTo(o2.getMD5());
-                }});
-            int increment = dbSize / 20;
-            int i = 0;
-            int step = 0;
-            if (increment == 0) {
-                increment = 1;
-            }
+                }
+            });
+            int increment = dbSize / 100;
+            int processed = 0;
+            int processedSinceLastTick = 0;
+
             MultipleResultSet mrs = getAllInDataBases();
             ArrayList<ResultSet> ares = mrs.getResultSets();
             ArrayList<Connection> connections = mrs.getConnections();
@@ -881,15 +879,15 @@ public class ThumbStore {
                 try {
                     Connection c = connections.get(currentConnection);
                     while (res.next()) {
-                        i++;
-                        if (i > increment) {
-                            i = 0;
-                            step++;
-                            if (pb != null) {
-                                pb.update(step, 20);
-                            }
-                            Status.getStatus().setStringStatus("Building descriptors list " + ((step + 1) * 5) + "%");
+                        processed++;
+                        processedSinceLastTick++;
+
+                        if (processedSinceLastTick>=increment) {
+                            pb.tick(processed);
+                            Status.getStatus().setStringStatus("Building descriptors list  " + pb.getPercent() + "%");
+                            processedSinceLastTick=0;
                         }
+//                        }
                         String path = null;
                         path = res.getString("path");
                         byte[] d = res.getBytes("data");
@@ -910,7 +908,7 @@ public class ThumbStore {
                                 imd.setConnection(c);
                                 preloadedDescriptors.add(imd);
                             } else {
-                                //  System.out.println("Thumbstore: something is wrong with data " + path);
+                                //  System.err.println("Thumbstore: something is wrong with data " + path);
                                 //TODO : we should clean the data here
                             }
                         }
@@ -921,18 +919,17 @@ public class ThumbStore {
                 }
             }
 
-            System.out.println("ThumbStore.getPreloadedDescriptors sorting  " + preloadedDescriptors.size() + " data");
+            System.err.println("ThumbStore.getPreloadedDescriptors sorting  " + preloadedDescriptors.size() + " data");
             long t0 = System.currentTimeMillis();
             preloadedDescriptors.sort();
             //Collections.sort(preloadedDescriptors, );
             long t1 = System.currentTimeMillis();
-            System.out.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
+            System.err.println("ThumbStore.getPreloadedDescriptors sorting data .... done after " + (t1 - t0));
             Status.getStatus().setStringStatus(Status.IDLE);
-            System.out.println("ThumbStore.getPreloadedDescriptors all done  " + (t1 - ti));
+            System.err.println("ThumbStore.getPreloadedDescriptors all done  " + (t1 - ti));
         }
         return preloadedDescriptors;
     }
-
 
 
     public boolean preloadedDescriptorsExists() {

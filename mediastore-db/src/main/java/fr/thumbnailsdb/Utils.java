@@ -1,5 +1,9 @@
 package fr.thumbnailsdb;
 
+import org.apache.commons.codec.binary.Base64;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,7 +75,6 @@ public class Utils {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-
         }
         return idata;
     }
@@ -89,4 +92,32 @@ public class Utils {
         }
         return null;
     }
+
+
+    public static String byteArrayToImg(byte[] data) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+      //  ImageIO.write(bf, "JPEG", out);
+        //imgData = Base64.encodeBase64String(out.toByteArray());
+        //encode image signature
+      //  out = new ByteArrayOutputStream();
+        BufferedImage dest =  new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+//
+        //we check we have a correct number of entries in the array, to avoid NPE
+        int[] tab = toIntArray(data);
+        if (tab!=null) {
+            dest.setRGB(0,0,10,10,tab,0,10);
+            try {
+                ImageIO.write(dest, "JPEG", out);
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+
+            return Base64.encodeBase64String(out.toByteArray());
+        }   else {
+            return null;
+        }
+        //System.out.println("Utils.byteArrayToImg data size " + tab.length);
+
+    }
+
 }

@@ -83,6 +83,7 @@ function updateDuplicateTable(table, html_table) {
     $(document).ready(function () {
         $.ay.tableSort({target:$('table'), debug:false});
         generatePathLink();
+        generateDeleteLink();
     });
 }
 //
@@ -489,7 +490,7 @@ function displaySimilarImages(sourceSignature, object) {
 
         var image = object[f];
         var rmse = (image.rmse);
-        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}" style="height:auto; width:auto; max-width:100px; max-height:100px;"/>';
+        var templateThumbnail = '<img class="smallImage" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
         spanImg.innerHTML=imgTag;
 
@@ -534,14 +535,14 @@ function displaySimilarImages(sourceSignature, object) {
 
 function equalHeight(group) {
     tallest = 0;
-                                 debugger;
+           //                      debugger;
     group.each(function() {
         thisHeight = $(this).height();
         if(thisHeight > tallest) {
             tallest = thisHeight;
         }
     });
-    debugger;
+   // debugger;
     group.each(function() { $(this).height(tallest); });
 }
 
