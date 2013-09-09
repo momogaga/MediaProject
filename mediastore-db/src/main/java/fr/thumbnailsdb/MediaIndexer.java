@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import fr.thumbnailsdb.hash.ImageHash;
 import fr.thumbnailsdb.utils.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -27,7 +28,9 @@ public class MediaIndexer {
     protected boolean software = true;
     protected ThumbStore ts;
 
-    protected boolean forceGPSUpdate = false;
+    protected boolean forceGPSUpdate = true;
+    protected boolean forceHashUpdate = true;
+
 
     protected Logger log = Logger.getLogger();
 
@@ -141,14 +144,15 @@ public class MediaIndexer {
             id.setSize(f.length());
             // generate thumbnails only for images, not video
             if (Utils.isValideImageName(f.getName())) {
-                data = generateThumbnail(f);
-                id.setData(data);
+            //    data = generateThumbnail(f);
+              //  id.setData(data);
                 MetaDataFinder mdf = new MetaDataFinder(f);
                 double[] latLon = mdf.getLatLong();
                 if (latLon != null) {
                     id.setLat(latLon[0]);
                     id.setLon(latLon[1]);
                 }
+                id.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
             }
             md5 = generateMD5(f);
             id.setMd5Digest(md5);
@@ -170,7 +174,7 @@ public class MediaIndexer {
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
-
+                boolean update = false;
 
                 if (forceGPSUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
@@ -182,8 +186,19 @@ public class MediaIndexer {
                         mfd.setLon(latLon[1]);
                         Logger.getLogger().err("MediaIndexer : forced update for GPS data for " + f);
                         ts.updateToDB(mfd);
-                        updatedFiles++;
+                        update=true;
                     }
+                }
+
+                if (forceHashUpdate) {
+                    MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
+                    mfd.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
+                    ts.updateToDB(mfd);
+                    update=true;
+                }
+
+                if (update) {
+                    updatedFiles++;
                 }
             } else {
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
@@ -293,12 +308,14 @@ public class MediaIndexer {
 
 
     public void updateDB() {
-        this.updateDB(ts.getIndexedPaths());
+        this.updateDB(ts.getIndexedPaths().toArray(new String[] {}));
     }
 
-    public void updateDB(List<String> al) {
-        for (String s : al) {
-            Logger.getLogger().err("MediaIndexer.updateDB updating " + s);
+    public void updateDB(String[] al) {
+        System.out.println(" XXXXXXXXX");
+        for (int i=0;i<al.length;i++) {
+            String s = al[i];
+            Logger.getLogger().log("MediaIndexer.updateDB updating " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);
             processMTRoot(s);
         }

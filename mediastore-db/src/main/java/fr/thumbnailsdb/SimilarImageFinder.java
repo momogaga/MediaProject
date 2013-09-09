@@ -67,7 +67,8 @@ public class SimilarImageFinder {
 
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
                                 imd.setPath(path);
-                                imd.setData(idata);
+                                //TODO: handle signature here
+                              //  imd.setData(idata);
                                 bkTree.add(imd);
                             }
                         }
@@ -100,7 +101,9 @@ public class SimilarImageFinder {
 
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
                                 imd.setPath(path);
-                                imd.setData(idata);
+//                                imd.setData(idata);
+                                //TODO: handle signature here
+
                                 al.add(imd);
                             }
                         }
@@ -165,12 +168,14 @@ public class SimilarImageFinder {
             MediaFileDescriptor current = it.next();
             //processed++;
             //  String path = current.getPath();
-            int[] idata = current.getData();
-            if (idata == null) {
+           // int[] idata = current.getData();
+            String sig = current.getHash();
+            if (sig == null) {
                 continue;
             }
 //            double rmse = ImageComparator.compareARGBUsingRMSE(id.getData(), idata);
-            double rmse = ImageComparator.compareRGBUsingRMSE(id.getData(), idata);
+//            double rmse = //ImageComparator.compareRGBUsingRMSE(id.getData(), idata);
+            double rmse = ImageComparator.compareUsingHammingDistance(id.getHash(),sig);
 //
 //            if (i > increment) {
 //                i = 0;
@@ -219,7 +224,8 @@ public class SimilarImageFinder {
                     MediaFileDescriptor imd = new MediaFileDescriptor();
                     imd.setPath(current.getPath());
                     imd.setRmse(rmse);
-                    imd.setData(current.getData());
+                    imd.setHash(current.getHash());
+                   // imd.setData(current.getData());
                     imd.setConnection(current.getConnection());
                     imd.setId(current.getId());
                     //tree.remove(df);
@@ -229,7 +235,8 @@ public class SimilarImageFinder {
                 MediaFileDescriptor imd = new MediaFileDescriptor();
                 imd.setPath(current.getPath());
                 imd.setRmse(rmse);
-                imd.setData(current.getData());
+                imd.setHash(current.getHash());
+//                imd.setData(current.getData());
                 imd.setConnection(current.getConnection());
                 imd.setId(current.getId());
                 queue.add(imd);

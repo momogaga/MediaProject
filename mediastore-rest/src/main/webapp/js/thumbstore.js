@@ -109,8 +109,8 @@ function toFolderLinks(path1, path2) {
 }
 
 function toThumbnailLink(path) {
- //   debugger;
-   return   '<a class="thumbnaillink btn-mini btn-info" href="#!"  data-p1="'+path+'">thumbnail</a>';
+    //   debugger;
+    return   '<a class="thumbnaillink btn-mini btn-info" href="#!"  data-p1="' + path + '">thumbnail</a>';
 }
 
 
@@ -126,17 +126,17 @@ function getFolder(path) {
 }
 function toFolderAndFileLink(path) {
     var folder = getFolder(path);
-    return path + '  ' +  toFileLink(path) +  ' '  +
+    return path + '  ' + toFileLink(path) + ' ' +
         toFolderLink(folder);
 }
 
-function toDeleteLink(path){
-    return '<a class="deletelink  btn-mini btn-danger" href="#!"  data-p1="'+path+'">delete</a>';
+function toDeleteLink(path) {
+    return '<a class="deletelink  btn-mini btn-danger" href="#!"  data-p1="' + path + '">delete</a>';
 }
 
 function toLinks(path) {
-  return toFolderAndFileLink(path)  + ' '
-    + toThumbnailLink(path) + ' '+ toDeleteLink(path);
+    return toFolderAndFileLink(path) + ' '
+        + toThumbnailLink(path) + ' ' + toDeleteLink(path);
 
 }
 
@@ -164,14 +164,13 @@ function getDuplicateFolderDetails(folder1, folder2) {
 //        '<a class="deletelink  btn btn-warning" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
 //        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
 //        '{{/.}}';
-    var templateFiles = '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}'+  toFileLink("{{f1.path}}")        +
-        toDeleteLink("{{f1.path}}") +  '<br>' +
-        '{{f2.path}}' + toFileLink("{{f2.path}}")  +    toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
+    var templateFiles = '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}' + toFileLink("{{f1.path}}") +
+        toDeleteLink("{{f1.path}}") + '<br>' +
+        '{{f2.path}}' + toFileLink("{{f2.path}}") + toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
     for (i in tab) {
         var htmlFiles = Mustache.to_html(templateFiles, tab[i]);
         html_table += htmlFiles;
     }
-
 
 
     html_table += "</tbody>"
@@ -227,11 +226,11 @@ function buildAllTable(array) {
         '</tr></thead> <tbody>';
 
     for (i in array) {
-         html_table+= '<tr>'
-             + '<td class="size">'+ array[i].size+'</td>'
-             + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
-     //   debugger;
-     }
+        html_table += '<tr>'
+            + '<td class="size">' + array[i].size + '</td>'
+            + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
+        //   debugger;
+    }
     html_table += "</tbody>"
 
     $('#all-table').children().remove();
@@ -248,6 +247,8 @@ function buildAllTable(array) {
 function getDuplicateFolder() {
 
     var folders = getSelectedFolders();
+
+    debugger;
     $('#duplicate-folders-table-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
@@ -328,12 +329,12 @@ function callDelete(para1) {
     $.get("rest/hello/trash", {path:para1});
 }
 
-function callThumbnail(source,p1) {
+function callThumbnail(source, p1) {
     //remove previous image
-    if ($("img", source).length ==0 ) {
+    if ($("img", source).length == 0) {
         //no previous image, add thumbnail
-        $(source).append('<img src="rest/hello/getThumbnail?path=' + p1+'"/>');
-    }                       else {
+        $(source).append('<img src="rest/hello/getThumbnail?path=' + p1 + '"/>');
+    } else {
         $("img", source).remove();
     }
 }
@@ -341,19 +342,24 @@ function callThumbnail(source,p1) {
 
 function shrink() {
     var folders = getSelectedFolders();
-    $.get("rest/hello/shrink", {  folder:folders}, function (data) {
+    $.get("rest/hello/shrink", {
+        folder:JSON.stringify(folders)
+    }, function (data) {
     });
 }
 
 function update() {
     var folders = getSelectedFolders();
-    $.get("rest/hello/update", {folder:folders}, function (data) {
+    $.get("rest/hello/update", {folder:JSON.stringify(folders)}, function (data) {
     });
 }
 
 function shrinkUpdate() {
     var folders = getSelectedFolders();
-    $.get("rest/hello/shrinkUpdate", {folder:folders}, function (data) {
+    debugger;
+    $.get("rest/hello/shrinkUpdate", {
+        folder:JSON.stringify(folders)
+    }, function (data) {
     });
 }
 
@@ -433,7 +439,7 @@ function displaySimilarImages(sourceSignature, object) {
     var sourceSig = document.createElement('div');
     sourceSig.style.float = "left";
     //sourceSig.style.marginLeft="10px";
-    sourceSig.className="signatureDiv";
+    sourceSig.className = "signatureDiv";
 
     var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
     sourceSig.appendChild(sourceSigCanvas.canvas);
@@ -441,7 +447,7 @@ function displaySimilarImages(sourceSignature, object) {
     document.getElementById("duplicate_upload_source").appendChild(sourceSig);
 
     var ul = document.createElement('ul');
-    ul.className="thumbnails";
+    ul.className = "thumbnails";
 
 
     for (f in object) {
@@ -465,34 +471,34 @@ function displaySimilarImages(sourceSignature, object) {
 
 
         var li = document.createElement('li');
-        li.className="span4";
+        li.className = "span4";
 
 
-        var thumb=document.createElement('div');
-        thumb.className="thumbnail";
+        var thumb = document.createElement('div');
+        thumb.className = "thumbnail";
 
         var container = document.createElement('div');
-        container.className="container";
+        container.className = "container";
 
         var row = document.createElement('div');
-        row.className="row";
+        row.className = "row";
 
 
         var spanImg = document.createElement('div');
-        spanImg.className="span2";
+        spanImg.className = "span2";
 
         var spanSig = document.createElement('div');
-        spanSig.className="span2";
+        spanSig.className = "span2";
 
         var caption = document.createElement('div');
-        caption.className="caption";
-        caption.style.wordWrap="break-word"
+        caption.className = "caption";
+        caption.style.wordWrap = "break-word"
 
         var image = object[f];
         var rmse = (image.rmse);
         var templateThumbnail = '<img class="smallImage" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
-        spanImg.innerHTML=imgTag;
+        spanImg.innerHTML = imgTag;
 
         row.appendChild(spanImg);
         row.appendChild(spanSig);
@@ -502,7 +508,7 @@ function displaySimilarImages(sourceSignature, object) {
         thumb.appendChild(container);
 
 
-         li.appendChild(thumb);
+        li.appendChild(thumb);
         li.appendChild(caption);
         //build the description
 
@@ -535,17 +541,18 @@ function displaySimilarImages(sourceSignature, object) {
 
 function equalHeight(group) {
     tallest = 0;
-           //                      debugger;
-    group.each(function() {
+    //                      debugger;
+    group.each(function () {
         thisHeight = $(this).height();
-        if(thisHeight > tallest) {
+        if (thisHeight > tallest) {
             tallest = thisHeight;
         }
     });
-   // debugger;
-    group.each(function() { $(this).height(tallest); });
+    // debugger;
+    group.each(function () {
+        $(this).height(tallest);
+    });
 }
-
 
 
 function generatePathLink() {
@@ -572,7 +579,7 @@ function generateThumbnailLink() {
     $('.thumbnaillink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');
-        callThumbnail($this,p1);
+        callThumbnail($this, p1);
     });
 }
 

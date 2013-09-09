@@ -21,7 +21,10 @@ public class ProgressBar {
     public ProgressBar(int min, int max, int steps) {
         this.min = min;
         this.max=max;
-      //  this.steps = steps;
+      //  this.steps = steps;\
+        if (steps==0) {
+            steps = 1;
+        }
         this.increment = (max-min) / steps;
         init();
     }

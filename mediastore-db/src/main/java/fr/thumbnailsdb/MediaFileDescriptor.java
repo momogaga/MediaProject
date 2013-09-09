@@ -1,5 +1,7 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.hash.ImageHash;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.image.BufferedImage;
@@ -14,8 +16,10 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
     protected long size;
     protected long mtime;
     protected String md5Digest;
+    protected String hash;
 
-    protected int[] data;
+
+//    protected int[] data;
     protected double lat;
     protected double lon;
 
@@ -41,7 +45,7 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         // int read = fi.read(data);
         // System.out.println("ImageDescriptor.main() read " + read +
         // " bytes from file");
-        id = new MediaFileDescriptor(path, size, modifiedTime, data, null);
+        id = new MediaFileDescriptor(path, size, modifiedTime, null,  null);
 //		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
 //		} catch (IOException e) {
@@ -88,10 +92,10 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
      * @param path
      * @param size
      * @param mtime
-     * @param data
      * @param md5
+     * @param hash
      */
-    public MediaFileDescriptor(String path, long size, long mtime, int[] data, String md5) {
+    public MediaFileDescriptor(String path, long size, long mtime,  String md5, String hash) {
         super();
         this.path = path;
 
@@ -100,8 +104,9 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
 
         // byte[] rgba = convertToARGB(data);
         // this.data = rgba;
-        this.data = data;
+       // this.data = data;
         this.md5Digest = md5;
+        this.hash = hash;
     }
 
     protected byte[] convertToARGB(int[] data) {
@@ -137,8 +142,17 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         this.path = path;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
     public void setSize(long size) {
         this.size = size;
+
     }
 
     public void setMtime(long mtime) {
@@ -149,9 +163,9 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         this.md5Digest = md5Digest;
     }
 
-    public void setData(int[] data) {
-        this.data = data; // this.convertToARGB(data);
-    }
+//    public void setData(int[] data) {
+//        this.data = data; // this.convertToARGB(data);
+//    }
 
     //
     // public void setData(byte[] data) {
@@ -173,16 +187,41 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         return mtime;
     }
 
-    public int[] getData() {
-        return data;
-    }
+//    public int[] getData() {
+//        return data;
+//    }
 
-    public byte[] getDataAsByte() {
-        // convert the int[] array to byte[] array
-        if (data == null) {
-            System.out.println("MediaFileDescriptor.getDataAsByte found null data");
-            return null;
-        }
+//    public byte[] getDataAsByte() {
+//        // convert the int[] array to byte[] array
+//        if (data == null) {
+//            System.out.println("MediaFileDescriptor.getDataAsByte found null data");
+//            return null;
+//        }
+//        ByteArrayOutputStream ba = new ByteArrayOutputStream();
+//        ObjectOutputStream oi;
+//        try {
+//            oi = new ObjectOutputStream(ba);
+//            oi.writeObject(data);
+//            oi.close();
+//
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        return ba.toByteArray();
+//    }
+
+
+    /**
+     * Convert the signature to a BufferedImage and return the
+     * corresponding byte[]
+     * @return
+     */
+
+    public byte[] getSignatureAsByte() {
+          BufferedImage bf = ImageHash.signatureToImage(this.hash);
+        int[] data = new int[bf.getWidth()*bf.getHeight()];
+        bf.getRGB(0,0,bf.getWidth(),bf.getHeight(),data,0,bf.getWidth());
         ByteArrayOutputStream ba = new ByteArrayOutputStream();
         ObjectOutputStream oi;
         try {
@@ -197,11 +236,13 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         return ba.toByteArray();
     }
 
-    public BufferedImage getSignatureAsImage() {
-        BufferedImage dest =  new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        dest.setRGB(0,0,10,10,data,0,10);
 
-        return dest;
+    public BufferedImage getSignatureAsImage() {
+//        BufferedImage dest =  new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+//        dest.setRGB(0,0,10,10,data,0,10);
+
+//        return dest;
+        return ImageHash.signatureToImage(this.hash);
 
     }
 
@@ -221,7 +262,7 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
 
     @Override
     public String toString() {
-        return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + ",\n md5="  + md5Digest + "]";
+        return "[path=" + path + "\n size=" + size + ",\n mtime=" + mtime + ",\n md5="  + md5Digest +",\n hash="  + hash + "]";
     }
 
 

@@ -1,5 +1,6 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.hash.ImageHash;
 import fr.thumbnailsdb.utils.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -188,8 +189,10 @@ public class ThumbnailGenerator {
             id.setSize(f.length());
             // generate thumbnails only for images, not video
             if (Utils.isValideImageName(f.getName())) {
-                data = generateThumbnail(f);
-                id.setData(data);
+              //  data = generateThumbnail(f);
+//                id.setData(data);
+                String sig = ImageHash.generateSignature(f.getCanonicalPath());
+                id.setHash(sig);
             }
             md5 = generateMD5(f);
             id.setMd5Digest(md5);

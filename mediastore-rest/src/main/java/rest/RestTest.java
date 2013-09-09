@@ -226,7 +226,7 @@ public class RestTest {
         MediaFileDescriptor mdf = tb.getMediaFileDescriptor(imageId);
 
         final InputStream bigInputStream =
-                new ByteArrayInputStream(mdf.getDataAsByte());
+                new ByteArrayInputStream(mdf.getSignatureAsByte());
         return Response.status(200).entity(bigInputStream).build();
 
         //return Response.status(404).build();
@@ -277,19 +277,23 @@ public class RestTest {
 
     @GET
     @Path("update/")
-    public Response update(@QueryParam("folder") final java.util.List<String> obj) {
+    public Response update(@QueryParam("folder") String obj) {
+        String[] folders = this.parseFolders(obj);
         tb.flushPreloadedDescriptors();
-        new MediaIndexer(tb).updateDB(obj);
+        new MediaIndexer(tb).updateDB(folders);
         return Response.status(200).entity("Update done").build();
     }
 
     @GET
     @Path("shrinkUpdate/")
-    public Response shrinkUpdate(@QueryParam("folder") final java.util.List<String> obj) {
+    public Response shrinkUpdate(@QueryParam("folder") final String obj) {
+
+        String[] folders = this.parseFolders(obj);
+
         tb.flushPreloadedDescriptors();
-        tb.shrink();
+      //  tb.shrink();
         MediaIndexer mdi = new MediaIndexer(tb);
-        mdi.updateDB(obj);
+        mdi.updateDB(folders);
         return Response.status(200).entity("Update done").build();
     }
 

@@ -18,6 +18,8 @@ public class VPRMSEDistance extends Distance {
         MediaFileDescriptor mf2 = (MediaFileDescriptor) y ;
 //        System.out.println("VPRMSEDistance.d " + x + "<-> " + y + " RMSE : " + ImageComparator.compareARGBUsingRMSE(mf1.getData(), mf2.getData()));
 
-        return  ImageComparator.compareARGBUsingRMSE(mf1.getData(), mf2.getData());
+        //TODO Fix for hash
+        return 0;
+      //  return  ImageComparator.compareARGBUsingRMSE(mf1.getData(), mf2.getData());
     }
 }

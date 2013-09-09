@@ -1,5 +1,7 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.hash.ImageHash;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -118,9 +120,11 @@ public class ImageComparator {
             }
 
         }
-
-
         return total;
+    }
+
+    public static double compareUsingHammingDistance(String s1, String s2) {
+        return ImageHash.hammingDistance(s1,s2);
     }
 
 
@@ -177,7 +181,7 @@ public class ImageComparator {
 
         MediaFileDescriptor id1 = tb.buildMediaDescriptor(new File(path));
         MediaFileDescriptor id4 = tb.buildMediaDescriptor(new File(path4));
-        System.out.println("ImageComparator.main() Comparison of VERY MODIFIED thumbnails using ARGB RMSE " + ImageComparator.compareARGBUsingRMSE(id1.getData(), id4.getData()));
+//        System.out.println("ImageComparator.main() Comparison of VERY MODIFIED thumbnails using ARGB RMSE " + ImageComparator.compareARGBUsingRMSE(id1.getData(), id4.getData()));
 
     }
 

@@ -257,6 +257,7 @@ public class NPhase1 extends Configured implements Tool {
 					}
                     if (doneSinceLastProgress++>1000) {
                         context.progress();
+
                         doneSinceLastProgress=0;
                         System.out.println("  --- done 1000");
                     }
@@ -280,7 +281,7 @@ public class NPhase1 extends Configured implements Tool {
 		}
 
 		protected int[]  extractBase64(ImageDescriptor img,
-                                       FSDataInputStream in, Context context) {
+                                       FSDataInputStream in) {
 			//ArrayList<float[]> descriptorsList = null;
             int[] base64 = null;
 
@@ -324,15 +325,15 @@ public class NPhase1 extends Configured implements Tool {
 				ImageDescriptor cible, FSDataInputStream in, Context context) {
 
 
-            int[] b1 = this.extractBase64(source,in,context);
-            int[] b2 = this.extractBase64(cible,in,context);
+            int[] b1 = this.extractBase64(source,in);
+            int[] b2 = this.extractBase64(cible,in);
 
 //            System.out.println("NPhase1$Reduce.computeDistance");
 //            System.out.println("      "  + b1);
 //            System.out.println("      " + b2);
             double result = ImageComparator.compareRGBUsingRMSE(b1,b2);
 
-            if (result < 20) {
+            if (result < 5) {
                 try {
 
 

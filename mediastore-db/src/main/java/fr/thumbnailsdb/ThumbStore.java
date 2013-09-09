@@ -17,7 +17,7 @@ import javax.swing.JLabel;
 public class ThumbStore {
 
     protected static String DEFAULT_DB = "localDB";
-    protected static int CURRENT_VERSION = 3;
+    protected static int CURRENT_VERSION = 4;
 
 
     //This is used as a cache of preloaded descriptors
@@ -182,6 +182,9 @@ public class ThumbStore {
             if (dbVersion == 2) {
                 upgradeToV3(connection);
             }
+            if (dbVersion == 3) {
+                upgradeToV4(connection);
+            }
 
 
             Statement st = connection.createStatement();
@@ -234,13 +237,28 @@ public class ThumbStore {
     private void upgradeToV3(Connection connection) throws SQLException {
         //ok we need to upgrade the DB to the next version
         //This one includes an index for the path
-        //CREATE INDEX index_name
+        //CREATE INDEX md5_index
         // ON table_name (column_name)
         Statement st = connection.createStatement();
         String action = "CREATE  INDEX md5_index ON IMAGES(md5)";
         Logger.getLogger().log("ThumbStore.upgradeToV3 creating Index for MD5");
         st.execute(action);
         action = "UPDATE VERSION SET version=3 WHERE version=2";
+        st.execute(action);
+    }
+
+
+    private void upgradeToV4(Connection connection) throws SQLException {
+        Statement st = connection.createStatement();
+        String action = "ALTER TABLE IMAGES ADD hash varchar(100)";
+        Logger.getLogger().log("ThumbStore.upgradeToV4 creating column for hash");
+        Logger.getLogger().log("ThumbStore.upgradeToV4 dropping column data");
+        st.execute(action);
+
+        action = " ALTER TABLE IMAGES DROP COLUMN data";
+        st.execute(action);
+
+        action = "UPDATE VERSION SET version=4 WHERE version=3";
         st.execute(action);
     }
 
@@ -345,7 +363,7 @@ public class ThumbStore {
         Connection connexion = findResponsibleDB(id.getPath());
         try {
             Statement st;
-            psmnt = connexion.prepareStatement("insert into IMAGES(path, size, mtime, md5, data, lat, lon) "
+            psmnt = connexion.prepareStatement("insert into IMAGES(path, size, mtime, md5, hash, lat, lon) "
                     + "values(?,?,?,?,?,?,?)");
             psmnt.setString(1, id.getPath());
             psmnt.setLong(2, id.getSize());
@@ -353,7 +371,7 @@ public class ThumbStore {
 
 
             psmnt.setString(4, id.getMD5());
-            psmnt.setBytes(5, Utils.toByteArray(id.getData()));
+            psmnt.setString(5, id.getHash());
             psmnt.setDouble(6, id.getLat());
             psmnt.setDouble(7, id.getLon());
             psmnt.execute();
@@ -377,12 +395,12 @@ public class ThumbStore {
         try {
             Statement st;
             psmnt = connexion
-                    .prepareStatement("UPDATE IMAGES SET path=?, size=?, mtime=?, data=?, md5=? , lat=?, lon=? WHERE path=? ");
+                    .prepareStatement("UPDATE IMAGES SET path=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
             psmnt.setString(1, id.getPath());
             psmnt.setLong(2, id.getSize());
             psmnt.setLong(3, id.getMtime());
 
-            psmnt.setBytes(4, id.getDataAsByte());
+            psmnt.setString(4, id.getHash());
             psmnt.setString(5, id.getMD5());
 
             System.err.println("ThumbStore.updateToDB lat : " + id.getLat());
@@ -676,7 +694,7 @@ public class ThumbStore {
                 while (all.next()) {
                     id = getCurrentMediaFileDescriptor(all);
                     if (Utils.isValideImageName(id.path)) {
-                        if (id.getData() == null || id.getMD5() == null) {
+                        if (id.getHash() == null || id.getMD5() == null) {
                             System.err.println("ThumbStore.fix() " + id.getPath() + " has null data ord md5");
                             all.deleteRow();
                         }
@@ -736,12 +754,13 @@ public class ThumbStore {
             // if (res.next()) {
             // id = new ImageDescriptor();
             String path = res.getString("path");
-            byte[] d = res.getBytes("data");
-            int[] idata = Utils.toIntArray(d);
+          //  byte[] d = res.getBytes("data");
+           // int[] idata = Utils.toIntArray(d);
             String md5 = res.getString("md5");
             long mtime = res.getLong("mtime");
             long size = res.getLong("size");
-            id = new MediaFileDescriptor(path, size, mtime, idata, md5);
+            String hash = res.getString("hash");
+            id = new MediaFileDescriptor(path, size, mtime, md5, hash);
             // }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -750,23 +769,14 @@ public class ThumbStore {
     }
 
     public MediaFileDescriptor getMediaFileDescriptor(String path) {
-        MediaFileDescriptor id = null;
-        try {
-            // System.err.println("path is " + path);
+             System.out.println("path is " + path);
             ResultSet res = getFromDatabase(path);
-            if (res.next()) {
-                byte[] d = res.getBytes("data");
-                int[] idata = Utils.toIntArray(d);
-                String md5 = res.getString("md5");
-                long mtime = res.getLong("mtime");
-                long size = res.getLong("size");
-                id = new MediaFileDescriptor(path, size, mtime, idata, md5);
-            }
+        try {
+            res.next();
         } catch (SQLException e) {
-
-            e.printStackTrace();
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        return id;
+        return this.getCurrentMediaFileDescriptor(res);
     }
 
 
@@ -807,8 +817,8 @@ public class ThumbStore {
                 ResultSet res = st.executeQuery(select);
                 while (res.next()) {
                     String i = res.getString("path");
-                    byte[] d = res.getBytes("data");
-                    System.err.println(i + " has data " + d + " and mtime " + res.getLong("mtime"));
+                  //  byte[] d = res.getBytes("data");
+                    System.err.println(i + " has mtime " + res.getLong("mtime"));
                 }
 
             } catch (SQLException e) {
@@ -817,7 +827,7 @@ public class ThumbStore {
         }
 
         System.err.println("Testing update ");
-        id.data = null;
+       // id.data = null;
         id.mtime = 0;
         updateToDB(id);
         System.err.println("ThumbStore.test() dumping entries");
@@ -834,17 +844,18 @@ public class ThumbStore {
                 while (res.next()) {
                     String path = res.getString("path");
                     int i = res.getInt("id");
-                    byte[] d = res.getBytes("data");
-                    if (d != null) {
-                        String data = null;
-                        if ((data = Utils.byteArrayToBase64Img(d)) != null) {
+                   // byte[] d = res.getBytes("data");
+                    String s = res.getString("hash");
+                    if (s != null) {
+//                        String data = null;
+//                        if ((data = Utils.byteArrayToBase64Img(d)) != null) {
                             if (p) {
-                                System.out.println(path + "," + data);
+                                System.out.println(path + "," + s);
                             } else {
-                                System.out.println(i+  "," + data);
+                                System.out.println(i+  "," + s);
                             }
 
-                        }
+//                        }
                     }
                 }
             } catch (SQLException e) {
@@ -893,19 +904,21 @@ public class ThumbStore {
 //                        }
                         String path = null;
                         path = res.getString("path");
-                        byte[] d = res.getBytes("data");
+                        //byte[] d = res.getBytes("data");
                         int id = res.getInt("id");
                         String md5 = res.getString("md5");
                         long size = res.getLong("size");
-                        if (d != null) {
-                            int[] idata = Utils.toIntArray(d);
+                        String hash = res.getString("hash");
+                       // if (d != null) {
+                           // int[] idata = Utils.toIntArray(d);
                             if (path != null && md5 != null) {
                                 MediaFileDescriptor imd = new MediaFileDescriptor();
                                 if (SimilarImageFinder.USE_FULL_PATH) {
                                     imd.setPath(path);
                                 }
                                 imd.setId(id);
-                                imd.setData(idata);
+                              //  imd.setData(idata);
+                                        imd.setHash(hash);
                                 imd.setSize(size);
                                 imd.setMd5Digest(md5);
                                 imd.setConnection(c);
@@ -915,7 +928,7 @@ public class ThumbStore {
                                 //TODO : we should clean the data here
                             }
                         }
-                    }
+                  //  }
                     currentConnection++;
                 } catch (SQLException e) {
                     e.printStackTrace();
