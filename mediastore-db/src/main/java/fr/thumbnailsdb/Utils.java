@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
-    private static final String IMAGE_PATTERN = "(.+(\\.(?i)(jpg|jpeg|png|gif|bmp))$)";
+    private static final String IMAGE_PATTERN = "(.+(\\.(?i)(jpg|jpeg|JPG|png|gif|bmp))$)";
     private static final String VIDEO_PATTERN = "(.+(\\.(?i)(avi|flv|mpg|mp4|wmv))$)";
 
     private static Pattern imagePattern = Pattern.compile(IMAGE_PATTERN);

@@ -144,8 +144,6 @@ public class MediaIndexer {
             id.setSize(f.length());
             // generate thumbnails only for images, not video
             if (Utils.isValideImageName(f.getName())) {
-            //    data = generateThumbnail(f);
-              //  id.setData(data);
                 MetaDataFinder mdf = new MetaDataFinder(f);
                 double[] latLon = mdf.getLatLong();
                 if (latLon != null) {
@@ -165,12 +163,13 @@ public class MediaIndexer {
     }
 
     public void generateAndSave(File f) {
+        System.out.print(".");
         try {
             MediaFileDescriptor mf = ts.getMediaFileDescriptor(f.getCanonicalPath());
+            Logger.getLogger().err("MediaIndexer.generateAndSave " + f + " descriptor: " + mf);
 
             if ((mf != null) && (f.lastModified() == mf.getMtime())) {
                 //TODO : process again if time difference
-                Logger.getLogger().err("MediaIndexer.generateAndSave " + f);
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
@@ -186,32 +185,35 @@ public class MediaIndexer {
                         mfd.setLon(latLon[1]);
                         Logger.getLogger().err("MediaIndexer : forced update for GPS data for " + f);
                         ts.updateToDB(mfd);
-                        update=true;
+                        update = true;
                     }
                 }
 
                 if (forceHashUpdate) {
                     MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
-                    mfd.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
-                    ts.updateToDB(mfd);
-                    update=true;
+                    if (mfd.getHash() == null) {
+                        //only update if hash does not exist in DB
+                        mfd.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
+                        ts.updateToDB(mfd);
+                        update = true;
+                    }
                 }
 
                 if (update) {
                     updatedFiles++;
                 }
             } else {
+                Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
+
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
                 if (id != null) {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
                         //we need to update it
                         ts.updateToDB(id);
 
-                    }    else {
+                    } else {
                         ts.saveToDB(id);
                     }
-
-
 
 
                     if (log.isEnabled()) {
@@ -262,6 +264,7 @@ public class MediaIndexer {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         ts.addIndexPath(path);
+        System.out.println("MediaIndexer.processMTRoot() "+ path);
         System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
         if (executorService.isShutdown()) {
             executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
@@ -282,6 +285,7 @@ public class MediaIndexer {
         System.out.println("MediaIndexer.processMTRoot() finished at time " + dateFormat.format(date));
         System.out.println("MediaIndexer.processMTRoot() found " + newFiles + " new files");
         System.out.println("MediaIndexer.processMTRoot() updated " + updatedFiles + " files");
+        System.out.println("MediaIndexer.processMTRoot() total " + ts.size() + " files");
     }
 
 
@@ -295,7 +299,7 @@ public class MediaIndexer {
                 if (entries != null) {
                     for (int i = 0; i < entries.length; i++) {
                         File f = new File(fd.getCanonicalPath() + "/" + entries[i]);
-                        if (isValideFile(fd)) {
+                        if (isValideFile(f)) {
                             executorService.submit(new RunnableProcess(f));
                         } else {
                             this.processMT(f);
@@ -308,12 +312,12 @@ public class MediaIndexer {
 
 
     public void updateDB() {
-        this.updateDB(ts.getIndexedPaths().toArray(new String[] {}));
+        this.updateDB(ts.getIndexedPaths().toArray(new String[]{}));
     }
 
     public void updateDB(String[] al) {
         System.out.println(" XXXXXXXXX");
-        for (int i=0;i<al.length;i++) {
+        for (int i = 0; i < al.length; i++) {
             String s = al[i];
             Logger.getLogger().log("MediaIndexer.updateDB updating " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);

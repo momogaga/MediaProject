@@ -33,7 +33,7 @@ public class MetaDataFinder {
         try {
             metadata = ImageMetadataReader.readMetadata(f);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

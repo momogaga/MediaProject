@@ -94,18 +94,18 @@ public class SimilarImageFinder {
                 try {
                     while (res.next()) {
                         String path = res.getString("path");
-                        byte[] d = res.getBytes("data");
-                        if (d != null) {
-                            int[] idata = Utils.toIntArray(d);
-                            if (idata != null) {
+                        //  byte[] d = res.getBytes("data");
+                        String s = res.getString("hash");
+                        if (s != null) {
 
-                                MediaFileDescriptor imd = new MediaFileDescriptor();
-                                imd.setPath(path);
+                            MediaFileDescriptor imd = new MediaFileDescriptor();
+                            imd.setPath(path);
+                            imd.setHash(s);
 //                                imd.setData(idata);
-                                //TODO: handle signature here
+                            //TODO: handle signature here
 
-                                al.add(imd);
-                            }
+                            al.add(imd);
+
                         }
                     }
                 } catch (SQLException e) {
@@ -114,10 +114,7 @@ public class SimilarImageFinder {
             }
             System.out.println("SimilarImageFinder.getPreloadedDescriptors array list built , creating tree");
             vpTree = builder.buildVPTree(al);
-
         }
-
-
         System.out.println("SimilarImageFinder.getPreloadedDescriptors records in VPTree : " + vpTree);
         return vpTree;
 
@@ -136,17 +133,7 @@ public class SimilarImageFinder {
                 return Double.compare(e2, e1);
             }
         });
-//        TreeSet<MediaFileDescriptor> tree = new TreeSet<MediaFileDescriptor>(new Comparator<MediaFileDescriptor>() {
-//            //	@Override
-//            public int compare(MediaFileDescriptor o1, MediaFileDescriptor o2) {
-//                double e1 = o1.getRmse();
-//                double e2 = o2.getRmse();
-//                if (e1==e2) {
-//
-//                }
-//                return Double.compare(o1.getRmse(), o2.getRmse());
-//            }
-//        });
+
 
         Iterator<MediaFileDescriptor> it = thumbstore.getPreloadedDescriptors().iterator();
         int found = 0;

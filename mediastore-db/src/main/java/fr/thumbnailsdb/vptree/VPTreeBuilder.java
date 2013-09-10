@@ -1,13 +1,15 @@
 package fr.thumbnailsdb.vptree;
 
+import fr.thumbnailsdb.MediaFileDescriptor;
+import fr.thumbnailsdb.ThumbStore;
+import fr.thumbnailsdb.Utils;
 import fr.thumbnailsdb.vptree.distances.Distance;
+import fr.thumbnailsdb.vptree.distances.VPRMSEDistance;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 
 /**
@@ -28,9 +30,8 @@ public class VPTreeBuilder {
 
     /**
      * Defines a VPTree Builder for a specific distance.
-     * 
-     * @param distance
-     *            The class implementing the distance.
+     *
+     * @param distance The class implementing the distance.
      */
     public VPTreeBuilder(Distance distance) {
         this.distance = distance;
@@ -87,7 +88,7 @@ public class VPTreeBuilder {
 
         Node randomNode = getVantagePoint(nodes, begin, end);
         TNode vpNode = new TNode(randomNode.get());
-        
+
         if (DEBUG) System.out.println("\nvp-node: " + vpNode.get().toString());
 
         calculateDistances(vpNode, nodes, begin, end);
@@ -119,9 +120,9 @@ public class VPTreeBuilder {
         if (OPTIMIZED) {
             Node buffer[] = new Node[sample_size];
             for (int i = 0; i < sample_size; i++) {
-                buffer[i] = getRandomNode(nodes,begin,end); 
+                buffer[i] = getRandomNode(nodes, begin, end);
             }
-    
+
             double bestSpread = 0;
             Node bestNode = buffer[0];
             for (int i = 0; i < sample_size; i++) {
@@ -135,18 +136,18 @@ public class VPTreeBuilder {
                     bestNode = buffer[i];
                 }
             }
-    
+
             System.out.println("best: " + bestSpread);
             return bestNode;
         } else {
-            return getRandomNode(nodes,begin,end);            
+            return getRandomNode(nodes, begin, end);
         }
     }
 
     private Node getRandomNode(Node nodes[], int begin, int end) {
-        return nodes[begin + generator.nextInt(end - begin)];        
+        return nodes[begin + generator.nextInt(end - begin)];
     }
-    
+
     private double deviation(Node buffer[], double median) {
         double sum = 0;
         for (int i = 0; i < buffer.length; i++) {
@@ -157,7 +158,7 @@ public class VPTreeBuilder {
 
     public double median(Node nodes[], int begin, int end) {
         int delta = end - begin;
-        int middle = delta / 2; 
+        int middle = delta / 2;
 
         if (delta % 2 == 0) {
             return nodes[begin + middle].getDistance();
@@ -190,5 +191,48 @@ public class VPTreeBuilder {
 
     private void orderDistances(Node nodes[], int begin, int end) {
         NodeSorter.sort(nodes, begin, end);
+    }
+
+    protected VPTree getPreloadedDescriptorsVPTree() {
+        ThumbStore thumbstore = new ThumbStore();
+        int size = thumbstore.size();
+        VPTree vpTree = new VPTree();
+        ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(size);
+
+        ArrayList<ResultSet> ares = thumbstore.getAllInDataBases().getResultSets();
+        for (ResultSet res : ares) {
+            try {
+                while (res.next()) {
+                    String path = res.getString("path");
+                    //  byte[] d = res.getBytes("data");
+                    String s = res.getString("hash");
+                    if (s != null) {
+
+                        MediaFileDescriptor imd = new MediaFileDescriptor();
+                        imd.setPath(path);
+                        imd.setHash(s);
+//                                imd.setData(idata);
+                        //TODO: handle signature here
+
+                        al.add(imd);
+
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        System.out.println("SimilarImageFinder.getPreloadedDescriptors array list built , creating tree");
+        vpTree = this.buildVPTree(al);
+
+        System.out.println("SimilarImageFinder.getPreloadedDescriptors records in VPTree : " + vpTree);
+        return vpTree;
+    }
+
+
+    public static void main(String[] args) {
+        VPTreeBuilder vpt = new VPTreeBuilder(new VPRMSEDistance());
+        vpt.getPreloadedDescriptorsVPTree();
+
     }
 }
