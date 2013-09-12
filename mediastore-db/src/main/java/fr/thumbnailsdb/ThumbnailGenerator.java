@@ -199,6 +199,7 @@ public class ThumbnailGenerator {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            System.err.println("Error processing  file " + f.getName());
             e.printStackTrace();
         }
         return id;

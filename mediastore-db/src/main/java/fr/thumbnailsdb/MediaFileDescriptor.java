@@ -29,7 +29,7 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
     protected Connection connection;
 
     @XmlElement
-    protected double rmse;
+    protected double distance;
 
     public static MediaFileDescriptor readFromDisk(String path) {
         MediaFileDescriptor id = null;
@@ -130,12 +130,12 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         return rgba;
     }
 
-    public double getRmse() {
-        return rmse;
+    public double getDistance() {
+        return distance;
     }
 
-    public void setRmse(double rmse) {
-        this.rmse = rmse;
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
     public void setPath(String path) {

@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,14 +30,19 @@ public class MediaIndexer {
     protected boolean software = true;
     protected ThumbStore ts;
 
-    protected boolean forceGPSUpdate = true;
-    protected boolean forceHashUpdate = true;
+    protected boolean forceGPSUpdate = false;
+    protected boolean forceHashUpdate = false;
 
 
     protected Logger log = Logger.getLogger();
 
     protected int newFiles = 0;
     protected int updatedFiles = 0;
+    protected int recentModifications = 0;
+    protected int modificationsBeforeReport = 100;
+    protected int processedFiles;
+
+    protected int totalNumberOfFiles;
 
     ThreadPoolExecutor executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
             new LimitedQueue<Runnable>(50));
@@ -157,6 +164,7 @@ public class MediaIndexer {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            System.err.println("Error processing  file " + f.getName());
             e.printStackTrace();
         }
         return id;
@@ -169,60 +177,59 @@ public class MediaIndexer {
             Logger.getLogger().err("MediaIndexer.generateAndSave " + f + " descriptor: " + mf);
 
             if ((mf != null) && (f.lastModified() == mf.getMtime())) {
-                //TODO : process again if time difference
+                //Descriptor exists with same mtime
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() Already in DB, ignoring with same mtime");
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() In   DB : " + mf.getMtime());
                 Logger.getLogger().err("MediaIndexer.generateImageDescriptor() On Disk : " + f.lastModified());
                 boolean update = false;
 
                 if (forceGPSUpdate) {
-                    MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
+                    //  MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
                     MetaDataFinder mdf = new MetaDataFinder(f);
                     double latLon[] = mdf.getLatLong();
                     Logger.getLogger().err("MediaIndexer.generateAndSave working on " + f);
                     if (latLon != null) {
-                        mfd.setLat(latLon[0]);
-                        mfd.setLon(latLon[1]);
+                        mf.setLat(latLon[0]);
+                        mf.setLon(latLon[1]);
                         Logger.getLogger().err("MediaIndexer : forced update for GPS data for " + f);
-                        ts.updateToDB(mfd);
+                        ts.updateToDB(mf);
                         update = true;
                     }
                 }
-
-                if (forceHashUpdate) {
-                    MediaFileDescriptor mfd = ts.getMediaFileDescriptor(f.getCanonicalPath());
-                    if (mfd.getHash() == null) {
-                        //only update if hash does not exist in DB
-                        mfd.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
-                        ts.updateToDB(mfd);
+                if (forceHashUpdate || (mf.getHash() == null)) {
+                    if (Utils.isValideImageName(f.getName())) {
+                        mf.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
+                        ts.updateToDB(mf);
                         update = true;
                     }
-                }
 
-                if (update) {
-                    updatedFiles++;
                 }
+               // if (update) {
+                    this.fileCreatedUpdated(false, update);
+                //}
             } else {
                 Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
-
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
                 if (id != null) {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
                         //we need to update it
                         ts.updateToDB(id);
-
+                        this.fileCreatedUpdated(false, true);
                     } else {
                         ts.saveToDB(id);
+                        this.fileCreatedUpdated(true, false);
                     }
 
 
                     if (log.isEnabled()) {
                         log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
                     }
+                } else {
+                    this.fileCreatedUpdated(false, false);
                 }
-                newFiles++;
             }
         } catch (IOException e) {
+            System.err.println("Error processing  file " + f.getName());
             e.printStackTrace();
         }
     }
@@ -260,12 +267,32 @@ public class MediaIndexer {
         return fd.isFile(); //&& (Utils.isValideImageName(fd.getName()) || Utils.isValideVideoName(fd.getName()));
     }
 
+
+    public void fileCreatedUpdated(boolean created, boolean modified) {
+        if (created) {
+            newFiles++;
+        }
+        if (modified) {
+            updatedFiles++;
+        }
+        recentModifications++;
+        processedFiles++;
+      //  System.out.println("MediaIndexer.fileCreatedUpdated");
+        if (recentModifications > modificationsBeforeReport) {
+            System.out.println("\nProcessed files : " + processedFiles+"/" +totalNumberOfFiles);
+            recentModifications = 0;
+        }
+    }
+
     public void processMTRoot(String path) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         ts.addIndexPath(path);
-        System.out.println("MediaIndexer.processMTRoot() "+ path);
+        System.out.println("MediaIndexer.processMTRoot() " + path);
         System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
+        System.out.println("MediaIndexer.processMTRoot() computing number of files...");
+        totalNumberOfFiles=this.countFiles(path);
+        System.out.println("Number of files to explorer " + totalNumberOfFiles);
         if (executorService.isShutdown()) {
             executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
                     new LimitedQueue<Runnable>(50));
@@ -286,6 +313,37 @@ public class MediaIndexer {
         System.out.println("MediaIndexer.processMTRoot() found " + newFiles + " new files");
         System.out.println("MediaIndexer.processMTRoot() updated " + updatedFiles + " files");
         System.out.println("MediaIndexer.processMTRoot() total " + ts.size() + " files");
+    }
+
+    public int countFiles(String root) {
+        CountFile fileProcessor = new CountFile();
+        try {
+            Files.walkFileTree(Paths.get(root), fileProcessor);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return fileProcessor.getTotal();
+    }
+
+    private static final class CountFile extends SimpleFileVisitor<Path> {
+        int total = 0;
+        @Override public FileVisitResult visitFile(
+                Path aFile, BasicFileAttributes aAttrs
+        ) throws IOException {
+            total++;
+            //System.out.println("Processing file:" + aFile);
+            return FileVisitResult.CONTINUE;
+        }
+        public int getTotal() {
+            return this.total;
+        }
+
+//        @Override  public FileVisitResult preVisitDirectory(
+//                Path aDir, BasicFileAttributes aAttrs
+//        ) throws IOException {
+//            //System.out.println("Processing directory:" + aDir);
+//            return FileVisitResult.CONTINUE;
+//        }
     }
 
 
@@ -342,6 +400,7 @@ public class MediaIndexer {
         public void run() {
             generateAndSave(fd);
         }
+
     }
 
     public static void main(String[] args) {

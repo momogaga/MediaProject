@@ -8,6 +8,73 @@
     // getFolder();
 
 </script>
+
+<script type="text/javascript">
+    window.onload = function () {
+
+        var free = []; // dataPoints
+        var total=[];
+
+        var chart = new CanvasJS.Chart("memoryChart",{
+            title :{
+                text: "Memory"
+            },   legend: {
+                horizontalAlign: "right", // "center" , "right"
+                verticalAlign: "center",  // "top" , "bottom"
+                fontSize: 15
+            },
+            data: [{
+                showInLegend: true,
+                legendText: "Used",
+                type: "line",
+                xValueType: "dateTime",
+                dataPoints: free
+            },
+                {
+                    showInLegend: true,
+                    legendText: "Total",
+                    type: "line",
+                    xValueType: "dateTime",
+                    dataPoints: total
+
+                }]
+        });
+
+        var xVal = 0;
+        var yVal = 100;
+        var updateInterval = 1000;
+        var dataLength = 50; // number of dataPoints visible at any point
+
+        var updateChart = function () {
+          //  count = count || 1;
+            // count is number of times loop runs to generate random dataPoints.
+
+            $.get("rest/hello/monitor",function (data) {
+               // debugger;
+             //   document.getElementById('db_status').innerHTML = data["stringStatus"];
+                free.push({x:data.time, y:data.usedMemory/1024/1024});
+                total.push({x:data.time, y:data.totalMemory/1024/1024});
+            });
+//
+            if (free.length > dataLength)
+            {
+                free.shift();
+                total.shift();
+            }
+
+            chart.render();
+
+        };
+
+        // generates first set of dataPoints
+        updateChart();
+
+        // update chart after specified time.
+        setInterval(function(){updateChart()}, updateInterval);
+
+    }
+</script>
+
 <div id="tabs-1">
     <p>
         Path db : <span id="db_path"> </span>
@@ -18,7 +85,6 @@
     </p>
 
     <div id="db_paths" style="margin-bottom: 0"> </div>
-    <p>
     <!--<div style="float: left; padding-right: 20px">-->
         <!--<form name="input" action="javascript: shrink()">-->
             <!--<input type="submit" value="Shrink"/>-->
@@ -36,7 +102,9 @@
     </div>
 
 
-    </p>
+    <div id="memoryChart" style="height: 300px; width:30%;clear:both;">
+    </div>
+
     <!--<script type="text/javascript">-->
         <!--jQuery(document).ready(function () {-->
             <!--jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();-->

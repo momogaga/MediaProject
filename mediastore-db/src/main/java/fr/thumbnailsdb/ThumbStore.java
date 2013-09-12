@@ -1,5 +1,6 @@
 package fr.thumbnailsdb;
 
+import fr.thumbnailsdb.lsh.LSH;
 import fr.thumbnailsdb.utils.Logger;
 import fr.thumbnailsdb.utils.ProgressBar;
 
@@ -22,6 +23,8 @@ public class ThumbStore {
 
     //This is used as a cache of preloaded descriptors
     protected PreloadedDescriptors preloadedDescriptors;
+    protected LSH lsh;
+
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
 
@@ -528,6 +531,24 @@ public class ThumbStore {
     }
 
 
+   public ResultSet getFromDatabase(int index) {
+       ResultSet res = null;
+       //TODO: Fix for multiple connections
+       Connection connexion = (Connection) connexions.values().toArray()[0];
+       try {
+           PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE id=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+           psmnt.setInt(1, index);
+           //		st = connexion.createStatement();
+           psmnt.execute();
+           res = psmnt.getResultSet();
+
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+       return res;
+   }
+
+
     public long getMTime(String path) {
 
         ResultSet res = null;
@@ -673,7 +694,6 @@ public class ThumbStore {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         return p;
-
     }
 
 
@@ -774,7 +794,9 @@ public class ThumbStore {
             long mtime = res.getLong("mtime");
             long size = res.getLong("size");
             String hash = res.getString("hash");
+
             id = new MediaFileDescriptor(path, size, mtime, md5, hash);
+            id.setId(res.getInt("id"));
             // }
         } catch (SQLException e) {
            // e.printStackTrace();
@@ -793,6 +815,20 @@ public class ThumbStore {
         }
         return null;
     }
+
+    public MediaFileDescriptor getMediaFileDescriptor(int index) {
+        ResultSet res = getFromDatabase(index);
+        try {
+            res.next();
+            return this.getCurrentMediaFileDescriptor(res);
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
+    }
+
+
+
 
 
     public void displayImage(BufferedImage bf) {
@@ -919,20 +955,16 @@ public class ThumbStore {
 //                        }
                         String path = null;
                         path = res.getString("path");
-                        //byte[] d = res.getBytes("data");
                         int id = res.getInt("id");
                         String md5 = res.getString("md5");
                         long size = res.getLong("size");
                         String hash = res.getString("hash");
-                        // if (d != null) {
-                        // int[] idata = Utils.toIntArray(d);
                         if (path != null && md5 != null) {
                             MediaFileDescriptor imd = new MediaFileDescriptor();
                             if (SimilarImageFinder.USE_FULL_PATH) {
                                 imd.setPath(path);
                             }
                             imd.setId(id);
-                            //  imd.setData(idata);
                             imd.setHash(hash);
                             imd.setSize(size);
                             imd.setMd5Digest(md5);
@@ -962,6 +994,41 @@ public class ThumbStore {
         return preloadedDescriptors;
     }
 
+
+    public ArrayList<MediaFileDescriptor> findCandidatesUsingLSH(MediaFileDescriptor id) {
+        if (lsh==null) {
+            Status.getStatus().setStringStatus("Teaching LSH");
+            lsh = new LSH(10,15,100);
+            ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
+            for (ResultSet res : ares) {
+                try {
+                    while (res.next()) {
+                        // String path = res.getString("path");
+                        int index = res.getInt("ID");
+                        //  byte[] d = res.getBytes("data");
+                        String s = res.getString("hash");
+                        if (s != null) {
+                            lsh.add(s, index);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+            Status.getStatus().setStringStatus(Status.IDLE);
+
+        }
+        List<Integer> result = lsh.lookupCandidates(id.getHash());
+        System.out.println("Found " + result.size() + " candidates");
+
+         ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
+          //TODO : Fix for multiple connections
+        //assume only one connection
+        for(Integer i : result) {
+              al.add(getMediaFileDescriptor(i));
+        }
+        return al;
+    }
 
     public boolean preloadedDescriptorsExists() {
         return (this.preloadedDescriptors != null);

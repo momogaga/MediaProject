@@ -28,10 +28,8 @@ import java.net.URLDecoder;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Path("/hello")
 @Singleton
@@ -86,7 +84,7 @@ public class RestTest {
     @GET
     @Path("/db/{param}")
     public Response getDBInfo(@PathParam("param") String info) {
-        System.out.println("RestTest.getDBInfo() " + info);
+   //     System.out.println("RestTest.getDBInfo() " + info);
         if ("size".equals(info)) {
             System.out.println("RestTest.getDBInfo() " + tb.size());
             return Response.status(200).entity(tb.size() + "").build();
@@ -100,10 +98,44 @@ public class RestTest {
         return Response.status(404).build();
     }
 
+
+    @GET
+    @Path("/monitor")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response monitor() {
+        long usedMemory = (Runtime.getRuntime().totalMemory() -Runtime.getRuntime().freeMemory());
+        //System.out.println("RestTest.monitor() ");
+        JSONObject result = new JSONObject();
+        try {
+//            SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
+//            String date = DATE_FORMAT.format(new Date());
+//            result.put("time", date);
+            result.put("time", System.currentTimeMillis());
+            result.put("usedMemory",usedMemory);
+            result.put("totalMemory",Runtime.getRuntime().totalMemory());
+        } catch (JSONException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+//        if ("size".equals(info)) {
+//            System.out.println("RestTest.getDBInfo() " + tb.size());
+//            return Response.status(200).entity(tb.size() + "").build();
+//        }
+//        if ("path".equals(info)) {
+//            return Response.status(200).entity(tb.getPath() + "").build();
+//        }
+//        if ("status".equals(info)) {
+//            return Response.status(200).entity("idle").build();
+//        }
+
+        return Response.status(200).entity(result).build();
+    }
+
+
     @GET
     @Path("/status")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getStatus() {
+
         return Response.status(200).entity(Status.getStatus()).build();
 
     }
@@ -428,9 +460,9 @@ public class RestTest {
             }
 
             String folder = Utils.fileToDirectory(path);
-            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getRmse(), sigData);
+            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getDistance(), sigData);
             al.add(si);
-            System.out.println(si);
+          //  System.out.println(si);
 
         }
         System.out.println("RestTest.findSimilar sending " + al.size() + " elements");
@@ -443,7 +475,7 @@ public class RestTest {
                 json.put("path", al.get(i).path);
                 json.put("base64Data", al.get(i).base64Data);
                 json.put("base64Sig", al.get(i).base64Sig);
-                json.put("rmse", al.get(i).rmse);
+                json.put("distance", al.get(i).rmse);
                 mJSONArray.put(json);
             } catch (JSONException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

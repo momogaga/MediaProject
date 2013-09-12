@@ -120,7 +120,7 @@
                                     
                                     
                                     //$('*').animate({scrollTop:0}, 300);
-                                    //reorganizeImages(imgPath, paths,rmse);
+                                    //reorganizeImages(imgPath, paths,distance);
                                     //reorganizeResults(divResult.width());
                                 }
                             }

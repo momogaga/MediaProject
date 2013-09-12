@@ -395,13 +395,13 @@ function prettyPrint(object) {
 //
 //    for (f in object) {
 //        var image = object[f];
-//        var rmse = (image.rmse);
+//        var distance = (image.distance);
 //        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
 //        var imgTag = Mustache.to_html(templateThumbnail, image);
 //        var sigTag = "data:image;base64," + image.base64Sig;
 //        var descriptionDiv = document.createElement('div');
 //        descriptionDiv.className = "description flt";
-//        descriptionDiv.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
+//        descriptionDiv.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
 //
 //        var floatedDiv = document.createElement('div');
 //        floatedDiv.className = "floated_img cls";
@@ -495,7 +495,7 @@ function displaySimilarImages(sourceSignature, object) {
         caption.style.wordWrap = "break-word"
 
         var image = object[f];
-        var rmse = (image.rmse);
+        var distance = (image.distance);
         var templateThumbnail = '<img class="smallImage" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
         var imgTag = Mustache.to_html(templateThumbnail, image);
         spanImg.innerHTML = imgTag;
@@ -517,12 +517,9 @@ function displaySimilarImages(sourceSignature, object) {
         spanSig.appendChild(canv.canvas);
         sourceSigCanvas.addOther(canv);
 
-        caption.innerHTML = 'Distance:' + rmse + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
-
-
+        caption.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
 //        $('#duplicate_upload_result').append(li);
         ul.appendChild(li)
-
     }
 
 
