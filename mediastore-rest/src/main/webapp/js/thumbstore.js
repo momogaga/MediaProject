@@ -55,7 +55,7 @@ function getDuplicate() {
                 + ' <th class="ay-sort"><span>#Files</span></th>  <th class="ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
 
             var template = ' <tr >'
-                + '<td class="size"><a href="#"  onclick=""> {{fileSize}}</a></td>'
+                + '<td class="size"><a href="#"  onclick="">{{fileSize}}</a></td>'
                 + '<td class="files">{{occurences}}</td><td class="paths"> ';
 
             for (i in data) {
@@ -64,7 +64,7 @@ function getDuplicate() {
                 data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
                 var rowTag = Mustache.to_html(template, data[i]);
                 for (f in data[i].al) {
-                    rowTag += '<div>' + toFolderAndFileLink(data[i].al[f]) + ' ' + toDeleteLink(data[i].al[f]) + '</div> ';
+                    rowTag += '<div class="paths">' + toFolderAndFileLink(data[i].al[f]) + ' ' + toDeleteLink(data[i].al[f]) + '</div> ';
                 }
                 html_table += rowTag + '</td></tr> ';
             }
@@ -126,7 +126,7 @@ function getFolder(path) {
 }
 function toFolderAndFileLink(path) {
     var folder = getFolder(path);
-    return path + '  ' + toFileLink(path) + ' ' +
+    return path + '' + toFileLink(path) + ' ' +
         toFolderLink(folder);
 }
 
@@ -154,7 +154,7 @@ function getDuplicateFolderDetails(folder1, folder2) {
         + '<th class="ay-sort"><span>Paths</span></th>' +
         '</tr></thead> <tbody>';
 
-    var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}" >'
+    var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}">'
         + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
         + '<td class="files">{{occurences}}</td>'
         + '<td class="f1">{{filesInFolder1}}</td>'
@@ -248,7 +248,7 @@ function getDuplicateFolder() {
 
     var folders = getSelectedFolders();
 
-    debugger;
+    //debugger;
     $('#duplicate-folders-table-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
@@ -322,7 +322,9 @@ function callOpen(para1, para2) {
 }
 
 function callDelete(para1) {
+    //$(".paths > div").contents().
     $(".paths").contents().filter(function () {
+        debugger;
         return this.nodeValue == para1
     }).wrap('<div style="float:left; text-decoration:line-through"/>');
 
@@ -565,6 +567,7 @@ function generatePathLink() {
 }
 
 function generateDeleteLink() {
+  //  debugger;
     $('.deletelink').click(function () {
         var $this = $(this);
         var p1 = $this.data('p1');

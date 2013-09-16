@@ -86,7 +86,7 @@ public class RestTest {
     public Response getDBInfo(@PathParam("param") String info) {
    //     System.out.println("RestTest.getDBInfo() " + info);
         if ("size".equals(info)) {
-            System.out.println("RestTest.getDBInfo() " + tb.size());
+     //       System.out.println("RestTest.getDBInfo() " + tb.size());
             return Response.status(200).entity(tb.size() + "").build();
         }
         if ("path".equals(info)) {
@@ -323,7 +323,7 @@ public class RestTest {
         String[] folders = this.parseFolders(obj);
 
         tb.flushPreloadedDescriptors();
-      //  tb.shrink();
+        tb.shrink();
         MediaIndexer mdi = new MediaIndexer(tb);
         mdi.updateDB(folders);
         return Response.status(200).entity("Update done").build();
