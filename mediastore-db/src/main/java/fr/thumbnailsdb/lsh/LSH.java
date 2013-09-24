@@ -13,6 +13,7 @@ import java.util.Random;
 public class LSH {
 
     LSHTable[] tables;
+    private int lastCandidatesCount;
 
     public LSH(int nbTables, int k, int maxExcluded) {
         tables = new LSHTable[nbTables];
@@ -33,7 +34,16 @@ public class LSH {
             List<Integer> r = t.get(key);
             hs.addAll(r);
         }
+        lastCandidatesCount=hs.size();
         return new ArrayList<Integer>(hs);
+    }
+
+    public int size() {
+        return tables[0].size();
+    }
+
+    public int lastCandidatesCount() {
+          return lastCandidatesCount;
     }
 
 

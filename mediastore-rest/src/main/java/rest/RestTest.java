@@ -389,23 +389,23 @@ public class RestTest {
 
     }
 
-
     @POST
     @Path("findSimilar/")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+   // @Consumes("image/*")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response findSimilar(FormDataMultiPart multipart) {
+    public Response findSimilar(InputStream stream) {
         ThumbnailGenerator tg = new ThumbnailGenerator(null);
-        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
+//        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
         Collection<MediaFileDescriptor> c = null;
         ArrayList<SimilarImage> al = null;
         File temp = null;
         MediaFileDescriptor initialImage = null;
 
         try {
-            InputStream source = bpe.getInputStream();
+            InputStream source = stream; //bpe.getInputStream();
             Logger.getLogger().log("RestTest.findSimilar() received " + source);
             temp = File.createTempFile("tempImage", ".jpg");
+            System.out.println("Temp file " +temp);
             FileOutputStream fo = new FileOutputStream(temp);
 
             byte[] buffer = new byte[8 * 1024];
@@ -431,6 +431,8 @@ public class RestTest {
         c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
         long t2 = System.currentTimeMillis();
         System.out.println("Found similar files " + c.size() + " took " + (t2 - t1) + "ms");
+
+        int[] status = tb.getLSHStatus();
 
         al = new ArrayList<SimilarImage>(c.size());
         for (MediaFileDescriptor mdf : c) {
@@ -462,7 +464,7 @@ public class RestTest {
             String folder = Utils.fileToDirectory(path);
             SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getDistance(), sigData);
             al.add(si);
-          //  System.out.println(si);
+            //  System.out.println(si);
 
         }
         System.out.println("RestTest.findSimilar sending " + al.size() + " elements");
@@ -498,11 +500,128 @@ public class RestTest {
             responseDetailsJson.put("success", true);
             responseDetailsJson.put("sourceSig", Base64.encodeBase64String(out.toByteArray()));
             responseDetailsJson.put("images", mJSONArray);
+            responseDetailsJson.put("lshSize", status[0]);
+            responseDetailsJson.put("lshCandidates", status[1]);
+
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
     }
+
+//    @POST
+//    @Path("findSimilar/")
+//    @Consumes(MediaType.MULTIPART_FORM_DATA)
+//    @Produces({MediaType.APPLICATION_JSON})
+//    public Response findSimilar(FormDataMultiPart multipart) {
+//        ThumbnailGenerator tg = new ThumbnailGenerator(null);
+//        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
+//        Collection<MediaFileDescriptor> c = null;
+//        ArrayList<SimilarImage> al = null;
+//        File temp = null;
+//        MediaFileDescriptor initialImage = null;
+//
+//        try {
+//            InputStream source = bpe.getInputStream();
+//            Logger.getLogger().log("RestTest.findSimilar() received " + source);
+//            temp = File.createTempFile("tempImage", ".jpg");
+//            FileOutputStream fo = new FileOutputStream(temp);
+//
+//            byte[] buffer = new byte[8 * 1024];
+//
+//            int total = 0;
+//            try {
+//                int bytesRead;
+//                while ((bytesRead = source.read(buffer)) != -1) {
+//                    fo.write(buffer, 0, bytesRead);
+//                    total += bytesRead;
+//                }
+//            } finally {
+//                fo.close();
+//            }
+//
+//            initialImage = tg.buildMediaDescriptor(temp);
+//            Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        long t1 = System.currentTimeMillis();
+//        c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
+//        long t2 = System.currentTimeMillis();
+//        System.out.println("Found similar files " + c.size() + " took " + (t2 - t1) + "ms");
+//
+//        al = new ArrayList<SimilarImage>(c.size());
+//        for (MediaFileDescriptor mdf : c) {
+//
+//            String path = mdf.getPath();
+//
+//            String imgData = null;
+//            String sigData = null;
+//            try {
+//                FileInputStream f = new FileInputStream(new File(path));
+//                try {
+//                    //encode thumbnail
+//                    BufferedImage bf = tg.downScaleImage(ImageIO.read(f), 200, 200);
+//                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                    ImageIO.write(bf, "JPEG", out);
+//                    imgData = Base64.encodeBase64String(out.toByteArray());
+//                    //encode image signature
+//                    out = new ByteArrayOutputStream();
+//                    ImageIO.write(mdf.getSignatureAsImage(), "JPEG", out);
+//
+//                    sigData = Base64.encodeBase64String(out.toByteArray());
+//                } finally {
+//                    f.close();
+//                }
+//            } catch (IOException e) {
+//                System.err.println("Err: File " + path + " not found");
+//            }
+//
+//            String folder = Utils.fileToDirectory(path);
+//            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getDistance(), sigData);
+//            al.add(si);
+//          //  System.out.println(si);
+//
+//        }
+//        System.out.println("RestTest.findSimilar sending " + al.size() + " elements");
+//
+//        JSONArray mJSONArray = new JSONArray();
+//        for (int i = 0; i < al.size(); i++) {
+//            JSONObject json = new JSONObject();
+//            try {
+//                json.put("foldersize", al.get(i).folderSize);
+//                json.put("path", al.get(i).path);
+//                json.put("base64Data", al.get(i).base64Data);
+//                json.put("base64Sig", al.get(i).base64Sig);
+//                json.put("distance", al.get(i).rmse);
+//                mJSONArray.put(json);
+//            } catch (JSONException e) {
+//                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//            }
+//        }
+//
+//        //prepare signature of original image
+//        //TODO : create utility function
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        try {
+//
+//            ImageIO.write(initialImage.getSignatureAsImage(), "JPEG", out);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//        JSONObject responseDetailsJson = new JSONObject();
+//        try {
+//            responseDetailsJson.put("success", true);
+//            responseDetailsJson.put("sourceSig", Base64.encodeBase64String(out.toByteArray()));
+//            responseDetailsJson.put("images", mJSONArray);
+//        } catch (JSONException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
+//        return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
+//    }
 
 
     @POST

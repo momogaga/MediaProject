@@ -1,97 +1,334 @@
 <!--<link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>-->
 <!---->
 
-<script src="js/jquery.fileupload.js"></script>
-<script src="js/jquery.fileupload-fp.js"></script>
+<!--<script src="js/jquery.fileupload.js"></script>-->
+<!--<script src="js/jquery.fileupload-fp.js"></script>-->
 <link href="js/fileuploader/fileuploader.css" rel="stylesheet" type="text/css">
 <script src="js/fileuploader/fileuploader.js" type="text/javascript"></script>
+
+<style>
+
+    #filedrag {
+        display: block;
+        font-weight: bold;
+        text-align: center;
+        padding: 1em 0;
+        margin: 1em 0;
+        color: #555;
+        border: 2px dashed #555;
+        border-radius: 7px;
+        cursor: default;
+    }
+
+    #filedrag:hover {
+        color: #f00;
+        border-color: #f00;
+        border-style: solid;
+        box-shadow: inset 0 3px 4px #888;
+    }
+
+
+</style>
 
 
 <script>
 
-    $(function () {
-        $('#fileupload').fileupload({
-            dataType:'json',
-            forceIframeTransport:true,
-            previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
-            fail:function (e, data) {
-                //alert("xxx" + e + " " + data);
-                for (i in e) {
-                    console.log("-" + i + " " + e[i]);
-                }
-                for (i in data) {
-                    console.log("-" + i + " " + data[i]);
-                }
-            },
-            hideDropzones:false,
-            done:function (e, data) {
-                uploadFinished(data);
-            }
-
-        });
-    });
-
-    function createUploader() {
-        var uploader = new qq.FileUploader({
-            element:document.getElementById('file-uploader-demo1'),
-            action:'rest/hello/findSimilar',
-            forceMultipart:true,
-            debug:false,
-            onSubmit:localSubmit,
-            onComplete:localFinished
-        });
-    }
-
-    function localSubmit(id, name, json) {
-        $('.qq-upload-list').children().remove();
-        var img = document.createElement("img");
-        // li.appendChild(img);
-        reader = new FileReader();
-        reader.onload = (function (theImg) {
-
-            return function (evt) {
-                theImg.src = evt.target.result;
-
-            };
-        }(img));
-        reader.readAsDataURL(this._handler._files[id]);
-        // display the source image
-        $("#duplicate_upload_source").children().remove();
-        $("#duplicate_upload_result").children().remove();
-        div_t = document.createElement("div");
-        div_t.className = "smallImage";
-        div_t.style.float = "left";
-        div_t.appendChild(img);
-
-        $("#duplicate_upload_source").append(div_t);
-//        jQuery(document).ready(function () {
-//            jQuery('.nailthumb-container').nailthumb();
-//            jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+//    $(function () {
+//        $('#fileupload').fileupload({
+//            dataType:'json',
+//            forceIframeTransport:true,
+//            previewSourceFileTypes:'/^image\/(gif|jpeg|png|jpg)$/',
+//            fail:function (e, data) {
+//                //alert("xxx" + e + " " + data);
+//                for (i in e) {
+//                    console.log("-" + i + " " + e[i]);
+//                }
+//                for (i in data) {
+//                    console.log("-" + i + " " + data[i]);
+//                }
+//            },
+//            hideDropzones:false,
+//            done:function (e, data) {
+//                debugger;
+//                uploadFinished(data);
+//            }
+//
 //        });
+//    });
+
+//    function createUploader() {
+//        var uploader = new qq.FileUploader({
+//            element:document.getElementById('file-uploader-demo1'),
+//            action:'rest/hello/findSimilar',
+//            forceMultipart:true,
+//            debug:false,
+//            onSubmit:localSubmit,
+//            onComplete:localFinished
+//        });
+//    }
+
+//    function localSubmit(id, name, json) {
+//        $('.qq-upload-list').children().remove();
+//        var img = document.createElement("img");
+//        // li.appendChild(img);
+//        debugger;
+//        reader = new FileReader();
+//        reader.onload = (function (theImg) {
+//
+//            return function (evt) {
+//                theImg.src = evt.target.result;
+//
+//            };
+//        }(img));
+//        reader.readAsDataURL(this._handler._files[id]);
+//        // display the source image
+//        $("#duplicate_upload_source").children().remove();
+//        $("#duplicate_upload_result").children().remove();
+//        div_t = document.createElement("div");
+//        div_t.className = "smallImage";
+//        div_t.style.float = "left";
+//        div_t.appendChild(img);
+//
+//        $("#duplicate_upload_source").append(div_t);
+////        jQuery(document).ready(function () {
+////            jQuery('.nailthumb-container').nailthumb();
+////            jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+////        });
+//
+//
+//    }
 
 
+function displaySrcImage(image) {
+    //  $('.qq-upload-list').children().remove();
+    var img = document.createElement("img");
+    // li.appendChild(img);
+
+    reader = new FileReader();
+    reader.onload = (function (theImg) {
+
+        return function (evt) {
+            theImg.src = evt.target.result;
+
+        };
+    }(img));
+    reader.readAsDataURL(image);
+    // display the source image
+    $("#duplicate_upload_source").children().remove();
+    $("#duplicate_upload_result").children().remove();
+    div_t = document.createElement("div");
+    div_t.className = "smallImage";
+    div_t.style.float = "left";
+    div_t.appendChild(img);
+
+    $("#duplicate_upload_source").append(div_t);
+}
+
+function localFinished(id, name, json) {
+   // debugger;
+    displaySimilarImages(json.sourceSig, json.images);
+    $("#lshStatus").text("  " + json.lshCandidates + " candidates / " +json.lshSize + " total");
+
+   // debugger;
+  //  $("#droppedFiles").children().remove();
+}
+
+
+function dataURItoBlob(dataURI) {
+  //  debugger;
+    // convert base64 to raw binary data held in a string
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = decodeURIComponent(dataURI.split(',')[1]);
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
     }
 
-    function localFinished(id, name, json) {
-      //  uploadFinished(json.sourceSig, json.images);
-        displaySimilarImages(json.sourceSig, json.images);
-        $(".qq-upload-list").children().remove();
-    }
+    // write the ArrayBuffer to a blob, and you're done
+    var bb = new Blob([ab], { type:mimeString });
+    // bb.append(ab);
+    return bb; //bb.getBlob(mimeString);
+}
 
 
-    jQuery(document).ready(function () {
-        createUploader();
+function imageURLToBlob(url) {
+    debugger;
+    $.ajax({
+        type: 'GET',
+        url: url,
+        processData: true,
+        data: {},
+        dataType: "json",
+        success: function (data) {
+            processData(data);
+        }
     });
+
+    var dataURI;
+    function processData(data){
+        dataURI="";
+        debugger;
+        //Do some stuff with the data
+    }
+   return dataURI;
+}
+
+
+function uploadOneFile(file, indice, nbFiles) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'rest/hello/findSimilar');
+    xhr.setRequestHeader("X_FILENAME", file.name);
+    var progressBar = document.getElementById("progressBar" + indice);
+    xhr.upload.onprogress = function (e) {
+        //  debugger;
+        progressBar.value = e.loaded;
+        progressBar.max = e.total;
+
+    };
+    xhr.onreadystatechange = function (e) {
+        if (xhr.readyState == 4) {
+            //    debugger;
+            // continue only if HTTP status is "OK"
+            if (xhr.status == 200) {
+                //      debugger;
+//                    alert("finished!");
+                localFinished(0, 0, jQuery.parseJSON(xhr.responseText));
+            }
+        }
+    };
+
+    // Send the Ajax request
+    //debugger;
+    displaySrcImage(file);
+    xhr.send(file);
+}
+
+//from http://codeaid.net/javascript/convert-size-in-bytes-to-human-readable-format-(javascript)
+function bytesToSize(bytes) {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes == 0) return 'n/a';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[[i]];
+};
+
+
+
+function dropHandler(event) {
+  //  console.log('drop event');
+    //   debugger;
+
+    //clean the text area
+    $("#dropText").hide();
+    $("#droppedFiles").children().remove();
+    // Do not propagate the event
+    event.stopPropagation();
+    // Prevent default behavior, in particular when we drop images or links
+    event.preventDefault();
+
+
+    // reset the visual look of the drop zone to default
+    event.target.classList.remove('draggedOver');
+
+    // get the files from the clipboard
+    var files = event.dataTransfer.files;
+
+    //check if image was drag and drop from another tab
+    var link = $(event.dataTransfer.getData('text/html'));
+    var tab_files = [];
+    //   debugger;
+    if (link.length > 0) {
+        //this is either a link to an image or the base64 code
+        var src = link.attr('src');
+           debugger;
+        if (src.substring(0, 4).indexOf("http") == 0) {
+            // this is an url to an image, let's download it
+            //TODO : I am not sure this can really happen
+            imageURLToBlob(src);
+
+        } else {
+            var blob = dataURItoBlob(src);
+            tab_files.push(blob);
+        }
+    }
+
+    var filesLen = files.length;
+    var filenames = "";
+    for (var i = 0; i < filesLen; i++) {
+        tab_files.push(files[i]);
+    }
+    filesLen = tab_files.length;
+   // debugger;
+    // iterate on the files, get details using the file API
+    // Display file names in a list.
+    for (var i = 0; i < filesLen; i++) {
+        filenames += '\n' + tab_files[i].name;
+        // Create a li, set its value to a file name, add it to the ol
+        var li = document.createElement('div');
+        li.textContent = tab_files[i].name + " (" + bytesToSize(tab_files[i].size) + ") ";
+        //  document.getElementById("namesAllFiles").value += tab_files[i].name;
+        // add a progress bar for this file upload
+        var progressBar = document.createElement('progress');
+        progressBar.id = "progressBar" + i;
+        progressBar.value = 0;
+        progressBar.max = 100;
+        li.appendChild(progressBar);
+
+        var status = document.createElement('div');
+        status.setAttribute('id', 'lshStatus');
+        li.appendChild(status);
+
+
+        document.querySelector("#droppedFiles").appendChild(li);
+        uploadOneFile(tab_files[i], i, filesLen);
+      //  debugger;
+        if (i + 1 < filesLen) {
+            document.getElementById("namesAllFiles").value += "::"; //For split
+        }
+    }
+    console.log(files.length + ' file(s) have been dropped:\n' + filenames);
+
+}
+//$("#filedrag").hide();
+//$("#tabs-drag").hover(function() {
+//    $(this).find('#filedrag').show();
+//}, function() {
+//    //debugger;
+//    $(this).find('#filedrag').hide();
+//});
+
+
+//    jQuery(document).ready(function () {
+//        createUploader();
+//    });
 
 </script>
 
-<div id="file-uploader-demo1" style="margin-left:10px">
-    <noscript>
-        <p>Please enable JavaScript to use file uploader.</p>
-        <!-- or put a simple form for upload here -->
-    </noscript>
-</div>
+<!--<div id="file-uploader-demo1" style="margin-left:10px">-->
+<!--<noscript>-->
+<!--<p>Please enable JavaScript to use file uploader.</p>-->
+<!--&lt;!&ndash; or put a simple form for upload here &ndash;&gt;-->
+<!--</noscript>-->
+<!--</div>-->
+
+<form id="formUpload" name="formUpload" method="post"  enctype="multipart/form-data">
+    <input type="hidden" id="namesAllFiles" name="namesAllFiles"/>
+
+    <div id="filedrag"
+         ondrop="dropHandler(event)" >
+        <div id="dropText"> Drop files here</div>
+        <ol id="droppedFiles"></ol>
+    </div>
+</form>
 
 
 <div id="duplicate_upload_source" style="margin:10px 10px"></div>
-<div id="duplicate_upload_result" style="margin-left:auto; margin-right:auto ; clear:both; height:80%; width:95%; overflow-x:hidden; overflow-y:auto"></div>
+<div id="duplicate_upload_result"
+     style="margin-left:auto; margin-right:auto ; clear:both; height:80%; width:95%; overflow-x:hidden; overflow-y:auto"></div>

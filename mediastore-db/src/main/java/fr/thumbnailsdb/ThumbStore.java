@@ -994,40 +994,59 @@ public class ThumbStore {
         return preloadedDescriptors;
     }
 
+    /**
+     * return LSH status
+     * [0] = LSH size
+     * [1] = number of candidates for last query
+     * @return
+     */
+    public int[] getLSHStatus() {
+        if (lsh==null) {
+             buildLSH();
+        }
+        return new int[] {lsh.size(), lsh.lastCandidatesCount()}     ;
+
+    }
 
     public ArrayList<MediaFileDescriptor> findCandidatesUsingLSH(MediaFileDescriptor id) {
         if (lsh==null) {
-            Status.getStatus().setStringStatus("Teaching LSH");
-            lsh = new LSH(10,15,100);
-            ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
-            for (ResultSet res : ares) {
-                try {
-                    while (res.next()) {
-                        // String path = res.getString("path");
-                        int index = res.getInt("ID");
-                        //  byte[] d = res.getBytes("data");
-                        String s = res.getString("hash");
-                        if (s != null) {
-                            lsh.add(s, index);
-                        }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
-            Status.getStatus().setStringStatus(Status.IDLE);
-
+            buildLSH();
         }
         List<Integer> result = lsh.lookupCandidates(id.getHash());
-        System.out.println("Found " + result.size() + " candidates");
+        System.out.println("Found " + result.size() + " candidates out of " + lsh.size());
 
          ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
           //TODO : Fix for multiple connections
         //assume only one connection
         for(Integer i : result) {
-              al.add(getMediaFileDescriptor(i));
+            MediaFileDescriptor tmp = getMediaFileDescriptor(i);
+            if (tmp!=null) {
+              al.add(tmp);
+            }
         }
         return al;
+    }
+
+    private void buildLSH() {
+        Status.getStatus().setStringStatus("Teaching LSH");
+        lsh = new LSH(10,15,100);
+        ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
+        for (ResultSet res : ares) {
+            try {
+                while (res.next()) {
+                    // String path = res.getString("path");
+                    int index = res.getInt("ID");
+                    //  byte[] d = res.getBytes("data");
+                    String s = res.getString("hash");
+                    if (s != null) {
+                        lsh.add(s, index);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        Status.getStatus().setStringStatus(Status.IDLE);
     }
 
     public boolean preloadedDescriptorsExists() {
