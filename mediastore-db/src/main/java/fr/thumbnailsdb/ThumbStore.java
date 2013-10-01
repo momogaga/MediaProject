@@ -618,10 +618,16 @@ public class ThumbStore {
         return null;
     }
 
-    public ArrayList<MediaFileDescriptor> getFromDB(String filter) {
+    public ArrayList<MediaFileDescriptor> getFromDB(String filter, boolean gps) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
 
-        String query = "SELECT * FROM IMAGES WHERE LCASE(path) LIKE LCASE(\'%" + filter + "%\')";
+        String query = null;
+        if (!gps) {
+            query = "SELECT * FROM IMAGES WHERE LCASE(path) LIKE LCASE(\'%" + filter + "%\')";
+        } else {
+            query = "SELECT * FROM IMAGES WHERE (LCASE(path) LIKE LCASE(\'%" + filter + "%\') " +
+                    "AND  (lat <> 0 OR lon <>0))";
+        }
         //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
             //mrs.add(connection, this.getAllInDataBase(connection));

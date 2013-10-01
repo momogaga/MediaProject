@@ -211,8 +211,12 @@ function getSelectedFolders() {
 }
 
 function getAll() {
+    //debugger;
+    var folders = getSelectedFolders();
     $.getJSON('rest/hello/getAll', {
-        filter:$("input[name=filter]").val()
+        filter:$("input[name=filter]").val(),
+        folder:JSON.stringify(folders),
+        gps:$("input[name=gps]").is(":checked")
         //$.param(folders)
     }, function (data) {
         buildAllTable(data);

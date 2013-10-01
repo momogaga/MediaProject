@@ -718,10 +718,12 @@ public class RestTest {
     @GET
     @Path("getAll/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getAll(@QueryParam("filter") String filter) {
-        Status.getStatus().setStringStatus("Requesting all media with filter : " + filter);
+    public Response getAll(@QueryParam("folder") final String obj, @QueryParam("filter") String filter, @QueryParam("gps") boolean gps) {
+        //TODO : handle folder parameter
+        String[] folders = this.parseFolders(obj);
+        Status.getStatus().setStringStatus("Requesting all media with filter : " + filter + " GPS : " + gps);
         long t0 = System.currentTimeMillis();
-        ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter);
+        ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter, gps);
         long t1 = System.currentTimeMillis();
         System.out.println("RestTest.getAll with filter " + filter + "  took " + (t1-t0) + " ms" );
         Iterator<MediaFileDescriptor> it = pd.iterator();
@@ -791,47 +793,47 @@ public class RestTest {
 
     public class DBDiskUpdater implements DiskListener {
 
-        public void fileCreated(java.nio.file.Path p) {
+        public synchronized void fileCreated(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileCreated " + p);
-            try {
-                new MediaIndexer(tb).processMT(new File(p.toString()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+         //   try {
+                new MediaIndexer(tb).process(p.toString());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
-        public void fileModified(java.nio.file.Path p) {
+        public  synchronized void fileModified(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
-            try {
-                new MediaIndexer(tb).processMT(new File(p.toString()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+                new MediaIndexer(tb).process(p.toString());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
-        public void fileDeleted(java.nio.file.Path p) {
+        public  synchronized void fileDeleted(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileDeleted " + p);
 
             // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
             tb.deleteFromDatabase(p.toString());
         }
 
-        public void folderCreated(java.nio.file.Path p) {
+        public  synchronized void folderCreated(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.folderCreated " + p);
-            try {
-                new MediaIndexer(tb).processMT(new File(p.toString()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+                new MediaIndexer(tb).process(p.toString());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
-        public void folderModified(java.nio.file.Path p) {
+        public  synchronized void folderModified(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
-            try {
-                new MediaIndexer(tb).processMT(new File(p.toString()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+                new MediaIndexer(tb).process(p.toString());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
         public void folderDeleted(java.nio.file.Path p) {
