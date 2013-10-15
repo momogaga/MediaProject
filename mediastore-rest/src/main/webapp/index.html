@@ -266,6 +266,7 @@
     <!--<li><a data-toggle="tab" href="drag.html">Drag'n'Drop</a></li>-->
     <li><a data-toggle="tab" href="#tabs-drag">Drag'n'Drop</a></li>
     <li><a data-toggle="tab" href="#tabs-gps">GPS</a></li>
+    <li><a data-toggle="tab" href="#tabs-gallery">Gallery</a></li>
 
 </ul>
 
@@ -346,6 +347,15 @@
     <div class="tab-pane " id="tabs-gps">
     </div>
 
+    <div class="tab-pane" id="tabs-gallery">
+
+        <form name="input_path_gallery" action="javascript:getGallery()">
+            <input class="textarea" type=text size="25" value="" name="filter_path" style="margin-bottom: 0px; margin-left:10px">
+            <input type="submit" value="Get">
+
+        </form>
+           <div name="gallery" id="gallery"></div>
+    </div>
 
 </div>
 

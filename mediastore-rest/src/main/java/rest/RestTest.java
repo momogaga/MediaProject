@@ -223,29 +223,31 @@ public class RestTest {
     @GET
     @Path("getThumbnail/")
     @Produces("image/jpg")
-    public Response getThumbnail(@QueryParam("path") String imageId) {
+    public Response getThumbnail(@QueryParam("path") String imageId, @QueryParam("w") int w, @QueryParam("h") int h ) {
 //        System.out.println("Thubnail : imageID " + imageId);
         BufferedInputStream source = null;
         try {
-
-            BufferedImage bf = ImageIO.read(new FileInputStream(new File(imageId)));
-            // scale it to the new size on-the-fly
-            BufferedImage thumbImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics2D = thumbImage.createGraphics();
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics2D.drawImage(bf, 0, 0, 100, 100, null);
-            // save thumbnail image to outFilename
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bout);
-            ImageIO.write(thumbImage, "jpg", out);
-            final byte[] imgData = bout.toByteArray();
-            final InputStream bigInputStream =
-                    new ByteArrayInputStream(imgData);
+            final InputStream bigInputStream = generateThumbnailStream(imageId, w, h);
             return Response.status(200).entity(bigInputStream).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return Response.status(404).build();
+    }
+
+    private InputStream generateThumbnailStream(String imageId, int w, int h) throws IOException {
+        BufferedImage bf = ImageIO.read(new FileInputStream(new File(imageId)));
+        // scale it to the new size on-the-fly
+        BufferedImage thumbImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics2D = thumbImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.drawImage(bf, 0, 0, w, h, null);
+        // save thumbnail image to outFilename
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        BufferedOutputStream out = new BufferedOutputStream(bout);
+        ImageIO.write(thumbImage, "jpg", out);
+        final byte[] imgData = bout.toByteArray();
+        return new ByteArrayInputStream(imgData);
     }
 
     @GET
@@ -746,27 +748,7 @@ public class RestTest {
         Status.getStatus().setStringStatus(Status.IDLE);
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
-//    public Response getAll(@QueryParam("filter") String filter) {
-//        PreloadedDescriptors pd = tb.getPreloadedDescriptors();
-//        Iterator<MediaFileDescriptor> it = pd.iterator();
-//        JSONArray mJSONArray = new JSONArray(pd.size());
-//        int i = 0;
-//        while (it.hasNext() && i < 10000) {
-//            i++;
-//            JSONObject json = new JSONObject();
-//            MediaFileDescriptor mfd = it.next();
-//            if (mfd.getPath().contains(filter)) {
-//                try {
-//                    json.put("path", mfd.getPath());
-//                    json.put("size", mfd.getSize());
-//                    mJSONArray.put(json);
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//        return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
-//    }
+
 
 
     @XmlRootElement

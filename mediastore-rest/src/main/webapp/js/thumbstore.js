@@ -224,6 +224,22 @@ function getAll() {
     });
 }
 
+
+function getGallery() {
+
+
+    var folders = getSelectedFolders();
+    $.getJSON('rest/hello/getAll', {
+        filter:$("input[name=filter_path]").val(),
+        folder:JSON.stringify(folders),
+        gps:false
+        //$.param(folders)
+    }, function (data) {
+        buildGallery(data);
+        //   debugger;
+    });
+}
+
 function buildAllTable(array) {
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
         + '<th class="paths ay-sort"><span>Paths</span></th>' +
@@ -245,6 +261,69 @@ function buildAllTable(array) {
         generateDeleteLink();
         generateThumbnailLink();
     });
+}
+
+
+function buildGallery(array) {
+    //we want to build elements with the following form
+//        <li class="span4">
+//            <div class="thumbnail">
+//                <div class="container">
+//                           '<img src=""rest/hello/getThumbnail?path='" title="{{path}}"/>'
+//                </div>
+//            </div>
+//            <div class="caption">description </div>
+//           </div>
+//        </li>
+    //input_path_gallery
+    var ul = document.createElement('ul');
+    ul.className = "thumbnails";
+
+    for (f in array) {
+        var li = document.createElement('li');
+        li.className = "span4";
+
+
+        var thumb = document.createElement('div');
+        thumb.className = "thumbnail";
+
+    //    var container = document.createElement('div');
+    //    container.className = "container";
+
+//        var row = document.createElement('div');
+//        row.className = "row";
+
+        var image = array[f];
+      //  var templateThumbnail = '<img src="rest/hello/getThumbnail?path={{path}}/>'
+        var imgTag=document.createElement("img");
+        imgTag.src="rest/hello/getThumbnail?path="+image.path + "&w=600&h=600";
+
+        imgTag.title=image.path;
+        //var imgTag = Mustache.to_html(templateThumbnail, image);
+      //  debugger;
+     //   container.innerHTML = imgTag;
+
+
+//        var caption = document.createElement('div');
+//        caption.className = "caption";
+//        caption.style.wordWrap = "break-word"
+
+      //  container.appendChild(imgTag);
+//        container.appendChild(caption);
+
+        thumb.appendChild(imgTag);
+
+
+        li.appendChild(thumb);
+      //  li.appendChild(caption);
+        //build the description
+
+        ul.appendChild(li)
+    }
+
+    $('#gallery').children().remove();
+    $('#gallery').append(ul);
+
 }
 
 
@@ -339,7 +418,7 @@ function callThumbnail(source, p1) {
     //remove previous image
     if ($("img", source).length == 0) {
         //no previous image, add thumbnail
-        $(source).append('<img src="rest/hello/getThumbnail?path=' + p1 + '"/>');
+        $(source).append('<img src="rest/hello/getThumbnail?path=' + p1 + '&w=100&h=100"/>');
     } else {
         $("img", source).remove();
     }

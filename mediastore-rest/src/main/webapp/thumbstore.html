@@ -1,14 +1,8 @@
-<!--<script src="js/thumbstore.js"></script>-->
-<!--<script src="js/jquery-1.8.2.js"></script>-->
-
 <script>
     getSize();
     getPath();
     getIndexedPaths('db_paths');
-    // getFolder();
-
 </script>
-
 <script type="text/javascript">
     window.onload = function () {
 
@@ -46,12 +40,9 @@
         var dataLength = 50; // number of dataPoints visible at any point
 
         var updateChart = function () {
-          //  count = count || 1;
-            // count is number of times loop runs to generate random dataPoints.
-
             $.get("rest/hello/monitor",function (data) {
-               // debugger;
-             //   document.getElementById('db_status').innerHTML = data["stringStatus"];
+                // debugger;
+                //   document.getElementById('db_status').innerHTML = data["stringStatus"];
                 free.push({x:data.time, y:data.usedMemory/1024/1024});
                 total.push({x:data.time, y:data.totalMemory/1024/1024});
             });
@@ -61,14 +52,11 @@
                 free.shift();
                 total.shift();
             }
-
             chart.render();
 
         };
-
         // generates first set of dataPoints
         updateChart();
-
         // update chart after specified time.
         setInterval(function(){updateChart()}, updateInterval);
 
@@ -85,33 +73,15 @@
     </p>
 
     <div id="db_paths" style="margin-bottom: 0"> </div>
-    <!--<div style="float: left; padding-right: 20px">-->
-        <!--<form name="input" action="javascript: shrink()">-->
-            <!--<input type="submit" value="Shrink"/>-->
-        <!--</form>-->
-    <!--</div>-->
-    <!--<div style="float: left">-->
-        <!--<form name="input" action="javascript: update()">-->
-            <!--<input type="submit" value="Update"/>-->
-        <!--</form>-->
-    <!--</div>-->
+
+
+
     <div style="float: left">
         <form name="input" action="javascript: shrinkUpdate()">
             <input type="submit" class="btn btn-primary" value="Shrink-Update"/>
         </form>
     </div>
 
+    <div id="memoryChart" style="height: 300px; width:30%;clear:both;"> </div>
 
-    <div id="memoryChart" style="height: 300px; width:30%;clear:both;">
-    </div>
-
-    <!--<script type="text/javascript">-->
-        <!--jQuery(document).ready(function () {-->
-            <!--jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();-->
-            <!--jQuery('.nailthumb-image-titles-animated-onload').nailthumb({titleWhen:'load'});-->
-            <!--jQuery('.nailthumb-image-titles-onhover').nailthumb({animateTitle:false});-->
-            <!--jQuery('.nailthumb-image-titles-onload').nailthumb({titleWhen:'load', animateTitle:false});-->
-            <!--jQuery('.nailthumb-image-titles-bigger').nailthumb({titleWhen:'load'});-->
-        <!--})-->
-    <!--</script>-->
 </div>
