@@ -99,34 +99,12 @@ function imageURLToBlob(url) {
             var tab =[];
             tab.push(this.response);
             uploadBlobs(tab);
-         //   return response;
-            //    var img = document.getElementById('img');
-            //   var url = window.URL = window.webkitURL;
-            //  img.src = url.createObjectURL(this.response);
         }
     }
     xhr.open('GET', url, true);
     xhr.responseType = 'blob';
     xhr.send();
-
-
-
-//
-//    return $.ajax({
-//        type:'GET',
-//        url:url
-//    });
 }
-//var dataURI;
-function processData(data) {
-    dataURI = "";
-    debugger;
-    // console.log("success " + data);
-    //Do some stuff with the data
-}
-//  return dataURI;
-//}
-
 
 function uploadOneFile(file, indice, nbFiles) {
     var xhr = new XMLHttpRequest();
@@ -141,11 +119,7 @@ function uploadOneFile(file, indice, nbFiles) {
     };
     xhr.onreadystatechange = function (e) {
         if (xhr.readyState == 4) {
-            //    debugger;
-            // continue only if HTTP status is "OK"
             if (xhr.status == 200) {
-                //      debugger;
-//                    alert("finished!");
                 localFinished(0, 0, jQuery.parseJSON(xhr.responseText));
             }
         }
@@ -167,10 +141,7 @@ function bytesToSize(bytes) {
 
 
 function dropHandler(event) {
-    //  console.log('drop event');
-    //   debugger;
-
-    //clean the text area
+     //clean the text area
     $("#dropText").hide();
     $("#droppedFiles").children().remove();
     // Do not propagate the event
@@ -224,8 +195,6 @@ function uploadBlobs(tab_files) {
         // Create a li, set its value to a file name, add it to the ol
         var li = document.createElement('div');
         li.textContent = tab_files[i].name + " (" + bytesToSize(tab_files[i].size) + ") ";
-        //  document.getElementById("namesAllFiles").value += tab_files[i].name;
-        // add a progress bar for this file upload
         var progressBar = document.createElement('progress');
         progressBar.id = "progressBar" + i;
         progressBar.value = 0;
@@ -239,7 +208,6 @@ function uploadBlobs(tab_files) {
 
         document.querySelector("#droppedFiles").appendChild(li);
         uploadOneFile(tab_files[i], i, filesLen);
-        //  debugger;
         if (i + 1 < filesLen) {
             document.getElementById("namesAllFiles").value += "::"; //For split
         }
