@@ -519,6 +519,7 @@ function prettyPrint(object) {
 
 
 function displaySimilarImages(sourceSignature, object) {
+    debugger;
     $('#duplicate_upload_result').children().remove();
     var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
     var sourceSig = document.createElement('div');

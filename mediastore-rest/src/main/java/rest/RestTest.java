@@ -393,18 +393,18 @@ public class RestTest {
 
     @POST
     @Path("findSimilar/")
-   // @Consumes("image/*")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces({MediaType.APPLICATION_JSON})
-    public Response findSimilar(InputStream stream) {
+    public Response findSimilar(FormDataMultiPart multipart) {
         ThumbnailGenerator tg = new ThumbnailGenerator(null);
-//        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
+        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
         Collection<MediaFileDescriptor> c = null;
         ArrayList<SimilarImage> al = null;
         File temp = null;
         MediaFileDescriptor initialImage = null;
 
         try {
-            InputStream source = stream; //bpe.getInputStream();
+            InputStream source = bpe.getInputStream();
             Logger.getLogger().log("RestTest.findSimilar() received " + source);
             temp = File.createTempFile("tempImage", ".jpg");
             System.out.println("Temp file " +temp);
