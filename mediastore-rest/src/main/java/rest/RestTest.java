@@ -24,6 +24,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -84,9 +86,9 @@ public class RestTest {
     @GET
     @Path("/db/{param}")
     public Response getDBInfo(@PathParam("param") String info) {
-   //     System.out.println("RestTest.getDBInfo() " + info);
+        //     System.out.println("RestTest.getDBInfo() " + info);
         if ("size".equals(info)) {
-     //       System.out.println("RestTest.getDBInfo() " + tb.size());
+            //       System.out.println("RestTest.getDBInfo() " + tb.size());
             return Response.status(200).entity(tb.size() + "").build();
         }
         if ("path".equals(info)) {
@@ -103,7 +105,7 @@ public class RestTest {
     @Path("/monitor")
     @Produces({MediaType.APPLICATION_JSON})
     public Response monitor() {
-        long usedMemory = (Runtime.getRuntime().totalMemory() -Runtime.getRuntime().freeMemory());
+        long usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
         //System.out.println("RestTest.monitor() ");
         JSONObject result = new JSONObject();
         try {
@@ -111,8 +113,8 @@ public class RestTest {
 //            String date = DATE_FORMAT.format(new Date());
 //            result.put("time", date);
             result.put("time", System.currentTimeMillis());
-            result.put("usedMemory",usedMemory);
-            result.put("totalMemory",Runtime.getRuntime().totalMemory());
+            result.put("usedMemory", usedMemory);
+            result.put("totalMemory", Runtime.getRuntime().totalMemory());
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -223,7 +225,7 @@ public class RestTest {
     @GET
     @Path("getThumbnail/")
     @Produces("image/jpg")
-    public Response getThumbnail(@QueryParam("path") String imageId, @QueryParam("w") int w, @QueryParam("h") int h ) {
+    public Response getThumbnail(@QueryParam("path") String imageId, @QueryParam("w") int w, @QueryParam("h") int h) {
 //        System.out.println("Thubnail : imageID " + imageId);
         BufferedInputStream source = null;
         try {
@@ -231,6 +233,21 @@ public class RestTest {
             return Response.status(200).entity(bigInputStream).build();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return Response.status(404).build();
+    }
+
+    @GET
+    @Path("getImageFromWeb/")
+    @Produces("image/jpg")
+    public Response getImageFromWeb(@QueryParam("url") String sUrl) {
+        URL url = null;
+        try {
+            url = new URL(sUrl);
+            InputStream in = new BufferedInputStream(url.openStream());
+            return Response.status(200).entity(in).build();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         return Response.status(404).build();
     }
@@ -391,28 +408,40 @@ public class RestTest {
 
     }
 
-    @POST
-    @Path("findSimilar/")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response findSimilar(FormDataMultiPart multipart) {
-        ThumbnailGenerator tg = new ThumbnailGenerator(null);
-        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
-        Collection<MediaFileDescriptor> c = null;
-        ArrayList<SimilarImage> al = null;
-        File temp = null;
-        MediaFileDescriptor initialImage = null;
 
+    @GET
+    @Path("findSimilarFromURL/")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response findSimilarFromURL(@QueryParam("url") String sUrl) {
+        ThumbnailGenerator tg = new ThumbnailGenerator(null);
         try {
-            InputStream source = bpe.getInputStream();
-            Logger.getLogger().log("RestTest.findSimilar() received " + source);
+            URL url = new URL(sUrl);
+            InputStream in = new BufferedInputStream(url.openStream());
+            File temp = streamToFile(in);
+            MediaFileDescriptor initialImage = tg.buildMediaDescriptor(temp);
+
+            JSONObject responseDetailsJson = computeSimilar(tg, temp, initialImage);
+            return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return Response.status(500).build();
+    }
+
+
+    private File streamToFile(InputStream source) {
+        File temp = null;
+        int total = 0;
+        Logger.getLogger().log("RestTest.streamToFile() received " + source);
+        try {
             temp = File.createTempFile("tempImage", ".jpg");
-            System.out.println("Temp file " +temp);
+
+            System.out.println("Temp file " + temp);
             FileOutputStream fo = new FileOutputStream(temp);
 
             byte[] buffer = new byte[8 * 1024];
 
-            int total = 0;
+
             try {
                 int bytesRead;
                 while ((bytesRead = source.read(buffer)) != -1) {
@@ -422,13 +451,34 @@ public class RestTest {
             } finally {
                 fo.close();
             }
-
-            initialImage = tg.buildMediaDescriptor(temp);
-            Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        Logger.getLogger().log("RestTest.streamToFile()  written to " + temp + " with size " + total);
+        return temp;
+    }
 
+    @POST
+    @Path("findSimilar/")
+    // @Consumes("image/*")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response findSimilar(InputStream stream) {
+        ThumbnailGenerator tg = new ThumbnailGenerator(null);
+//        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
+      //  Collection<MediaFileDescriptor> c = null;
+      //  ArrayList<SimilarImage> al = null;
+        File temp = null;
+        MediaFileDescriptor initialImage = null;
+      //  InputStream source = stream; //bpe.getInputStream();
+        temp = streamToFile(stream);
+        initialImage = tg.buildMediaDescriptor(temp);
+
+        JSONObject responseDetailsJson = computeSimilar(tg, temp, initialImage);
+        return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    private JSONObject computeSimilar(ThumbnailGenerator tg, File temp, MediaFileDescriptor initialImage) {
+        Collection<MediaFileDescriptor> c;ArrayList<SimilarImage> al;
         long t1 = System.currentTimeMillis();
         c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
         long t2 = System.currentTimeMillis();
@@ -508,123 +558,8 @@ public class RestTest {
         } catch (JSONException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
+        return responseDetailsJson;
     }
-
-//    @POST
-//    @Path("findSimilar/")
-//    @Consumes(MediaType.MULTIPART_FORM_DATA)
-//    @Produces({MediaType.APPLICATION_JSON})
-//    public Response findSimilar(FormDataMultiPart multipart) {
-//        ThumbnailGenerator tg = new ThumbnailGenerator(null);
-//        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
-//        Collection<MediaFileDescriptor> c = null;
-//        ArrayList<SimilarImage> al = null;
-//        File temp = null;
-//        MediaFileDescriptor initialImage = null;
-//
-//        try {
-//            InputStream source = bpe.getInputStream();
-//            Logger.getLogger().log("RestTest.findSimilar() received " + source);
-//            temp = File.createTempFile("tempImage", ".jpg");
-//            FileOutputStream fo = new FileOutputStream(temp);
-//
-//            byte[] buffer = new byte[8 * 1024];
-//
-//            int total = 0;
-//            try {
-//                int bytesRead;
-//                while ((bytesRead = source.read(buffer)) != -1) {
-//                    fo.write(buffer, 0, bytesRead);
-//                    total += bytesRead;
-//                }
-//            } finally {
-//                fo.close();
-//            }
-//
-//            initialImage = tg.buildMediaDescriptor(temp);
-//            Logger.getLogger().log("RestTest.findSimilar()  written to " + temp + " with size " + total);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        long t1 = System.currentTimeMillis();
-//        c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
-//        long t2 = System.currentTimeMillis();
-//        System.out.println("Found similar files " + c.size() + " took " + (t2 - t1) + "ms");
-//
-//        al = new ArrayList<SimilarImage>(c.size());
-//        for (MediaFileDescriptor mdf : c) {
-//
-//            String path = mdf.getPath();
-//
-//            String imgData = null;
-//            String sigData = null;
-//            try {
-//                FileInputStream f = new FileInputStream(new File(path));
-//                try {
-//                    //encode thumbnail
-//                    BufferedImage bf = tg.downScaleImage(ImageIO.read(f), 200, 200);
-//                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                    ImageIO.write(bf, "JPEG", out);
-//                    imgData = Base64.encodeBase64String(out.toByteArray());
-//                    //encode image signature
-//                    out = new ByteArrayOutputStream();
-//                    ImageIO.write(mdf.getSignatureAsImage(), "JPEG", out);
-//
-//                    sigData = Base64.encodeBase64String(out.toByteArray());
-//                } finally {
-//                    f.close();
-//                }
-//            } catch (IOException e) {
-//                System.err.println("Err: File " + path + " not found");
-//            }
-//
-//            String folder = Utils.fileToDirectory(path);
-//            SimilarImage si = new SimilarImage(path, Utils.folderSize(folder), imgData, mdf.getDistance(), sigData);
-//            al.add(si);
-//          //  System.out.println(si);
-//
-//        }
-//        System.out.println("RestTest.findSimilar sending " + al.size() + " elements");
-//
-//        JSONArray mJSONArray = new JSONArray();
-//        for (int i = 0; i < al.size(); i++) {
-//            JSONObject json = new JSONObject();
-//            try {
-//                json.put("foldersize", al.get(i).folderSize);
-//                json.put("path", al.get(i).path);
-//                json.put("base64Data", al.get(i).base64Data);
-//                json.put("base64Sig", al.get(i).base64Sig);
-//                json.put("distance", al.get(i).rmse);
-//                mJSONArray.put(json);
-//            } catch (JSONException e) {
-//                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//            }
-//        }
-//
-//        //prepare signature of original image
-//        //TODO : create utility function
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        try {
-//
-//            ImageIO.write(initialImage.getSignatureAsImage(), "JPEG", out);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//        JSONObject responseDetailsJson = new JSONObject();
-//        try {
-//            responseDetailsJson.put("success", true);
-//            responseDetailsJson.put("sourceSig", Base64.encodeBase64String(out.toByteArray()));
-//            responseDetailsJson.put("images", mJSONArray);
-//        } catch (JSONException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        }
-//        return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
-//    }
-
 
     @POST
     @Path("findGPS/")
@@ -727,7 +662,7 @@ public class RestTest {
         long t0 = System.currentTimeMillis();
         ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter, gps);
         long t1 = System.currentTimeMillis();
-        System.out.println("RestTest.getAll with filter " + filter + "  took " + (t1-t0) + " ms" );
+        System.out.println("RestTest.getAll with filter " + filter + "  took " + (t1 - t0) + " ms");
         Iterator<MediaFileDescriptor> it = pd.iterator();
         JSONArray mJSONArray = new JSONArray(pd.size());
         int i = 0;
@@ -735,20 +670,19 @@ public class RestTest {
             i++;
             JSONObject json = new JSONObject();
             MediaFileDescriptor mfd = it.next();
-         //   if (mfd.getPath().contains(filter)) {
-                try {
-                    json.put("path", mfd.getPath());
-                    json.put("size", mfd.getSize());
-                    mJSONArray.put(json);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            //   if (mfd.getPath().contains(filter)) {
+            try {
+                json.put("path", mfd.getPath());
+                json.put("size", mfd.getSize());
+                mJSONArray.put(json);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-       // }
+        }
+        // }
         Status.getStatus().setStringStatus(Status.IDLE);
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
-
 
 
     @XmlRootElement
@@ -777,42 +711,42 @@ public class RestTest {
 
         public synchronized void fileCreated(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileCreated " + p);
-         //   try {
-                new MediaIndexer(tb).process(p.toString());
+            //   try {
+            new MediaIndexer(tb).process(p.toString());
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
         }
 
-        public  synchronized void fileModified(java.nio.file.Path p) {
+        public synchronized void fileModified(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
 //            try {
-                new MediaIndexer(tb).process(p.toString());
+            new MediaIndexer(tb).process(p.toString());
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
         }
 
-        public  synchronized void fileDeleted(java.nio.file.Path p) {
+        public synchronized void fileDeleted(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileDeleted " + p);
 
             // MediaFileDescriptor mf = new MediaIndexer(tb).buildMediaDescriptor(new File(p.toString()));
             tb.deleteFromDatabase(p.toString());
         }
 
-        public  synchronized void folderCreated(java.nio.file.Path p) {
+        public synchronized void folderCreated(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.folderCreated " + p);
 //            try {
-                new MediaIndexer(tb).process(p.toString());
+            new MediaIndexer(tb).process(p.toString());
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
         }
 
-        public  synchronized void folderModified(java.nio.file.Path p) {
+        public synchronized void folderModified(java.nio.file.Path p) {
             Logger.getLogger().log("RestTest$DBDiskUpdater.fileModified " + p);
 //            try {
-                new MediaIndexer(tb).process(p.toString());
+            new MediaIndexer(tb).process(p.toString());
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
