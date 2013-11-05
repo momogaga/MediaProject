@@ -275,7 +275,6 @@ function buildGallery(array) {
 //            <div class="caption">description </div>
 //           </div>
 //        </li>
-    //input_path_gallery
     var ul = document.createElement('ul');
     ul.className = "thumbnails";
 
@@ -286,38 +285,15 @@ function buildGallery(array) {
 
         var thumb = document.createElement('div');
         thumb.className = "thumbnail";
-
-    //    var container = document.createElement('div');
-    //    container.className = "container";
-
-//        var row = document.createElement('div');
-//        row.className = "row";
-
         var image = array[f];
-      //  var templateThumbnail = '<img src="rest/hello/getThumbnail?path={{path}}/>'
         var imgTag=document.createElement("img");
         imgTag.src="rest/hello/getThumbnail?path="+image.path + "&w=600&h=600";
 
         imgTag.title=image.path;
-        //var imgTag = Mustache.to_html(templateThumbnail, image);
-      //  debugger;
-     //   container.innerHTML = imgTag;
-
-
-//        var caption = document.createElement('div');
-//        caption.className = "caption";
-//        caption.style.wordWrap = "break-word"
-
-      //  container.appendChild(imgTag);
-//        container.appendChild(caption);
-
         thumb.appendChild(imgTag);
 
 
         li.appendChild(thumb);
-      //  li.appendChild(caption);
-        //build the description
-
         ul.appendChild(li)
     }
 
@@ -465,160 +441,9 @@ function prettyPrint(object) {
     }
 }
 
-//function uploadFinished(sourceSignature, object) {
-//    $('#duplicate_upload_result').children().remove();
-//    var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
-//    var sourceSig = document.createElement('div');
-//    sourceSig.style.float = "left";
-//    //sourceSig.style.marginLeft="10px";
-//    sourceSig.className="signatureDiv";
-//
-//    var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
-//    sourceSig.appendChild(sourceSigCanvas.canvas);
-//
-//    document.getElementById("duplicate_upload_source").appendChild(sourceSig);
-//
-//    for (f in object) {
-//        var image = object[f];
-//        var distance = (image.distance);
-//        var templateThumbnail = '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
-//        var imgTag = Mustache.to_html(templateThumbnail, image);
-//        var sigTag = "data:image;base64," + image.base64Sig;
-//        var descriptionDiv = document.createElement('div');
-//        descriptionDiv.className = "description flt";
-//        descriptionDiv.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
-//
-//        var floatedDiv = document.createElement('div');
-//        floatedDiv.className = "floated_img cls";
-//      //  floatedDiv.style.marginLeft="10px";
-//
-//        var canvDiv = document.createElement('div');
-//        var canv = new customCanvas(sigTag, 100, 100);
-//        canvDiv.appendChild(canv.canvas);
-//        canvDiv.className="signatureDiv";
-//
-//
-//        sourceSigCanvas.addOther(canv);
-//
-//        var imgDiv = document.createElement('div');
-//        imgDiv.className = "nailthumb-container nailthumb-image-titles-animated-onhover square flt";
-//        imgDiv.innerHTML = imgTag;
-//        floatedDiv.appendChild(imgDiv);
-//        floatedDiv.appendChild(canvDiv);
-//
-//        floatedDiv.appendChild(descriptionDiv);
-//
-//        $("#duplicate_upload_result").append(floatedDiv);
-//    }
-//    jQuery(document).ready(function () {
-//        generatePathLink();
-//        jQuery('.nailthumb-container').nailthumb();
-//        jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
-//    });
-//}
 
 
-function displaySimilarImages(sourceSignature, object) {
-    $('#duplicate_upload_result').children().remove();
-    var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
-    var sourceSig = document.createElement('div');
-    sourceSig.style.float = "left";
-    //sourceSig.style.marginLeft="10px";
-    sourceSig.className = "signatureDiv";
 
-    var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
-    sourceSig.appendChild(sourceSigCanvas.canvas);
-
-    document.getElementById("duplicate_upload_source").appendChild(sourceSig);
-
-    var ul = document.createElement('ul');
-    ul.className = "thumbnails";
-
-
-    for (f in object) {
-        //we want to build elements with the following form
-//        <li class="span4">
-//            <div class="thumbnail">
-//                <div class="container">
-//                    <div class="row">
-//                        <div class="span2">
-//                           '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>'
-//                        </div>
-//                        <div class="span2" >
-//                           canvas
-//                        </div>
-//                    </div>
-//                </div>
-//            </div>
-//            <div class="caption">description </div>
-//           </div>
-//        </li>
-
-
-        var li = document.createElement('li');
-        li.className = "span4";
-
-
-        var thumb = document.createElement('div');
-        thumb.className = "thumbnail";
-
-        var container = document.createElement('div');
-        container.className = "container";
-
-        var row = document.createElement('div');
-        row.className = "row";
-
-
-        var spanImg = document.createElement('div');
-        spanImg.className = "span2";
-
-        var spanSig = document.createElement('div');
-        spanSig.className = "span2";
-
-        var caption = document.createElement('div');
-        caption.className = "caption";
-        caption.style.wordWrap = "break-word"
-
-        var image = object[f];
-        var distance = (image.distance);
-        var templateThumbnail = '<img class="smallImage" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
-        var imgTag = Mustache.to_html(templateThumbnail, image);
-        spanImg.innerHTML = imgTag;
-
-        row.appendChild(spanImg);
-        row.appendChild(spanSig);
-
-        container.appendChild(row);
-
-        thumb.appendChild(container);
-
-
-        li.appendChild(thumb);
-        li.appendChild(caption);
-        //build the description
-
-        var sigTag = "data:image;base64," + image.base64Sig;
-        var canv = new customCanvas(sigTag, 100, 100);
-        spanSig.appendChild(canv.canvas);
-        sourceSigCanvas.addOther(canv);
-
-        caption.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
-//        $('#duplicate_upload_result').append(li);
-        ul.appendChild(li)
-    }
-
-
-//    $('#duplicate_upload_result').wrap('<ul class="thumbnails"/>');
-    $('#duplicate_upload_result').append(ul);
-
-//    $('#duplicate_upload_result').append('</ul>');
-    jQuery(document).ready(function () {
-        generatePathLink();
-        jQuery('.nailthumb-container').nailthumb();
-        jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
-        equalHeight($(".caption"));
-    });
-}
 
 
 function equalHeight(group) {
