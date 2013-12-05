@@ -211,7 +211,7 @@ function getSelectedFolders() {
 }
 
 function getAll() {
-    //debugger;
+   // debugger;
     var folders = getSelectedFolders();
     $.getJSON('rest/hello/getAll', {
         filter:$("input[name=filter]").val(),
@@ -241,6 +241,7 @@ function getGallery() {
 }
 
 function buildAllTable(array) {
+    //debugger;
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
         + '<th class="paths ay-sort"><span>Paths</span></th>' +
         '</tr></thead> <tbody>';

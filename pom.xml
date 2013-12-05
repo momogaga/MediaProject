@@ -12,7 +12,7 @@
     <modules>
         <module>mediastore-db</module>
         <module>mediastore-rest</module>
-        <module>mediastore-hadoop</module>
+        <!--<module>mediastore-hadoop</module>-->
     </modules>
 
     <repositories>

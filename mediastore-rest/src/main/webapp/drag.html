@@ -22,7 +22,7 @@
 
 
 </style>
-<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/bootstrap.min.css"/>
 
 <script src="js/jquery.fileupload.js"></script>
 <script src="js/jquery.fileupload-fp.js"></script>
@@ -36,13 +36,18 @@
 <script src="js/mustache.js"></script>
 <script src="js/thumbstore.js"></script>
 <script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
+<script src="js/jquery.ay-table-sort.js"></script>
 
-<div id="file-uploader-demo1" style="margin-left:10px">
-    <noscript>
-        <p>Please enable JavaScript to use file uploader.</p>
-        <!-- or put a simple form for upload here -->
-    </noscript>
-</div>
+<form id="formUpload" name="formUpload" method="post" enctype="multipart/form-data">
+    <input type="hidden" id="namesAllFiles" name="namesAllFiles"/>
+
+    <div id="filedrag"
+         ondragover="return false;"
+         ondrop="dropHandler(event)">
+        <div id="dropText"> Drop files here</div>
+        <ol id="droppedFiles"></ol>
+    </div>
+</form>
 
 
 <div id="duplicate_upload_source" style="margin:10px 10px"></div>

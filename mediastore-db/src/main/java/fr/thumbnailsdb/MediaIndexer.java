@@ -287,7 +287,8 @@ public class MediaIndexer {
     public void processMTRoot(String path) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
-        ts.addIndexPath(path);
+        try {
+        ts.addIndexPath(new File(path).getCanonicalPath());
         System.out.println("MediaIndexer.processMTRoot() " + path);
         System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
         System.out.println("MediaIndexer.processMTRoot() computing number of files...");
@@ -297,7 +298,7 @@ public class MediaIndexer {
             executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
                     new LimitedQueue<Runnable>(50));
         }
-        try {
+
             this.processMT(new File(path));
         } catch (IOException e) {
             e.printStackTrace();
