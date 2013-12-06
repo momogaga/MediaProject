@@ -99,7 +99,8 @@ public class ThumbStore {
             // Table exists
         } else {
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table IMAGES does not exist, should create it");
-            String table = "CREATE TABLE IMAGES(id  bigint identity(1,1),path varchar(256), size long, mtime long, md5 varchar(256), hash varchar(100),  lat double, lon double)";
+            String table = "CREATE TABLE IMAGES(id  bigint identity(1,1),path varchar(256), path_id int, size long, mtime long, md5 varchar(256), hash varchar(100),  lat double, lon double);";
+            //"CREATE TABLE IMAGES(id  bigint identity(1,1),path varchar(256), size long, mtime long, md5 varchar(256), hash varchar(100),  lat double, lon double)";
             Statement st = connexion.createStatement();
             st.execute(table);
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
@@ -122,7 +123,7 @@ public class ThumbStore {
         } else {
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table PATHS does not exist, should create it");
             // Table does not exist
-            String table = "CREATE TABLE PATHS(path varchar(256),  PRIMARY KEY ( path ))";
+            String table = "CREATE TABLE PATHS(path varchar(256),  path_id int AUTO_INCREMENT, PRIMARY KEY ( path ));";
             Statement st = connexion.createStatement();
             st.execute(table);
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
@@ -454,6 +455,22 @@ public class ThumbStore {
         return result;
     }
 
+
+    /**
+     * return s as root path and relative path
+     * @param s
+     * @return
+     */
+    private String[] decomposePath(String s) {
+     ArrayList<String> l = this.getIndexedPaths();
+        for (String root : l) {
+            if (s.contains(root)) {
+                return new String[] {root,s.replace(root,"")};
+            }
+        }
+        return null;
+    }
+
     /**
      * Save the descriptor to the db
      * DO NOT check that the key is not used
@@ -466,17 +483,22 @@ public class ThumbStore {
         Connection connexion = findResponsibleDB(id.getPath());
         try {
             //   Statement st;
-            psmnt = connexion.prepareStatement("insert into IMAGES(path, size, mtime, md5, hash, lat, lon) "
-                    + "values(?,?,?,?,?,?,?)");
-            psmnt.setString(1, id.getPath());
-            psmnt.setLong(2, id.getSize());
-            psmnt.setLong(3, id.getMtime());
+            psmnt = connexion.prepareStatement("insert into IMAGES(path, path_id, size, mtime, md5, hash, lat, lon) "
+                    + "values(?,?,?,?,?,?,?,?)");
+            //we need to change the path to remove the root directory
+            String[] decomposedPath=this.decomposePath(id.getPath());
+          //  String relativePath=this.decomposePath(id.getPath())[1];
+            psmnt.setString(1, decomposedPath[1]);
+            psmnt.setInt(2,this.getIndexedPaths().indexOf(decomposedPath[0])+1);
+
+            psmnt.setLong(3, id.getSize());
+            psmnt.setLong(4, id.getMtime());
 
 
-            psmnt.setString(4, id.getMD5());
-            psmnt.setString(5, id.getHash());
-            psmnt.setDouble(6, id.getLat());
-            psmnt.setDouble(7, id.getLon());
+            psmnt.setString(5, id.getMD5());
+            psmnt.setString(6, id.getHash());
+            psmnt.setDouble(7, id.getLat());
+            psmnt.setDouble(8, id.getLon());
             psmnt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -498,18 +520,24 @@ public class ThumbStore {
         try {
             Statement st;
             psmnt = connexion
-                    .prepareStatement("UPDATE IMAGES SET path=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
-            psmnt.setString(1, id.getPath());
-            psmnt.setLong(2, id.getSize());
-            psmnt.setLong(3, id.getMtime());
+                    .prepareStatement("UPDATE IMAGES SET path=?, path_id=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
+            //psmnt.setString(1, id.getPath());
+            //we need to change the path to remove the root directory
+            String[] decomposedPath=this.decomposePath(id.getPath());
+            //  String relativePath=this.decomposePath(id.getPath())[1];
+            psmnt.setString(1, decomposedPath[1]);
+            psmnt.setInt(2,this.getIndexedPaths().indexOf(decomposedPath[0])+1);
 
-            psmnt.setString(4, id.getHash());
-            psmnt.setString(5, id.getMD5());
+            psmnt.setLong(3, id.getSize());
+            psmnt.setLong(4, id.getMtime());
+
+            psmnt.setString(5, id.getHash());
+            psmnt.setString(6, id.getMD5());
 
             //System.err.println("ThumbStore.updateToDB lat : " + id.getLat());
-            psmnt.setDouble(6, id.getLat());
-            psmnt.setDouble(7, id.getLon());
-            psmnt.setString(8, id.getPath());
+            psmnt.setDouble(7, id.getLat());
+            psmnt.setDouble(8, id.getLon());
+            psmnt.setString(9, id.getPath());
 
             psmnt.execute();
         } catch (SQLException e) {
@@ -564,13 +592,14 @@ public class ThumbStore {
 
     public void deleteFromDatabase(String path) {
 
-        System.err.println("ThumbStore.deleteFromDatabase " + path);
+        System.err.print("ThumbStore.deleteFromDatabase " + path);
         //this.dump();
         MediaFileDescriptor mf = this.getMediaFileDescriptor(path);
         ResultSet res = this.getFromDatabase(path);
         try {
             while (res.next()) {
                 res.deleteRow();
+                System.err.print("    ... done" );
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -605,7 +634,15 @@ public class ThumbStore {
         Connection connexion = findResponsibleDB(path);
         try {
             PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            psmnt.setString(1, path);
+
+            //check whether this is a full path or not
+            String[] decomposedPath=this.decomposePath(path);
+            if (decomposedPath==null) {
+
+              psmnt.setString(1, path);
+            } else {
+                psmnt.setString(1,decomposedPath[1]);
+            }
             //		st = connexion.createStatement();
             psmnt.execute();
             res = psmnt.getResultSet();
