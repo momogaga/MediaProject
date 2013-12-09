@@ -302,7 +302,7 @@ public class SimilarImageFinder {
 
         MediaIndexer tg = new MediaIndexer(null);
         MediaFileDescriptor id = tg.buildMediaDescriptor(new File(source)); // ImageDescriptor.readFromDisk(s);
-        System.out.println(id.md5Digest);
+//        System.out.println(id.md5Digest);
         ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>();
         return thumbstore.getDuplicatesMD5(id);
     }
