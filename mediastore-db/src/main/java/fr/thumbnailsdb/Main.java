@@ -1,9 +1,11 @@
 package fr.thumbnailsdb;
 
+import java.util.ArrayList;
+
 public class Main {
 
     public static void mediaAction(String dbPath, String[] args) {
-        System.err.println("Main.mediaAction() db " + dbPath);
+        System.err.println("Main.mediaAction() mediaAction " + dbPath);
         for (int i = 0; i < args.length; i++) {
             System.err.println("    " + args[i]);
         }
@@ -24,7 +26,7 @@ public class Main {
     }
 
     public static void dbAction(String dbPath, String[] args) {
-        System.err.println("Main.dbAction() db " + dbPath);
+        System.err.println("Main.dbAction() db xx" + dbPath);
         for (int i = 0; i < args.length; i++) {
             System.err.println("    " + args[i]);
         }
@@ -47,6 +49,11 @@ public class Main {
         if ("shrink".equals(args[0])) {
             tb.shrink();
         }
+
+        if ("compact".equals(args[0])) {
+            tb.compact();
+        }
+
         if ("size".equals(args[0])) {
             System.out.println("DB has size " + tb.size());
         }
@@ -76,7 +83,47 @@ public class Main {
             //df.prettyPrintDuplicateFolder(df.findDuplicateMedia());
         }
 
+        System.out.println("Main.dbAction  going to relocate");
+        if ("relocate".equals(args[0])) {
+            if (args.length<2) {
+               usage();
+            }
+            System.out.println("Main.dbAction relocating from " + args[1] + " to " + args[2]);
+            System.out.println("--- current paths ----");
+            ArrayList<String> paths = tb.getIndexedPaths();
+            for (String p : paths) {
+                System.out.println(p);
+            }
+            tb.updateIndexedPath(args[1],args[2]);
+            System.out.println("--- new paths ----");
+            paths = tb.getIndexedPaths();
+            for (String p : paths) {
+                System.out.println(p);
+            }
+
+        }
+
     }
+
+    public static void usage() {
+        System.err.println("Usage : java " + Main.class + " [-db path_to_db]  target [options]");
+        System.err.println("where target [options] are ");
+        System.err.println("   db index  folder_or_file_to_process");
+        System.err.println("   db indexGPS  folder_or_file_to_process");
+        System.err.println("   db clean");
+        System.err.println("   db compact");
+        System.err.println("   db fix");
+        System.err.println("   db shrink");
+        System.err.println("   db size");
+        System.err.println("   db duplicate");
+        System.err.println("   db duplicateFolder");
+        System.err.println("   db dump [true|false]");
+        System.err.println("   db relocate <previous path> <new path>");
+        System.err.println("   media similar folder_or_file_to_process");
+        System.err.println("   media duplicate folder_or_file_to_process");
+        System.exit(-1);
+    }
+
 
     public static void main(String[] args) {
         // try {
@@ -86,20 +133,7 @@ public class Main {
         // e.printStackTrace();
         // }
         if (args.length < 2) {
-            System.err.println("Usage : java " + Main.class + " [-db path_to_db]  target [options]");
-            System.err.println("where target [options] are ");
-            System.err.println("   db index  folder_or_file_to_process");
-            System.err.println("   db indexGPS  folder_or_file_to_process");
-            System.err.println("   db clean");
-            System.err.println("   db fix");
-            System.err.println("   db shrink");
-            System.err.println("   db size");
-            System.err.println("   db duplicate");
-            System.err.println("   db duplicateFolder");
-            System.err.println("   db dump [true|false]");
-            System.err.println("   media similar folder_or_file_to_process");
-            System.err.println("   media duplicate folder_or_file_to_process");
-            System.exit(-1);
+            usage();
         } else {
             int i = 0;
             String db = null;

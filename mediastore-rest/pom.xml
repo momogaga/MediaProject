@@ -6,8 +6,8 @@
         <artifactId>MediaStore</artifactId>
         <version>1.0</version>
     </parent>
-        
-     <artifactId>mediastore-rest</artifactId>
+
+    <artifactId>mediastore-rest</artifactId>
     <packaging>war</packaging>
     <version>1.0</version>
     <name>MediaStore-Rest</name>
@@ -21,31 +21,33 @@
         </dependency>
     </dependencies>
 
+
+
     <build>
-       
+
         <plugins>
             <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-antrun-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>generate-resources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>run</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<tasks>-->
-                                <!--&lt;!&ndash; Safety &ndash;&gt;-->
-                                <!--<mkdir dir="${project.build.directory}"/>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-antrun-plugin</artifactId>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>generate-resources</phase>-->
+            <!--<goals>-->
+            <!--<goal>run</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<tasks>-->
+            <!--&lt;!&ndash; Safety &ndash;&gt;-->
+            <!--<mkdir dir="${project.build.directory}"/>-->
 
-                                <!--<tstamp>-->
-                                    <!--<format property="last.updated" pattern="yyyy-MM-dd hh:mm:ss"/>-->
-                                <!--</tstamp>-->
-                                <!--<echo file="${basedir}/target/filter.properties" message="build.time=${last.updated}"/>-->
-                            <!--</tasks>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--<tstamp>-->
+            <!--<format property="last.updated" pattern="yyyy-MM-dd hh:mm:ss"/>-->
+            <!--</tstamp>-->
+            <!--<echo file="${basedir}/target/filter.properties" message="build.time=${last.updated}"/>-->
+            <!--</tasks>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -54,9 +56,8 @@
                     <useDefaultManifestFile>true</useDefaultManifestFile>
                 </configuration>
             </plugin>
-           
 
- 
+
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
@@ -90,43 +91,70 @@
                 </executions>
             </plugin>
             <!--<plugin>-->
-                <!--<groupId>org.codehaus.mojo</groupId>-->
-                <!--<artifactId>wagon-maven-plugin</artifactId>-->
-                <!--<version>1.0-beta-3</version>-->
-                <!--<configuration>-->
-                    <!--<fromFile>target/restThumbstore.jar</fromFile>-->
-                    <!--<url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>-->
-                    <!--<serverId>cloudbees-private-release-repository</serverId>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>upload-war-to-server</id>-->
-                        <!--<phase>deploy</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>upload-single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>wagon-maven-plugin</artifactId>-->
+            <!--<version>1.0-beta-3</version>-->
+            <!--<configuration>-->
+            <!--<fromFile>target/restThumbstore.jar</fromFile>-->
+            <!--<url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>-->
+            <!--<serverId>cloudbees-private-release-repository</serverId>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>upload-war-to-server</id>-->
+            <!--<phase>deploy</phase>-->
+            <!--<goals>-->
+            <!--<goal>upload-single</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
+
+            <!--<plugin>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>wagon-maven-plugin</artifactId>-->
+            <!--<version>1.0-beta-3</version>-->
+            <!--<configuration>-->
+            <!--<serverId>my-home</serverId>-->
+            <!--<fromFile>target/restThumbstore.jar</fromFile>-->
+            <!--<url>${my-home}</url>-->
+            <!--<serverId>my-home</serverId>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>upload-war-to-server</id>-->
+            <!--<phase>deploy</phase>-->
+            <!--<goals>-->
+            <!--<goal>upload-single</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-3</version>
+                <version>1.0-beta-4</version>
                 <configuration>
-                    <fromFile>target/restThumbstore.jar</fromFile>
-                    <url>${my-home}</url>
                     <serverId>my-home</serverId>
+                    <fromFile>target/restThumbstore.jar</fromFile>
+                    <!--<url>toto</url>-->
+                    <url>${my-home}</url>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>upload-war-to-server</id>
+                        <id>upload-jar</id>
                         <phase>deploy</phase>
                         <goals>
                             <goal>upload-single</goal>
                         </goals>
+
                     </execution>
                 </executions>
             </plugin>
+
+
+
 
         </plugins>
 

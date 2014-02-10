@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import fr.thumbnailsdb.hash.ImageHash;
+import fr.thumbnailsdb.utils.Configuration;
 import fr.thumbnailsdb.utils.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -41,14 +42,26 @@ public class MediaIndexer {
     protected int recentModifications = 0;
     protected int modificationsBeforeReport = 100;
     protected int processedFiles;
+    protected long lastProgressTime;
+    protected int currentProgressSize;
 
     protected int totalNumberOfFiles;
 
-    ThreadPoolExecutor executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
-            new LimitedQueue<Runnable>(50));
-    ;
+    //default value for the number of threads in the pool.
+    protected int maxThreads;
+
+    protected ThreadPoolExecutor executorService;
+
 
     public MediaIndexer(ThumbStore t) {
+
+        maxThreads = Configuration.getMaxIndexerThreads();
+        System.out.println("MediaIndexer.MediaIndexer Max Threads = " + maxThreads);
+
+
+        executorService= new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                new LimitedQueue<Runnable>(50));
+
         this.ts = t;
     }
 
@@ -204,8 +217,9 @@ public class MediaIndexer {
                     }
 
                 }
-               // if (update) {
-                    this.fileCreatedUpdated(false, update);
+                // if (update) {
+                this.fileCreatedUpdated(false, update);
+                currentProgressSize+=f.length()/1024;
                 //}
             } else {
                 Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
@@ -277,10 +291,13 @@ public class MediaIndexer {
         }
         recentModifications++;
         processedFiles++;
-      //  System.out.println("MediaIndexer.fileCreatedUpdated");
+        //  System.out.println("MediaIndexer.fileCreatedUpdated");
         if (recentModifications > modificationsBeforeReport) {
-            System.out.println("\nProcessed files : " + processedFiles+"/" +totalNumberOfFiles);
+            System.out.println("\nProcessed files : " + processedFiles + "/" + totalNumberOfFiles);
+            System.out.println("Speed : " + (currentProgressSize/(System.currentTimeMillis()-lastProgressTime)) + " MiB/s");
+            lastProgressTime=System.currentTimeMillis();
             recentModifications = 0;
+            currentProgressSize=0;
         }
     }
 
@@ -288,16 +305,17 @@ public class MediaIndexer {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         try {
-        ts.addIndexPath(new File(path).getCanonicalPath());
-        System.out.println("MediaIndexer.processMTRoot() " + path);
-        System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
-        System.out.println("MediaIndexer.processMTRoot() computing number of files...");
-        totalNumberOfFiles=this.countFiles(path);
-        System.out.println("Number of files to explorer " + totalNumberOfFiles);
-        if (executorService.isShutdown()) {
-            executorService = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS,
-                    new LimitedQueue<Runnable>(50));
-        }
+            ts.addIndexPath(new File(path).getCanonicalPath());
+            System.out.println("MediaIndexer.processMTRoot() " + path);
+            System.out.println("MediaIndexer.processMTRoot() started at time " + dateFormat.format(date));
+            System.out.println("MediaIndexer.processMTRoot() computing number of files...");
+            totalNumberOfFiles = this.countFiles(path);
+            lastProgressTime = System.currentTimeMillis();
+            System.out.println("Number of files to explore " + totalNumberOfFiles);
+            if (executorService.isShutdown()) {
+                executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                        new LimitedQueue<Runnable>(50));
+            }
 
             this.processMT(new File(path));
         } catch (IOException e) {
@@ -328,13 +346,16 @@ public class MediaIndexer {
 
     private static final class CountFile extends SimpleFileVisitor<Path> {
         int total = 0;
-        @Override public FileVisitResult visitFile(
+
+        @Override
+        public FileVisitResult visitFile(
                 Path aFile, BasicFileAttributes aAttrs
         ) throws IOException {
             total++;
             //System.out.println("Processing file:" + aFile);
             return FileVisitResult.CONTINUE;
         }
+
         public int getTotal() {
             return this.total;
         }
@@ -375,12 +396,19 @@ public class MediaIndexer {
     }
 
     public void updateDB(String[] al) {
-        System.out.println(" XXXXXXXXX");
+
         for (int i = 0; i < al.length; i++) {
             String s = al[i];
-            Logger.getLogger().log("MediaIndexer.updateDB updating " + s);
+            File f = new File(s);
+            System.out.println(" XXXXXXXXX " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);
-            processMTRoot(s);
+
+            if (f.exists()) {
+                Logger.getLogger().log("MediaIndexer.updateDB updating " + s);
+                processMTRoot(s);
+            } else {
+                System.out.println("MediaIndexer.updateDB path " + s + " not reachable, ignoring");
+            }
         }
         Status.getStatus().setStringStatus(Status.IDLE);
     }

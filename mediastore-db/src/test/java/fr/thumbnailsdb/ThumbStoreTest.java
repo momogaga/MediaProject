@@ -55,8 +55,17 @@ public class ThumbStoreTest {
         for(File f : list) {
             Assert.assertEquals(si.findIdenticalMedia(f.getCanonicalPath()).size(), 1);
         }
+    }
 
 
+    @Test(dependsOnMethods={"testIndexing"})
+    public void testSimilarImage() throws IOException {
+        File[] list = folder1.listFiles();
+        SimilarImageFinder si = new SimilarImageFinder(tb);
+
+        for(File f : list) {
+            Assert.assertEquals(si.findSimilarMedia(f.getCanonicalPath(),1).size(), 1);
+        }
     }
 
 

@@ -302,12 +302,15 @@ public class ThumbStore {
         // and turn it into a HashMap for fast lookup
         ArrayList<String> currentPaths = new ArrayList<String>();
         ResultSet res = st.executeQuery("SELECT path,path_id FROM PATHS ORDER BY path_id");
-
+        final String dir = System.getProperty("user.dir");
+        System.out.println("current dir = " + dir);
         while (res.next()) {
 
             String s = res.getString("path");
             System.out.println("ThumbStore.upgradeToV5 found path " + s);
+//            currentPaths.add(dir + File.separator + s);
             currentPaths.add(s);
+
         }
 
 //        HashMap<String, Integer> hashPaths = new HashMap<String, Integer>();
@@ -320,11 +323,14 @@ public class ThumbStore {
         int index = 0;
 
         for (String p : currentPaths) {
+            String u_p = p.replaceAll("\\\\","\\\\\\\\");
             //get all paths matching the root path
-            System.out.println("ThumbStore.upgradeToV5 performning query  " + "SELECT * FROM IMAGES WHERE images.path LIKE \'" + p + "%\'");
-            ResultSet allResults = st.executeQuery("SELECT * FROM IMAGES WHERE images.path LIKE \'" + p + "%\'");
+            System.out.println("ThumbStore.upgradeToV5 performning query  " + "SELECT * FROM IMAGES WHERE images.path LIKE \'" + u_p + "%\'");
+            ResultSet allResults = st.executeQuery("SELECT * FROM IMAGES WHERE images.path LIKE \'" + u_p + "%\'");
             index++;
             while (allResults.next()) {
+                //System.out.println("ThumbStore.upgradeToV5 processing file ");
+
                 PreparedStatement psmnt;
                 psmnt = connection.prepareStatement("insert into IMAGES_TMP(path, path_id, size, mtime, md5, hash, lat, lon) "
                         + "values(?,?,?,?,?,?,?,?)");
@@ -343,17 +349,6 @@ public class ThumbStore {
         }
 
 
-        //ALTER TABLE PATHS ADD path_id  int AUTO_INCREMENT
-
-        // from IMAGES, PATHS
-        //  select images.path,paths.path_id where
-        // images.path like '%'||paths.path||'%'
-
-        //  action = "ALTER TABLE PATHS ADD path_id identity(1,1)";
-        // st.execute(action);
-//        action = " ALTER TABLE IMAGES DROP COLUMN data";
-//        st.execute(action);
-
         action = "DROP table IMAGES";
         st.execute(action);
         action = "ALTER table images_tmp rename to IMAGES";
@@ -365,6 +360,20 @@ public class ThumbStore {
 
     }
 
+
+    public void compact()  {
+        for (Connection connection : getConnections()) {
+            System.out.println("ThumbStore.compact " + connection);
+
+            try {
+            Statement st = connection.createStatement();
+
+            st.executeUpdate("SHUTDOWN COMPACT");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Add the path to the list of indexed pathsOfDBOnDisk
@@ -436,6 +445,24 @@ public class ThumbStore {
     }
 
 
+    public void updateIndexedPath(String current, String newP) {
+
+        PreparedStatement psmnt;
+        for (Connection connexion : getConnections()) {
+            try {
+
+                Statement st;
+                psmnt = connexion
+                        .prepareStatement("UPDATE PATHS SET path=? WHERE path=? ");
+                psmnt.setString(1,newP);
+                psmnt.setString(2,current);
+                psmnt.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Return the connection to the DB currently responsible
      * for managing the root path of mediaFile
@@ -458,14 +485,15 @@ public class ThumbStore {
 
     /**
      * return s as root path and relative path
+     *
      * @param s
      * @return
      */
     private String[] decomposePath(String s) {
-     ArrayList<String> l = this.getIndexedPaths();
+        ArrayList<String> l = this.getIndexedPaths();
         for (String root : l) {
             if (s.contains(root)) {
-                return new String[] {root,s.replace(root,"")};
+                return new String[]{root, s.replace(root, "")};
             }
         }
         return null;
@@ -486,10 +514,10 @@ public class ThumbStore {
             psmnt = connexion.prepareStatement("insert into IMAGES(path, path_id, size, mtime, md5, hash, lat, lon) "
                     + "values(?,?,?,?,?,?,?,?)");
             //we need to change the path to remove the root directory
-            String[] decomposedPath=this.decomposePath(id.getPath());
-          //  String relativePath=this.decomposePath(id.getPath())[1];
+            String[] decomposedPath = this.decomposePath(id.getPath());
+            //  String relativePath=this.decomposePath(id.getPath())[1];
             psmnt.setString(1, decomposedPath[1]);
-            psmnt.setInt(2,this.getIndexedPaths().indexOf(decomposedPath[0])+1);
+            psmnt.setInt(2, this.getIndexedPaths().indexOf(decomposedPath[0]) + 1);
 
             psmnt.setLong(3, id.getSize());
             psmnt.setLong(4, id.getMtime());
@@ -514,7 +542,7 @@ public class ThumbStore {
 
     }
 
-    public void updateToDB(MediaFileDescriptor id) {
+    public void  updateToDB(MediaFileDescriptor id) {
         PreparedStatement psmnt = null;
         Connection connexion = findResponsibleDB(id.getPath());
         try {
@@ -523,10 +551,10 @@ public class ThumbStore {
                     .prepareStatement("UPDATE IMAGES SET path=?, path_id=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
             //psmnt.setString(1, id.getPath());
             //we need to change the path to remove the root directory
-            String[] decomposedPath=this.decomposePath(id.getPath());
+            String[] decomposedPath = this.decomposePath(id.getPath());
             //  String relativePath=this.decomposePath(id.getPath())[1];
             psmnt.setString(1, decomposedPath[1]);
-            psmnt.setInt(2,this.getIndexedPaths().indexOf(decomposedPath[0])+1);
+            psmnt.setInt(2, this.getIndexedPaths().indexOf(decomposedPath[0]) + 1);
 
             psmnt.setLong(3, id.getSize());
             psmnt.setLong(4, id.getMtime());
@@ -599,7 +627,7 @@ public class ThumbStore {
         try {
             while (res.next()) {
                 res.deleteRow();
-                System.err.print("    ... done" );
+                System.err.print("    ... done");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -636,12 +664,12 @@ public class ThumbStore {
             PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
             //check whether this is a full path or not
-            String[] decomposedPath=this.decomposePath(path);
-            if (decomposedPath==null) {
+            String[] decomposedPath = this.decomposePath(path);
+            if (decomposedPath == null) {
 
-              psmnt.setString(1, path);
+                psmnt.setString(1, path);
             } else {
-                psmnt.setString(1,decomposedPath[1]);
+                psmnt.setString(1, decomposedPath[1]);
             }
             //		st = connexion.createStatement();
             psmnt.execute();
@@ -919,9 +947,6 @@ public class ThumbStore {
     }
 
 
-
-
-
     public MediaFileDescriptor getCurrentMediaFileDescriptor(ResultSet res) {
         MediaFileDescriptor id = null;
         try {
@@ -1150,7 +1175,9 @@ public class ThumbStore {
         if (lsh == null) {
             buildLSH();
         }
+//        System.out.println("ThumbStore.findCandidatesUsingLSH " + id.getPath() +  "  hash: " + id.getHash()) ;
         List<Integer> result = lsh.lookupCandidates(id.getHash());
+//        System.out.println("ThumbStore.findCandidatesUsingLSH " + id.getPath());
         System.out.println("Found " + result.size() + " candidates out of " + lsh.size());
 
         ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());

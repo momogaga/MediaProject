@@ -49,15 +49,24 @@
         </repository>
     </repositories>
 
-    <distributionManagement>
+    <!--<distributionManagement>-->
         <!-- use the following if you're not using a snapshot version. -->
 
+        <!--<repository>-->
+            <!--<id>cloudbees-private-release-repository</id>-->
+            <!--<name>CloudBees</name>-->
+            <!--<url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>-->
+        <!--</repository>-->
+    <!--</distributionManagement>-->
+
+    <distributionManagement>
         <repository>
-            <id>cloudbees-private-release-repository</id>
-            <name>CloudBees</name>
-            <url>dav:https://repository-fabricehuet.forge.cloudbees.com/release/</url>
+            <id>maison</id>
+            <name>maison</name>
+            <url>scp://fabrice@looz.no-ip.org//home/fabrice</url>
         </repository>
     </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
@@ -145,6 +154,15 @@
                     <version>2.0</version>
                     <configuration>
                         <path>/</path>
+                    </configuration>
+                </plugin>
+                <!--Avoid uploading generated files-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
             </plugins>

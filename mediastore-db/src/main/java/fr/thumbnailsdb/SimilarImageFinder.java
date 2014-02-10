@@ -36,6 +36,9 @@ public class SimilarImageFinder {
         MediaIndexer tg = new MediaIndexer(null);
         MediaFileDescriptor id = tg.buildMediaDescriptor(new File(source));
        // Collection<MediaFileDescriptor> result = this.findSimilarImage(id, max);
+        if (id==null) {
+            System.err.println("Error cannot load image "  + source);
+        }
 
         Collection<MediaFileDescriptor> result = this.findSimilarImageUsingLSH(id, max);
         //if (USE_FULL_PATH) {

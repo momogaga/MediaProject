@@ -3,8 +3,8 @@ package fr.thumbnailsdb.utils;
 public class Logger {
 
     private static Logger log = new Logger();
-    private static boolean logEnabled = false;
-    private static boolean errEnabled = false;
+    private static boolean logEnabled = Configuration.loggerOutEnabled();
+    private static boolean errEnabled = Configuration.loggerErrEnabled();
 
 
     public static Logger getLogger() {
