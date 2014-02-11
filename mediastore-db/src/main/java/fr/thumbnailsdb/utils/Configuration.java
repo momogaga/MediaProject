@@ -1,5 +1,8 @@
 package fr.thumbnailsdb.utils;
 
+import java.util.Enumeration;
+import java.util.Properties;
+
 /**
  * Created with IntelliJ IDEA.
  * User: fhuet
@@ -9,13 +12,13 @@ package fr.thumbnailsdb.utils;
  */
 public class Configuration {
 
-
+ static {
+     Configuration.dump();
+ }
     private static String MAX_THREADS= "mediastore.mediaindexer.maxthreads";
-
     private static String LOGGER_STDOUT="mediastore.logger.out";
-
     private static String LOGGER_ERR= "mediastore.logger.err" ;
-
+    private static String DRY_RUN="mediastore.dry.run";
 
     public static boolean loggerOutEnabled() {
         String out = System.getProperty(LOGGER_STDOUT);
@@ -28,6 +31,11 @@ public class Configuration {
     }
 
 
+    public static boolean dryRun(){
+        String err = System.getProperty(DRY_RUN);
+        return (err!=null);
+    }
+
 
     public static int getMaxIndexerThreads() {
         int maxThreads = 4;
@@ -38,5 +46,21 @@ public class Configuration {
         }
         return maxThreads;
     }
+
+    public static void dump() {
+        System.out.println(" ----- Configuration   ---------");
+        Properties props = System.getProperties();
+        Enumeration names = props.propertyNames();
+        while (names.hasMoreElements()) {
+            String s = (String) names.nextElement();
+            if (s.startsWith("mediastore")) {
+                System.out.println("   " + s + "  " + props.getProperty(s));
+
+
+            }
+        }
+        System.out.println(" -------------------------------");
+    }
+
 
 }

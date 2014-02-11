@@ -83,8 +83,9 @@ public class Main {
             //df.prettyPrintDuplicateFolder(df.findDuplicateMedia());
         }
 
-        System.out.println("Main.dbAction  going to relocate");
         if ("relocate".equals(args[0])) {
+            System.out.println("Main.dbAction  going to relocate");
+
             if (args.length<2) {
                usage();
             }

@@ -105,10 +105,12 @@ public class ThumbStore {
             st.execute(table);
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
             st = connexion.createStatement();
-            String action = "CREATE UNIQUE INDEX path_index ON IMAGES(path)";
-            Logger.getLogger().log("ThumbStore.checkAndCreateTables() creating Index on paths");
-            st.execute(action);
 
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() creating Index on path and path_id");
+            String action = "CREATE UNIQUE INDEX path_index ON IMAGES(path)";
+            st.execute(action);
+            action = "CREATE INDEX PATH_ID_INDEX ON IMAGES(path_id)";
+            st.execute(action);
 
             st = connexion.createStatement();
             action = "CREATE  INDEX md5_index ON IMAGES(md5)";
@@ -352,6 +354,13 @@ public class ThumbStore {
         action = "DROP table IMAGES";
         st.execute(action);
         action = "ALTER table images_tmp rename to IMAGES";
+        st.execute(action);
+
+
+        action = "CREATE INDEX PATH_ID_INDEX ON IMAGES(path_id)";
+        st.execute(action);
+
+        action = "CREATE INDEX PATH_INDEX ON IMAGES(path)";
         st.execute(action);
 
         action = "UPDATE VERSION SET version=5 WHERE version=4";

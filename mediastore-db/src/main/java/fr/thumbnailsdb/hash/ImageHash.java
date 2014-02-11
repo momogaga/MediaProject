@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 
 
@@ -97,6 +98,12 @@ public class ImageHash {
 
     public static String generateSignature(String path) throws IOException {
         BufferedImage bf = ImageIO.read(new File(path));
+        return generateSignature(bf);
+    }
+
+
+    public static String generateSignature(InputStream in) throws IOException {
+        BufferedImage bf = ImageIO.read(in);
         return generateSignature(bf);
     }
 

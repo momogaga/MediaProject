@@ -3,11 +3,7 @@ package fr.thumbnailsdb;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
@@ -24,6 +20,7 @@ import fr.thumbnailsdb.hash.ImageHash;
 import fr.thumbnailsdb.utils.Configuration;
 import fr.thumbnailsdb.utils.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 
 public class MediaIndexer {
 
@@ -51,6 +48,9 @@ public class MediaIndexer {
     protected int maxThreads;
 
     protected ThreadPoolExecutor executorService;
+
+
+    private boolean dryRun = Configuration.dryRun();
 
 
     public MediaIndexer(ThumbStore t) {
@@ -127,13 +127,20 @@ public class MediaIndexer {
     }
 
     public String generateMD5(File f) throws IOException {
-        InputStream fis = new FileInputStream(f);
-        byte[] buffer = DigestUtils.md5(fis);
-        String s = DigestUtils.md5Hex(buffer);
-
+        InputStream fis = new BufferedInputStream(new FileInputStream(f));
+        String s = this.generateMD5(fis);
         fis.close();
         return s;
     }
+
+   public String generateMD5(InputStream fi) throws IOException {
+
+       byte[] buffer = DigestUtils.md5(fi);
+       String s = DigestUtils.md5Hex(buffer);
+
+       return s;
+   }
+
 
     protected int[] generateThumbnail(File f) {
         // byte[] data;
@@ -154,7 +161,17 @@ public class MediaIndexer {
         return data1;
     }
 
+     private ByteArrayInputStream readFileToMemory(File f) {
+         try {
+             return new ByteArrayInputStream(FileUtils.readFileToByteArray(f));
+         } catch (IOException e) {
+             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+         }
+         return null;
+     }
+
     public MediaFileDescriptor buildMediaDescriptor(File f) {
+
         MediaFileDescriptor id = new MediaFileDescriptor();
         int[] data;
         String md5;
@@ -170,10 +187,17 @@ public class MediaIndexer {
                     id.setLat(latLon[0]);
                     id.setLon(latLon[1]);
                 }
-                id.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
-            }
+                //bufferize images in memory, read directly from file for others
+                ByteArrayInputStream fbi = this.readFileToMemory(f);
+//                id.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
+                id.setHash(new ImageHash().generateSignature(fbi));
+                fbi.reset();
+                md5 = generateMD5(fbi);
+                id.setMd5Digest(md5);
+            }   else {
             md5 = generateMD5(f);
             id.setMd5Digest(md5);
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -185,6 +209,7 @@ public class MediaIndexer {
 
     public void generateAndSave(File f) {
         System.out.print(".");
+        currentProgressSize+=f.length()/1024;
         try {
             MediaFileDescriptor mf = ts.getMediaFileDescriptor(f.getCanonicalPath());
             Logger.getLogger().err("MediaIndexer.generateAndSave " + f + " descriptor: " + mf);
@@ -205,21 +230,20 @@ public class MediaIndexer {
                         mf.setLat(latLon[0]);
                         mf.setLon(latLon[1]);
                         Logger.getLogger().err("MediaIndexer : forced update for GPS data for " + f);
-                        ts.updateToDB(mf);
+                        updateToDB(mf);
                         update = true;
                     }
                 }
                 if (forceHashUpdate || (mf.getHash() == null)) {
                     if (Utils.isValideImageName(f.getName())) {
                         mf.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
-                        ts.updateToDB(mf);
+                        updateToDB(mf);
                         update = true;
                     }
 
                 }
                 // if (update) {
                 this.fileCreatedUpdated(false, update);
-                currentProgressSize+=f.length()/1024;
                 //}
             } else {
                 Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
@@ -227,10 +251,10 @@ public class MediaIndexer {
                 if (id != null) {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
                         //we need to update it
-                        ts.updateToDB(id);
+                        updateToDB(id);
                         this.fileCreatedUpdated(false, true);
                     } else {
-                        ts.saveToDB(id);
+                        saveToDB(id);
                         this.fileCreatedUpdated(true, false);
                     }
 
@@ -245,6 +269,19 @@ public class MediaIndexer {
         } catch (IOException e) {
             System.err.println("Error processing  file " + f.getName());
             e.printStackTrace();
+        }
+    }
+
+
+    private void updateToDB(MediaFileDescriptor id) {
+        if (!dryRun) {
+           ts.updateToDB(id);
+        }
+    }
+
+    private void saveToDB(MediaFileDescriptor id) {
+        if(!dryRun) {
+           ts.saveToDB(id);
         }
     }
 
@@ -302,6 +339,7 @@ public class MediaIndexer {
     }
 
     public void processMTRoot(String path) {
+        long t0=System.currentTimeMillis();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         try {
@@ -327,11 +365,14 @@ public class MediaIndexer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        long t1=System.currentTimeMillis();
         date = new Date();
+
         System.out.println("MediaIndexer.processMTRoot() finished at time " + dateFormat.format(date));
         System.out.println("MediaIndexer.processMTRoot() found " + newFiles + " new files");
         System.out.println("MediaIndexer.processMTRoot() updated " + updatedFiles + " files");
         System.out.println("MediaIndexer.processMTRoot() total " + ts.size() + " files");
+        System.out.println("MediaIndexer.processMTRoot took " + (t1-t0)/1000 + " s");
     }
 
     public int countFiles(String root) {
