@@ -303,7 +303,7 @@ public class ThumbStore {
         //now get the current list of paths
         // and turn it into a HashMap for fast lookup
         ArrayList<String> currentPaths = new ArrayList<String>();
-        ResultSet res = st.executeQuery("SELECT path,path_id FROM PATHS ORDER BY path_id");
+        ResultSet res = st.executeQuery("SELECT path FROM PATHS ORDER BY path_id");
         final String dir = System.getProperty("user.dir");
         System.out.println("current dir = " + dir);
         while (res.next()) {
@@ -440,7 +440,7 @@ public class ThumbStore {
         for (Connection connexion : getConnections()) {
             try {
                 sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                res = sta.executeQuery("SELECT path,path_id FROM PATHS ORDER BY path_id");
+                res = sta.executeQuery("SELECT path,path_id AS path FROM PATHS ORDER BY path_id");
 
                 while (res.next()) {
                     String s = res.getString("path");
@@ -826,7 +826,7 @@ public class ThumbStore {
 
 
                 PreparedStatement psmnt;
-                psmnt = connexion.prepareStatement("SELECT path from IMAGES WHERE data=(?)");
+                psmnt = connexion.prepareStatement("SELECT paths.path||images.path AS path FROM IMAGES, PATHS WHERE data=(?)");
 
 
                 psmnt.setBytes(1, Utils.toByteArray(data));
@@ -856,7 +856,7 @@ public class ThumbStore {
         try {
             PreparedStatement psmnt;
 
-            psmnt = c.prepareStatement("SELECT path from IMAGES WHERE id=(?)");
+            psmnt = c.prepareStatement("SELECT paths.path||images.path AS path FROM IMAGES, PATHS WHERE id=(?)");
             psmnt.setInt(1, index);
             psmnt.execute();
             res = psmnt.getResultSet();
@@ -879,7 +879,7 @@ public class ThumbStore {
             try {
                 sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 res = sta
-                        .executeQuery("SELECT path, md5, size from IMAGES WHERE md5=\'" + mfd.getMD5() + "\'");
+                        .executeQuery("SELECT paths.path||images.path as path, md5, size FROM IMAGES, PATHS WHERE md5=\'" + mfd.getMD5() + "\'");
                 while (res.next()) {
                     results.add(getCurrentMediaFileDescriptor(res));
                 }
@@ -1030,7 +1030,7 @@ public class ThumbStore {
         saveToDB(id);
         // updateToDB(id);
         System.err.println("ThumbStore.test() dumping entries");
-        String select = "SELECT * FROM IMAGES";
+        String select = "SELECT * FROM IMAGES, PATHS";
         Statement st;
         for (Connection connexion : getConnections()) {
             try {
@@ -1057,7 +1057,7 @@ public class ThumbStore {
     }
 
     public void dump(boolean p) {
-        String select = "SELECT path,id,hash FROM IMAGES";
+        String select = "SELECT paths.path||images.path AS path,id,hash FROM IMAGES, PATHS";
         Statement st;
         for (Connection connexion : getConnections()) {
             try {

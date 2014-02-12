@@ -61,11 +61,10 @@ public class MetaDataFinder {
         ExifSubIFDDirectory directory = metadata.getDirectory(ExifSubIFDDirectory.class);
         ExifSubIFDDescriptor descriptor = new ExifSubIFDDescriptor((ExifSubIFDDirectory) directory);
         Date date = null;
-        if (directory!=null) {
-         date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+        if (directory != null) {
+            date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
             return date.toString();
-        }
-        else return "";
+        } else return "";
     }
 
     public String getGPS() {
@@ -78,13 +77,13 @@ public class MetaDataFinder {
 //         //   Logger.getLogger().log("---- " + file + " ----");
             for (Tag tag : directory.getTags()) {
 
-                result+=tag + "\n";
+                result += tag + "\n";
             }
         }
 
         Logger.getLogger().log("MetaDataFinder.getGPS file : " + file + " has coordinates " + result);
 
-       return result;
+        return result;
 
     }
 
@@ -92,7 +91,7 @@ public class MetaDataFinder {
         if (metadata == null) {
             return null;
         }
-        Logger.getLogger().log("MetaDataFinder.getLatLon processing file : " + file );
+        Logger.getLogger().log("MetaDataFinder.getLatLon processing file : " + file);
         GpsDirectory directory = metadata.getDirectory(GpsDirectory.class);
         if (directory != null && directory.getTags().size() > 2) {
 //         //   Logger.getLogger().log("---- " + file + " ----");
@@ -102,11 +101,15 @@ public class MetaDataFinder {
 //            double lat = getAsDecimalDegree(directory.getDescription(2));
 //            double lon = getAsDecimalDegree(directory.getDescription(4));
 ////            Logger.getLogger().log(lat+", " +lon );
-           GeoLocation gl =  directory.getGeoLocation();
-             double lat =     gl.getLatitude();
-            double lon = gl.getLongitude();
+            GeoLocation gl = directory.getGeoLocation();
+            double lat = 0;
+            double lon = 0;
+            if (gl != null) {
+                lat = gl.getLatitude();
+                lon = gl.getLongitude();
+            }
 
-            Logger.getLogger().log("MetaDataFinder.getLatLon file : " + file + " has coordinates {" + lat + "," + lon+"}");
+            Logger.getLogger().log("MetaDataFinder.getLatLon file : " + file + " has coordinates {" + lat + "," + lon + "}");
 
             return new double[]{lat, lon};
         } else {
@@ -151,7 +154,7 @@ public class MetaDataFinder {
 //            mdf.processMT(new File(args[0]));
 //        } else {
 
-      //  Logger.getLogger().log(mdf.hasGPSData().toString());
+        //  Logger.getLogger().log(mdf.hasGPSData().toString());
         mdf.printTags();
         Logger.getLogger().log(mdf.getDate());
         Logger.getLogger().log(mdf.getGPS());

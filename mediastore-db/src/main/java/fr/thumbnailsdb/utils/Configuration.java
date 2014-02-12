@@ -12,35 +12,44 @@ import java.util.Properties;
  */
 public class Configuration {
 
- static {
-     Configuration.dump();
- }
-    private static String MAX_THREADS= "mediastore.mediaindexer.maxthreads";
-    private static String LOGGER_STDOUT="mediastore.logger.out";
-    private static String LOGGER_ERR= "mediastore.logger.err" ;
-    private static String DRY_RUN="mediastore.dry.run";
+    static {
+        Configuration.dump();
+    }
+
+    private static String MAX_THREADS = "mediastore.mediaindexer.maxthreads";
+    private static String LOGGER_STDOUT = "mediastore.logger.out";
+    private static String LOGGER_ERR = "mediastore.logger.err";
+    private static String DRY_RUN = "mediastore.dry.run";
+    private static String FORCE_GPS = "mediastore.force.gps";
+    private static String FORCE_UPDATE = "mediastore.force.update";
 
     public static boolean loggerOutEnabled() {
         String out = System.getProperty(LOGGER_STDOUT);
-        return (out!=null);
+        return (out != null);
     }
 
     public static boolean loggerErrEnabled() {
         String err = System.getProperty(LOGGER_ERR);
-        return (err!=null);
+        return (err != null);
     }
 
-
-    public static boolean dryRun(){
+    public static boolean dryRun() {
         String err = System.getProperty(DRY_RUN);
-        return (err!=null);
+        return (err != null);
     }
 
+    public static boolean forceGPS() {
+        return (System.getProperty(FORCE_GPS) != null);
+    }
+
+    public static boolean forceUpdate() {
+        return (System.getProperty(FORCE_UPDATE) != null);
+    }
 
     public static int getMaxIndexerThreads() {
         int maxThreads = 4;
         String maxT = System.getProperty(MAX_THREADS);
-        if (maxT!=null) {
+        if (maxT != null) {
             maxThreads = Integer.parseInt(maxT);
 
         }
@@ -55,9 +64,8 @@ public class Configuration {
             String s = (String) names.nextElement();
             if (s.startsWith("mediastore")) {
                 System.out.println("   " + s + "  " + props.getProperty(s));
-
-
             }
+
         }
         System.out.println(" -------------------------------");
     }

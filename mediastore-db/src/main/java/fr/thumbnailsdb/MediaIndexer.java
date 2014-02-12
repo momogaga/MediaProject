@@ -28,8 +28,8 @@ public class MediaIndexer {
     protected boolean software = true;
     protected ThumbStore ts;
 
-    protected boolean forceGPSUpdate = false;
-    protected boolean forceHashUpdate = false;
+    protected boolean forceGPSUpdate = Configuration.forceGPS();
+    protected boolean forceHashUpdate = Configuration.forceUpdate();
 
 
     protected Logger log = Logger.getLogger();
@@ -134,10 +134,8 @@ public class MediaIndexer {
     }
 
    public String generateMD5(InputStream fi) throws IOException {
-
        byte[] buffer = DigestUtils.md5(fi);
        String s = DigestUtils.md5Hex(buffer);
-
        return s;
    }
 
@@ -257,8 +255,6 @@ public class MediaIndexer {
                         saveToDB(id);
                         this.fileCreatedUpdated(true, false);
                     }
-
-
                     if (log.isEnabled()) {
                         log.log(f.getCanonicalPath() + " ..... size  " + (f.length() / 1024) + " KiB OK " + executorService.getActiveCount() + " threads running");
                     }
@@ -367,7 +363,6 @@ public class MediaIndexer {
         }
         long t1=System.currentTimeMillis();
         date = new Date();
-
         System.out.println("MediaIndexer.processMTRoot() finished at time " + dateFormat.format(date));
         System.out.println("MediaIndexer.processMTRoot() found " + newFiles + " new files");
         System.out.println("MediaIndexer.processMTRoot() updated " + updatedFiles + " files");
@@ -380,7 +375,7 @@ public class MediaIndexer {
         try {
             Files.walkFileTree(Paths.get(root), fileProcessor);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return fileProcessor.getTotal();
     }

@@ -158,6 +158,8 @@ public class Main {
                     mediaAction(db, newArgs);
                     break;
 
+                } else {
+                    i++;
                 }
             }
 
