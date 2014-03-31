@@ -43,6 +43,11 @@ public class Utils {
             //it's probably a windows path
             folderIndex = n.lastIndexOf('\\');
         }
+        if (folderIndex == -1)  {
+            //something went wrong
+            System.err.println("Utils.fileToDirectory ERROR for path " + n);
+            folderIndex=0;
+        }
         return n.substring(0, folderIndex);//file.getParent(); // to get the parent dir name
     }
 
