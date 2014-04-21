@@ -174,7 +174,6 @@ public class RestTest {
     public Response getDuplicate(@QueryParam("max") String max, @QueryParam("folder") final String obj) {
         String[] folders = this.parseFolders(obj);
 
-
         System.out.println("RestTest.getDuplicate " + obj);
         Status.getStatus().setStringStatus("Requesting duplicate media");
         Collection dc = (Collection) df.computeDuplicateSets(df.findDuplicateMedia()).toCollection(Integer.parseInt(max), folders);

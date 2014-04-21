@@ -20,32 +20,10 @@ public class DuplicateMediaFinder {
     }
 
     public PreloadedDescriptors findDuplicateMedia() {
-//        return thumbstore.getMFDOrderedByMD5();
         return thumbstore.getPreloadedDescriptors();
     }
 
-    public void prettyPrintDuplicate(ResultSet r) {
-//        DuplicateFileList list = computeDuplicateSets(r);
-//        for (DuplicateFileGroup dg : list) {
-//            System.out.println(dg.fileSize + " (" + dg.fileSize * (dg.size() - 1) + " to save) ");
-//            System.out.println(dg);
-//        }
-    }
 
-    public void prettyPrintDuplicateFolder(ResultSet r) {
-//       Collection<DuplicateFolderGroup> map = computeDuplicateFolderSets(r).asSortedCollection(null);
-//        Iterator<DuplicateFolderGroup> it = map.iterator();
-//            //System.out.println(k + "  have " + map.get(k).occurences + " common files");
-//        while (it.hasNext()) {
-//        DuplicateFolderGroup df = it.next();
-//           System.out.println(df.occurences + " " + df.folder1 +   "  " + df.folder2);
-//        }
-//        for (DuplicateFileGroup dg : tree) {
-//            System.out.println(dg.fileSize + " (" + dg.fileSize * (dg.size() - 1) + " to save) ");
-//            System.out.println(dg);
-//        }
-
-    }
 
     public DuplicateFileList computeDuplicateSets(PreloadedDescriptors r) {
         if (duplicateFileList != null) {
@@ -72,7 +50,6 @@ public class DuplicateMediaFinder {
                     dg = new DuplicateFileGroup();
                     dg.add(mfd.getSize(), path);
                     currentMd5 = md5;
-
                 }
             }
         }

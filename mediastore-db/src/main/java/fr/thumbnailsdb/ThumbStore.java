@@ -556,8 +556,14 @@ public class ThumbStore {
         Connection connexion = findResponsibleDB(id.getPath());
         try {
             Statement st;
+//            psmnt = connexion
+//                    .prepareStatement("UPDATE IMAGES SET path=?, path_id=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
+//            psmnt = connexion
+//                    .prepareStatement("FROM IMAGES, PATHS " +
+//                    "SELECT paths.path||images.path as path,id size,mtime,md5,hash,lat,lon WHERE" +
+//                    " paths.path_id=images.path_id ");
             psmnt = connexion
-                    .prepareStatement("UPDATE IMAGES SET path=?, path_id=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? ");
+                    .prepareStatement("UPDATE IMAGES SET path=?, path_id=?, size=?, mtime=?, hash=?, md5=? , lat=?, lon=? WHERE path=? AND (FROM PATHS SELECT path_id WHERE path=?)");
             //psmnt.setString(1, id.getPath());
             //we need to change the path to remove the root directory
             String[] decomposedPath = this.decomposePath(id.getPath());
@@ -574,8 +580,10 @@ public class ThumbStore {
             //System.err.println("ThumbStore.updateToDB lat : " + id.getLat());
             psmnt.setDouble(7, id.getLat());
             psmnt.setDouble(8, id.getLon());
-            psmnt.setString(9, id.getPath());
+            psmnt.setString(9,decomposedPath[1]);
+            psmnt.setString(10, decomposedPath[0]);
 
+            System.out.println("fr.thumbnailsdb.ThumbStore.updateToDB query : " + psmnt);
             psmnt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -629,14 +637,14 @@ public class ThumbStore {
 
     public void deleteFromDatabase(String path) {
 
-        System.err.print("ThumbStore.deleteFromDatabase " + path);
+        Logger.getLogger().log("ThumbStore.deleteFromDatabase " + path);
         //this.dump();
         MediaFileDescriptor mf = this.getMediaFileDescriptor(path);
         ResultSet res = this.getFromDatabase(path);
         try {
             while (res.next()) {
                 res.deleteRow();
-                System.err.print("    ... done");
+                Logger.getLogger().log("    ... done");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -653,7 +661,8 @@ public class ThumbStore {
         ResultSet res = null;
         Connection connexion = findResponsibleDB(path);
         try {
-            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            PreparedStatement psmnt = connexion.prepareStatement("FROM IMAGES, PATHS " +
+                    "SELECT paths.path||images.path as path,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             psmnt.setString(1, path);
             //		st = connexion.createStatement();
             psmnt.execute();
@@ -670,16 +679,23 @@ public class ThumbStore {
         ResultSet res = null;
         Connection connexion = findResponsibleDB(path);
         try {
-            PreparedStatement psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            Logger.getLogger().log("fr.thumbnailsdb.ThumbStore.getFromDatabase   ---- " + path);
+            PreparedStatement psmnt = null;
 
-            //check whether this is a full path or not
             String[] decomposedPath = this.decomposePath(path);
             if (decomposedPath == null) {
-
+                psmnt = connexion.prepareStatement("FROM IMAGES, PATHS " +
+                        "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 psmnt.setString(1, path);
             } else {
+                psmnt=  connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
                 psmnt.setString(1, decomposedPath[1]);
             }
+
+
+            //check whether this is a full path or not
+
             //		st = connexion.createStatement();
             psmnt.execute();
             res = psmnt.getResultSet();
@@ -770,7 +786,9 @@ public class ThumbStore {
         long t0 = System.currentTimeMillis();
         try {
             sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            return sta.executeQuery("SELECT * FROM IMAGES");
+            return sta.executeQuery("FROM IMAGES, PATHS " +
+                    "SELECT paths.path||images.path as path,id size,mtime,md5,hash,lat,lon WHERE" +
+                    " paths.path_id=images.path_id ");
 //            return sta.executeQuery("SELECT path,data,id,md5,size,COUNT(md5) FROM IMAGES GROUP BY path,md5 HAVING ( COUNT(md5) > 1 )");
 
         } catch (SQLException e) {
@@ -940,11 +958,14 @@ public class ThumbStore {
             try {
                 int i = 0;
                 while (all.next()) {
+
                     id = getCurrentMediaFileDescriptor(all);
+                    Logger.getLogger().log("ThumbStore.shrink() processing  " + id);
                     File tmp = new File(id.getPath());
                     if (!tmp.exists()) {
                         i++;
-                        all.deleteRow();
+                        //all.deleteRow();
+                        this.deleteFromDatabase(id.getPath());
                     }
                 }
                 System.err.println("ThumbStore.shrink() has deleted  " + i + " records");
