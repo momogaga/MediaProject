@@ -246,14 +246,14 @@ public class MediaIndexer {
             } else {
                 Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
-                System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave id = " + id);
+                //System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave id = " + id);
                 if (id != null) {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
-                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave File  -- " + f);
-
-                        System.out.println("                                                     mtime :" + f.lastModified());
-                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave DB file :" + mf.getPath());
-                        System.out.println("                                                     mtime :" + mf.getMtime());
+//                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave File  -- " + f);
+//
+//                        System.out.println("                                                     mtime :" + f.lastModified());
+//                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave DB file :" + mf.getPath());
+//                        System.out.println("                                                     mtime :" + mf.getMtime());
 
                         //we need to update it
                         updateToDB(id);
