@@ -20,6 +20,15 @@ public class KbitLSH {
         }
     }
 
+    public KbitLSH(int nbBits, int keyLength, long seed){
+        indexes = new int[nbBits];
+        Random r = new Random(seed);
+        for (int i = 0; i < nbBits; i++) {
+            indexes[i]=r.nextInt(keyLength);
+        }
+    }
+
+
     public String hash(String s) {
         String result="";
         for (int i = 0; i < indexes.length; i++) {

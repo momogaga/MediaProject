@@ -164,9 +164,9 @@ public class LSH {
 
     public static void main(String[] args) {
 
-        //  testLocal();
+          testLocal();
 //        testThumbstore();
-        testRandom(900000);
+        //testRandom(900000);
 
 
     }

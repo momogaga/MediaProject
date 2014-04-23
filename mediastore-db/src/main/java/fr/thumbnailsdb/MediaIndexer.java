@@ -49,7 +49,6 @@ public class MediaIndexer {
 
     protected ThreadPoolExecutor executorService;
 
-
     private boolean dryRun = Configuration.dryRun();
 
 
@@ -57,11 +56,8 @@ public class MediaIndexer {
 
         maxThreads = Configuration.getMaxIndexerThreads();
         System.out.println("MediaIndexer.MediaIndexer Max Threads = " + maxThreads);
-
-
         executorService= new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
                 new LimitedQueue<Runnable>(50));
-
         this.ts = t;
     }
 
@@ -72,7 +68,6 @@ public class MediaIndexer {
 
         @Override
         public boolean add(E e) {
-            // System.out.println("MediaIndexer.LimitedQueue.add()");
             return super.add(e);
         }
 
@@ -92,21 +87,17 @@ public class MediaIndexer {
 
         @Override
         public E take() throws InterruptedException {
-            //		System.out.println("MediaIndexer.LimitedQueue.take()");
             return super.take();
         }
-
     }
 
     /**
      * Load the image and resize it if necessary
-     *
      * @param bi
      * @return
      * @throws IOException
      */
     public BufferedImage downScaleImageToGray(BufferedImage bi, int nw, int nh) throws IOException {
-
         if (debug) {
             System.out.println("MediaIndexer.downScaleImageToGray()  original image is " + bi.getWidth() + "x"
                     + bi.getHeight());
@@ -169,7 +160,6 @@ public class MediaIndexer {
      }
 
     public MediaFileDescriptor buildMediaDescriptor(File f) {
-
         MediaFileDescriptor id = new MediaFileDescriptor();
         int[] data;
         String md5;
@@ -187,7 +177,6 @@ public class MediaIndexer {
                 }
                 //bufferize images in memory, read directly from file for others
                 ByteArrayInputStream fbi = this.readFileToMemory(f);
-//                id.setHash(new ImageHash().generateSignature(f.getCanonicalPath()));
                 id.setHash(new ImageHash().generateSignature(fbi));
                 fbi.reset();
                 md5 = generateMD5(fbi);
@@ -246,15 +235,8 @@ public class MediaIndexer {
             } else {
                 Logger.getLogger().err("MediaIndexer.generateAndSave building descriptor");
                 MediaFileDescriptor id = this.buildMediaDescriptor(f);
-                //System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave id = " + id);
                 if (id != null) {
                     if ((mf != null) && (f.lastModified() != mf.getMtime())) {
-//                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave File  -- " + f);
-//
-//                        System.out.println("                                                     mtime :" + f.lastModified());
-//                        System.out.println("fr.thumbnailsdb.MediaIndexer.generateAndSave DB file :" + mf.getPath());
-//                        System.out.println("                                                     mtime :" + mf.getMtime());
-
                         //we need to update it
                         updateToDB(id);
                         this.fileCreatedUpdated(false, true);
@@ -403,12 +385,6 @@ public class MediaIndexer {
             return this.total;
         }
 
-//        @Override  public FileVisitResult preVisitDirectory(
-//                Path aDir, BasicFileAttributes aAttrs
-//        ) throws IOException {
-//            //System.out.println("Processing directory:" + aDir);
-//            return FileVisitResult.CONTINUE;
-//        }
     }
 
 
@@ -443,7 +419,6 @@ public class MediaIndexer {
         for (int i = 0; i < al.length; i++) {
             String s = al[i];
             File f = new File(s);
-            System.out.println(" XXXXXXXXX " + s);
             Status.getStatus().setStringStatus("Updating folder " + s);
 
             if (f.exists()) {

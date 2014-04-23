@@ -1,6 +1,7 @@
 package fr.thumbnailsdb;
 
 import fr.thumbnailsdb.lsh.LSH;
+import fr.thumbnailsdb.persistentLSH.PersistentLSH;
 import fr.thumbnailsdb.utils.Logger;
 import fr.thumbnailsdb.utils.ProgressBar;
 
@@ -23,7 +24,8 @@ public class ThumbStore {
 
     //This is used as a cache of preloaded descriptors
     protected PreloadedDescriptors preloadedDescriptors;
-    protected LSH lsh;
+    // protected LSH lsh;
+    protected PersistentLSH lsh;
 
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
@@ -325,7 +327,7 @@ public class ThumbStore {
         int index = 0;
 
         for (String p : currentPaths) {
-            String u_p = p.replaceAll("\\\\","\\\\\\\\");
+            String u_p = p.replaceAll("\\\\", "\\\\\\\\");
             //get all paths matching the root path
             System.out.println("ThumbStore.upgradeToV5 performning query  " + "SELECT * FROM IMAGES WHERE images.path LIKE \'" + u_p + "%\'");
             ResultSet allResults = st.executeQuery("SELECT * FROM IMAGES WHERE images.path LIKE \'" + u_p + "%\'");
@@ -370,14 +372,14 @@ public class ThumbStore {
     }
 
 
-    public void compact()  {
+    public void compact() {
         for (Connection connection : getConnections()) {
             System.out.println("ThumbStore.compact " + connection);
 
             try {
-            Statement st = connection.createStatement();
+                Statement st = connection.createStatement();
 
-            st.executeUpdate("SHUTDOWN COMPACT");
+                st.executeUpdate("SHUTDOWN COMPACT");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -463,8 +465,8 @@ public class ThumbStore {
                 Statement st;
                 psmnt = connexion
                         .prepareStatement("UPDATE PATHS SET path=? WHERE path=? ");
-                psmnt.setString(1,newP);
-                psmnt.setString(2,current);
+                psmnt.setString(1, newP);
+                psmnt.setString(2, current);
                 psmnt.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -551,7 +553,7 @@ public class ThumbStore {
 
     }
 
-    public void  updateToDB(MediaFileDescriptor id) {
+    public void updateToDB(MediaFileDescriptor id) {
         PreparedStatement psmnt = null;
         Connection connexion = findResponsibleDB(id.getPath());
         try {
@@ -580,10 +582,10 @@ public class ThumbStore {
             //System.err.println("ThumbStore.updateToDB lat : " + id.getLat());
             psmnt.setDouble(7, id.getLat());
             psmnt.setDouble(8, id.getLon());
-            psmnt.setString(9,decomposedPath[1]);
+            psmnt.setString(9, decomposedPath[1]);
             psmnt.setString(10, decomposedPath[0]);
 
-            System.out.println("fr.thumbnailsdb.ThumbStore.updateToDB query : " + psmnt);
+            //  System.out.println("fr.thumbnailsdb.ThumbStore.updateToDB query : " + psmnt);
             psmnt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -688,7 +690,7 @@ public class ThumbStore {
                         "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 psmnt.setString(1, path);
             } else {
-                psmnt=  connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
                 psmnt.setString(1, decomposedPath[1]);
             }
@@ -1195,7 +1197,7 @@ public class ThumbStore {
      */
     public int[] getLSHStatus() {
         if (lsh == null) {
-            buildLSH();
+            buildLSH(false);
         }
         return new int[]{lsh.size(), lsh.lastCandidatesCount()};
 
@@ -1203,7 +1205,7 @@ public class ThumbStore {
 
     public ArrayList<MediaFileDescriptor> findCandidatesUsingLSH(MediaFileDescriptor id) {
         if (lsh == null) {
-            buildLSH();
+            buildLSH(false);
         }
 //        System.out.println("ThumbStore.findCandidatesUsingLSH " + id.getPath() +  "  hash: " + id.getHash()) ;
         List<Integer> result = lsh.lookupCandidates(id.getHash());
@@ -1222,26 +1224,30 @@ public class ThumbStore {
         return al;
     }
 
-    private void buildLSH() {
-        Status.getStatus().setStringStatus("Teaching LSH");
-        lsh = new LSH(10, 15, 100);
-        ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
-        for (ResultSet res : ares) {
-            try {
-                while (res.next()) {
-                    // String path = res.getString("path");
-                    int index = res.getInt("ID");
-                    //  byte[] d = res.getBytes("data");
-                    String s = res.getString("hash");
-                    if (s != null) {
-                        lsh.add(s, index);
+    public void buildLSH(boolean force) {
+        lsh = new PersistentLSH(10, 15, 100);
+        if (force || lsh.size() == 0) {
+            Status.getStatus().setStringStatus("Teaching LSH");
+            System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH forced build or empty lsh size : " + lsh.size());
+            ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
+            for (ResultSet res : ares) {
+                try {
+                    while (res.next()) {
+                        // String path = res.getString("path");
+                        int index = res.getInt("ID");
+                        //  byte[] d = res.getBytes("data");
+                        String s = res.getString("hash");
+                        if (s != null) {
+                            lsh.add(s, index);
+                        }
                     }
+                } catch (SQLException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
+            lsh.commit();
+            Status.getStatus().setStringStatus(Status.IDLE);
         }
-        Status.getStatus().setStringStatus(Status.IDLE);
     }
 
     public boolean preloadedDescriptorsExists() {
