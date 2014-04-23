@@ -1229,6 +1229,7 @@ public class ThumbStore {
         if (force || lsh.size() == 0) {
             Status.getStatus().setStringStatus("Teaching LSH");
             System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH forced build or empty lsh size : " + lsh.size());
+            lsh.clear();
             ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
             for (ResultSet res : ares) {
                 try {

@@ -71,6 +71,9 @@ public class Main {
             // String source = args[1];
             //df.prettyPrintDuplicateFolder(df.findDuplicateMedia());
         }
+        if ("lsh".equals(args[0])) {
+            tb.buildLSH(true);
+        }
 
         if ("dump".equals(args[0])) {
 
@@ -118,6 +121,7 @@ public class Main {
         System.err.println("   db size");
         System.err.println("   db duplicate");
         System.err.println("   db duplicateFolder");
+        System.err.println("   db lsh");
         System.err.println("   db dump [true|false]");
         System.err.println("   db relocate <previous path> <new path>");
         System.err.println("   media similar folder_or_file_to_process");
