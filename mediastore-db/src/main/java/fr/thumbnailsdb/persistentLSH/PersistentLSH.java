@@ -1,12 +1,15 @@
 package fr.thumbnailsdb.persistentLSH;
 
-import fr.thumbnailsdb.lsh.LSHTable;
+import fr.thumbnailsdb.Candidate;
+import fr.thumbnailsdb.utils.Configuration;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.mapdb.Fun;
+import org.perf4j.LoggingStopWatch;
+import org.perf4j.StopWatch;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by fhuet on 23/04/2014.
@@ -15,23 +18,37 @@ public class PersistentLSH {
 
 
     private static String file = "lsh";
-//
- //   private int nbTables = 10;
+    //
+    //   private int nbTables = 10;
     private PersistentLSHTable[] tables;
     private PersistentLSHTable t;
     private int lastCandidatesCount;
     DB db;
 
+    private ExecutorService executorService ;
+
+
     public PersistentLSH(int nbTables, int k, int maxExcluded) {
         System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.PersistentLSH");
-       db = DBMaker.newFileDB(new File(file))
+        executorService = Executors.newFixedThreadPool(nbTables);
+        db = DBMaker.newFileDB(new File(file))
                 .closeOnJvmShutdown().make();
         //DBMaker.newMemoryDB().make();
         tables = new PersistentLSHTable[nbTables];
-        for(int i =0; i<nbTables;i++) {
-             tables[i]=new PersistentLSHTable(k, maxExcluded, i,db);
+        StopWatch stopWatch = null;
+        if (Configuration.timing()) {
+            stopWatch = new LoggingStopWatch("PersistentLSH");
         }
-
+        for (int i = 0; i < nbTables; i++) {
+            //System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.PersistentLSH loading table " + i);
+            tables[i] = new PersistentLSHTable(k, maxExcluded, i, db);
+            if (Configuration.timing()) {
+                stopWatch.lap("PersistentLSH." + i);
+            }
+        }
+        if (Configuration.timing()) {
+            stopWatch.stop("PersistentLSH");
+        }
     }
 
 
@@ -39,18 +56,72 @@ public class PersistentLSH {
         for (PersistentLSHTable t : tables) {
             t.add(key, value);
         }
-       // db.commit();
     }
 
 
-    public List<Integer> lookupCandidates(String key) {
-        HashSet<Integer> hs = new HashSet<Integer>();
-        for (PersistentLSHTable t : tables) {
-            List<Integer> r = t.get(key);
-            hs.addAll(r);
+    public List<Candidate> lookupCandidates(String key) {
+        HashSet<Candidate> hs = new HashSet<>();
+        LoggingStopWatch watch = null;
+        if (Configuration.timing()) {
+            watch = new LoggingStopWatch("lookupCandidates");
         }
-        lastCandidatesCount=hs.size();
-        return new ArrayList<Integer>(hs);
+        for (PersistentLSHTable t : tables) {
+            List<Candidate> r = t.get(key);
+            hs.addAll(r);
+            if (Configuration.timing()) {
+                watch.lap("testLoad.lookupCandidates");
+            }
+        }
+        lastCandidatesCount = hs.size();
+        return new ArrayList<Candidate>(hs);
+    }
+
+
+    public List<Candidate> lookupCandidatesMT(String key) {
+        //build the list of tasks
+        List<Callable<List<Candidate>>> callableList = new ArrayList<>();
+        HashSet<Candidate> hs = new HashSet<Candidate>();
+        LoggingStopWatch watch = null;
+        if (Configuration.timing()) {
+            watch = new LoggingStopWatch("lookupCandidatesMT");
+        }
+        for (PersistentLSHTable t : tables) {
+            //fill the list of tasks
+            callableList.add(new LookupTask(t, key));
+        }
+        try {
+            List<Future<List<Candidate>>> futureList = executorService.invokeAll(callableList);
+            for (Future<List<Candidate>> f : futureList) {
+                hs.addAll(f.get());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        lastCandidatesCount = hs.size();
+        if (Configuration.timing()) {
+            watch.stop();
+        }
+
+        return new ArrayList<>(hs);
+    }
+
+    class LookupTask implements Callable<List<Candidate>> {
+
+        private PersistentLSHTable table;
+        private String key;
+
+        public LookupTask(PersistentLSHTable t, String k) {
+            this.table = t;
+            this.key = k;
+        }
+
+        public List<Candidate> call() throws Exception {
+            //System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.LookupTask.call " + table.get(key));
+            return table.get(key);
+        }
     }
 
 
@@ -82,13 +153,13 @@ public class PersistentLSH {
     }
 
     public static void testRandom(int max) {
-        int nbBits=20;
+        int nbBits = 20;
         System.out.println("Generating random strings");
         String[] input = new String[max];
         for (int i = 0; i < max; i++) {
             input[i] = randomString(nbBits);
         }
-        long usedMemory0 = (Runtime.getRuntime().totalMemory() -Runtime.getRuntime().freeMemory());
+        long usedMemory0 = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
         System.out.println("Adding to LSH " + max + " items");
         long t0 = System.currentTimeMillis();
         PersistentLSH lsh = new PersistentLSH(10, 30, nbBits);
@@ -98,11 +169,12 @@ public class PersistentLSH {
         }
         lsh.commit();
         long t1 = System.currentTimeMillis();
-        long usedMemory1 = (Runtime.getRuntime().totalMemory() -Runtime.getRuntime().freeMemory());        System.out.println("Test took " + (t1 - t0) + " ms");
-        System.out.println("Test took " + ((usedMemory1 -usedMemory0)/1024/1024) + " MB");
+        long usedMemory1 = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+        System.out.println("Test took " + (t1 - t0) + " ms");
+        System.out.println("Test took " + ((usedMemory1 - usedMemory0) / 1024 / 1024) + " MB");
         String s = randomString(nbBits);
         System.out.println("LSH looking for similar to " + s);
-        List<Integer> result = lsh.lookupCandidates(s);
+        List<Candidate> result = lsh.lookupCandidates(s);
         System.out.println("Found " + result.size() + " candidates");
     }
 
@@ -139,20 +211,42 @@ public class PersistentLSH {
 
         System.out.println("PersistentLSH building reference set");
         PersistentLSH lsh = new PersistentLSH(10, 30, 100);
-//        for (int i = 0; i < input.length; i++) {
-//            String[] tokens = input[i].split(",");
-//            lsh.add(tokens[1], Integer.parseInt(tokens[0]));
-//        }
+        for (int i = 0; i < input.length; i++) {
+            String[] tokens = input[i].split(",");
+            lsh.add(tokens[1], Integer.parseInt(tokens[0]));
+        }
 
         System.out.println("PersistentLSH looking for similar to index 15");
-        List<Integer> result = lsh.lookupCandidates(input[14].split(",")[1]);
-        for (Integer i : result) {
+        List<Candidate> result = lsh.lookupCandidates(input[14].split(",")[1]);
+        for (Candidate i : result) {
             System.out.println("  " + i);
         }
     }
 
+    public static void testLoad(String f) {
+        System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.testLoad with file " + f);
+        PersistentLSH.file = f;
+        PersistentLSH lsh = new PersistentLSH(10, 30, 100);
+        //now perform some random lookup
+        StopWatch stopWatch = null;
+        if (Configuration.timing()) {
+            stopWatch = new LoggingStopWatch("testLoad.lookupCandidates");
+        }
+        for (int i = 0; i < 10; i++) {
+//            if (Configuration.timing()) {
+//                stopWatch.lap("testLoad.lookupCandidates." +i);
+//            }
+            lsh.lookupCandidatesMT(randomString(100));
+        }
+        if (Configuration.timing()) {
+            stopWatch.stop("testLoad.lookupCandidates");
+//            System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.testLoad total " + stopWatch.getElapsedTime());
+        }
+    }
+
     public static void main(String[] args) {
-        testRandom(500);
+          testLocal();
+       // testLoad(args[0]);
     }
 
 }

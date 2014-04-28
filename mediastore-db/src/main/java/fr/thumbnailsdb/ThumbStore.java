@@ -1,9 +1,9 @@
 package fr.thumbnailsdb;
 
-import fr.thumbnailsdb.lsh.LSH;
 import fr.thumbnailsdb.persistentLSH.PersistentLSH;
 import fr.thumbnailsdb.utils.Logger;
 import fr.thumbnailsdb.utils.ProgressBar;
+import org.perf4j.LoggingStopWatch;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -29,6 +29,8 @@ public class ThumbStore {
 
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
+
+
 
 
     public ThumbStore() {
@@ -1203,37 +1205,50 @@ public class ThumbStore {
 
     }
 
-    public ArrayList<MediaFileDescriptor> findCandidatesUsingLSH(MediaFileDescriptor id) {
+    public List<Candidate> findCandidatesUsingLSH(MediaFileDescriptor id) {
         if (lsh == null) {
             buildLSH(false);
         }
-//        System.out.println("ThumbStore.findCandidatesUsingLSH " + id.getPath() +  "  hash: " + id.getHash()) ;
-        List<Integer> result = lsh.lookupCandidates(id.getHash());
-//        System.out.println("ThumbStore.findCandidatesUsingLSH " + id.getPath());
+        List<Candidate> result = lsh.lookupCandidatesMT(id.getHash());
         System.out.println("Found " + result.size() + " candidates out of " + lsh.size());
 
-        ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
+       // ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
         //TODO : Fix for multiple connections
         //assume only one connection
-        for (Integer i : result) {
-            MediaFileDescriptor tmp = getMediaFileDescriptor(i);
-            if (tmp != null) {
-                al.add(tmp);
-            }
-        }
-        return al;
+        LoggingStopWatch watch = null;
+//        if (Configuration.timing()) {
+//            watch = new LoggingStopWatch("findCandidatesUsingLSH.getMediaFileDescriptor");
+//            watch.start();
+//        }
+//        for (Candidate i : result) {
+//            MediaFileDescriptor tmp = getMediaFileDescriptor(i);
+//            if (tmp != null) {
+//                al.add(tmp);
+//            }
+//        }
+//        if (Configuration.timing()) {
+//            watch.stop();
+//        }
+        return result;
     }
 
     public void buildLSH(boolean force) {
-        lsh = new PersistentLSH(10, 15, 100);
-        if (force || lsh.size() == 0) {
+        lsh = new PersistentLSH(5, 15, 100);
+        if ((force)  || lsh.size() == 0) {
             Status.getStatus().setStringStatus("Teaching LSH");
             System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH forced build or empty lsh size : " + lsh.size());
             lsh.clear();
+            int total = this.size();
+            int processed = 0;
             ArrayList<ResultSet> ares = this.getAllInDataBases().getResultSets();
             for (ResultSet res : ares) {
                 try {
                     while (res.next()) {
+                        processed++;
+                        if (processed>10000) {
+                            System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH processed 10 000");
+                            processed=0;
+                        }
                         // String path = res.getString("path");
                         int index = res.getInt("ID");
                         //  byte[] d = res.getBytes("data");

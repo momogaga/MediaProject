@@ -22,6 +22,7 @@ public class Configuration {
     private static String DRY_RUN = "mediastore.dry.run";
     private static String FORCE_GPS = "mediastore.force.gps";
     private static String FORCE_UPDATE = "mediastore.force.update";
+    private static String TIMING="mediastore.timing";
 
     public static boolean loggerOutEnabled() {
         String out = System.getProperty(LOGGER_STDOUT);
@@ -44,6 +45,10 @@ public class Configuration {
 
     public static boolean forceUpdate() {
         return (System.getProperty(FORCE_UPDATE) != null);
+    }
+
+    public static boolean timing(){
+        return (System.getProperty(TIMING) != null);
     }
 
     public static int getMaxIndexerThreads() {

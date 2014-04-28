@@ -273,9 +273,12 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         if (!(obj instanceof MediaFileDescriptor)) return false;
         MediaFileDescriptor target = (MediaFileDescriptor) obj;
         if ((this.path==null) || (target.getPath()==null))  {
+          //  System.out.println("fr.thumbnailsdb.MediaFileDescriptor.equals " + this.id + " =?= " + target.getId());
+
             //we don't have the path, just the index in the DB
              return (this.id == target.getId());
         }  else {
+           // System.out.println("fr.thumbnailsdb.MediaFileDescriptor.equals " + this.path + " =?= " + target.getPath());
              return this.path==target.getPath();
         }
         //return (this.)

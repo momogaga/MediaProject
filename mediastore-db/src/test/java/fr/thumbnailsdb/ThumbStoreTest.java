@@ -34,8 +34,15 @@ public class ThumbStoreTest {
     }
 
     @AfterClass
-    public void deleteTempDir() throws IOException {
+    public void deleteDir() throws IOException {
         FileUtils.deleteDirectory(tmpDir);
+        try{
+        FileUtils.deleteDirectory(new File("lsh"));
+        FileUtils.deleteDirectory(new File("lsh.p"));
+        FileUtils.deleteDirectory(new File("lsh.t"));
+        } catch (Exception e) {
+
+        }
     }
 
 
