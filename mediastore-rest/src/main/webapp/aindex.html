@@ -61,11 +61,8 @@
         <!-- /.navbar-static-side -->
 
         <div id="page-wrapper">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="page-header">Home</h1>
-                </div>
-            </div>
+            <br>
+
             <!-- /.row -->
             <div class="row">
                 <div class="col-lg-12">
@@ -81,17 +78,16 @@
                                 <input type="submit" value="Get All">
                                 <input type="checkbox" name="gps" value="gpOnly"> GPS only
                             </form>
-
                             <div class="table-responsive">
                                 <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered" id="example"></table>
                             </div>
                             <br />
                             <!--boutons d'interaction avec les images du tab-->
                             <div style="text-align: center">
-                                <a id="test" href="#" class="pathlink btn btn-default btn-info btn-sm"><span class="glyphicon glyphicon-open"></span> Open File</a>
-                                <a href="#" class="btn btn-default btn-warning btn-sm"><span class="glyphicon glyphicon-folder-open"></span> Open Folder</a>                                
-                                <a href="javascript:void(0)" class="btn btn-default btn-danger btn-sm" id="delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
-
+                                <a href="#mapGlobal" id="viewMap" class="pathlink btn btn-default btn-success btn-sm">View map  <i class="fa fa-map-marker"></i></a>
+                                <a disabled="disabled" id="openFile" href="#" class="pathlink btn btn-default btn-info btn-sm"><span class="glyphicon glyphicon-open"></span> Open File</a>
+                                <a disabled="disabled" id="openFolder" href="#" class="btn btn-default btn-warning btn-sm"><span class="glyphicon glyphicon-folder-open"></span> Open Folder</a>                                
+                                <a disabled="disabled" href="javascript:void(0)" class="btn btn-default btn-danger btn-sm" id="delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
                             </div>
                         </div>
                     </div>
@@ -102,7 +98,7 @@
                                     <i class="fa fa-info fa-fw"></i> Infos
                                 </a>
                             </div>
-                            <div id="collapseOne" class="panel-collapse collapse in">
+                            <div id="collapseOne" class="panel-collapse collapse">
                                 <div class="panel-body">
                                     Nom : Photo1.jpg <br>
                                     Taille : 67 Ko <br>
@@ -118,11 +114,6 @@
                             </div>
                             <div id="collapseTwo" class="panel-collapse collapse">
                                 <div id="panel-map" class="panel-body">
-
-                                    Coordonnée Lat : 
-                                    <br><br>
-                                    Coordonnée Long : 
-                                    <br><br>
                                     <div id="cadre">
                                         <div id="map"></div>
                                     </div>
@@ -136,7 +127,7 @@
                                     <i class="fa fa-bookmark fa-fw"></i> Comparaison
                                 </a>
                             </div>
-                            <div id="collapseThree" class="panel-collapse collapse in">
+                            <div id="collapseThree" class="panel-collapse collapse">
 
                                 <div class="tab-pane " id="tabs-drag" style="height:89%;"></div>
                             </div>

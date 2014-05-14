@@ -1,6 +1,3 @@
-//used to store details of duplicateFolders
-var duplicateFolderDetails = {};
-
 function getSize() {
     $.get("rest/hello/db/size", function(data) {
         document.getElementById('db_size').innerHTML = data;
@@ -376,6 +373,16 @@ function callOpen(para1, para2) {
         folders.push(para2);
     }
 
+    result.folders = folders;
+    $.getJSON("rest/hello/open", {path: JSON.stringify(result)});
+}
+function open(para1) {
+    //  debugger;
+    var result = {}
+    var folders = [];
+    if (para1 != null) {
+        folders.push(para1);
+    }
     result.folders = folders;
     $.getJSON("rest/hello/open", {path: JSON.stringify(result)});
 }

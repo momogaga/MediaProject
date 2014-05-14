@@ -19,10 +19,10 @@ function getJsonForDT(array) {
     JSONObj.iDisplayLength = 5;
     JSONObj.bPaginate = true; //enlève la pagination
     JSONObj.sPaginationType = "simple";
-    JSONObj.bFilter = true; //enlève le search
+    JSONObj.bFilter = false; //enlève le search
     JSONObj.sDom = "<'row'<'span8'l><'span8'f>r>t<'row'<'span8'i><'span8'p>>";
-
     JSONObj.bLengthChange = false;
+    JSONObj.bInfo = false;
 
     aoColumns1.sTitle = "Miniature";
     aoColumns2.sTitle = "Nom";
@@ -38,7 +38,7 @@ function getJsonForDT(array) {
     for (i in array) {
         var row = new Object();
         row.DT_RowId = "row_" + i;
-        row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=80&h=80"/>';
+        row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=50&h=50"/>';
         row[1] = array[i].path.substring(array[i].path.lastIndexOf("\\"));
         row[2] = array[i].size;
         row[3] = array[i].path;
@@ -64,6 +64,10 @@ function getJsonForDT(array) {
         $('#example tbody').on('click', 'tr', function() {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
+
+                $('#delete').attr("disabled", "disabled");
+                $('#openFile').attr("disabled", "disabled");
+                $('#openFolder').attr("disabled", "disabled");
             }
             else {
                 table.$('tr.selected').removeClass('selected');
@@ -72,15 +76,16 @@ function getJsonForDT(array) {
                 var pos = $(this).index();
                 aData = oTable.fnGetData(pos);
 
-                console.log(aData[0]);
-                console.log(aData[1]);
-                console.log(aData[2]);
-                console.log(aData[3]);
-                console.log(aData[4]);
-                console.log(aData[5]);
-
                 //MAJ de la map
                 changeMarkerPosition(aData[4], aData[5]);
+
+                $('#delete').removeAttr("disabled");
+                $('#openFile').removeAttr("disabled");
+                $('#openFolder').removeAttr("disabled");
+
+                $('#delete').replace("disabled", "");
+                $('#openFile').replace("disabled", "");
+                $('#openFolder').replace("disabled", "");
 
                 //bug
                 // callDelete(aData[3]);
@@ -88,9 +93,24 @@ function getJsonForDT(array) {
 
 
         });
-
+        //action du delete
         $('#delete').click(function() {
             table.row('.selected').remove().draw(false);
+        });
+        //action du open file
+        $('#openFile').click(function() {
+            open(aData[3]);
+        });
+        //action du open folder
+        $('#openFolder').click(function() {
+            var folder = aData[3];
+            folder = aData[3].substring(0, aData[3].lastIndexOf("\\"));
+            open(folder);
+        });
+        //action du view map
+        $('#viewMap').click(function() {
+            $('#collapseTwo').removeClass('panel-collapse collapse');
+            $('#collapseTwo').addClass('panel-collapse collapse in');
         });
     });
 }
