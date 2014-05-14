@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>MediaStore</title>
+
+        <!-- Include Bootstrap & FA -->
+        <link href="template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="template/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+        <!-- Include DataTables -->
+        <link href="template/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+        <!-- Include Style -->
+        <link href="template/css/media.css" rel="stylesheet">
+
+        <!-- Include Jstree -->
+        <link href="template/dist/themes/default/style.css" rel="stylesheet" />
+        
+    </head>
+    <body>
+        <!-- bandeau -->
+        <div id="header-include"></div>
+        <!-- /.navbar-static-side -->
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">                    
+                    <br />
+                    <div id="load-gallery"></div>
+                    <br />
+                </div>
+            </div>
+        </div>
+
+        <script src="js/thumbstores.js"></script>
+        <script src="js/thumbstore-gallery.js"></script>
+
+        <!-- Script JQuery & Bootstrap -->
+        <script src="template/js/jquery-1.10.2.js"></script>
+        <script src="template/js/bootstrap.min.js"></script>
+
+        
+        <script>
+           $(function() {
+               $("#header-include").load("template/include/header.html");
+           });
+        </script>
+        
+        <script>
+            $(function() {
+                $("#load-gallery").load("agalleryload.html");
+            });
+        </script>
+
+    </body>
+</html>

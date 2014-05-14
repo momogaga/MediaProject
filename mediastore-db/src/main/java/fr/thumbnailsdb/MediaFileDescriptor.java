@@ -45,7 +45,7 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
         // int read = fi.read(data);
         // System.out.println("ImageDescriptor.main() read " + read +
         // " bytes from file");
-        id = new MediaFileDescriptor(path, size, modifiedTime, null,  null);
+        id = new MediaFileDescriptor(path, size, modifiedTime, null,  null, 0,0);
 //		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
 //		} catch (IOException e) {
@@ -95,7 +95,7 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
      * @param md5
      * @param hash
      */
-    public MediaFileDescriptor(String path, long size, long mtime,  String md5, String hash) {
+    public MediaFileDescriptor(String path, long size, long mtime,  String md5, String hash,double lon, double lat) {
         super();
         this.path = path;
 
@@ -107,6 +107,8 @@ public class MediaFileDescriptor implements Serializable, Comparable<MediaFileDe
        // this.data = data;
         this.md5Digest = md5;
         this.hash = hash;
+        this.lon = lon;
+        this.lat = lat;
     }
 
     protected byte[] convertToARGB(int[] data) {

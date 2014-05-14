@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Duplicate Folder</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width">
+        <!-- Include Bootstrap & FA -->
+        <link href="template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="template/font-awesome/css/font-awesome.css" rel="stylesheet">
+        <!-- Include DataTables -->
+        <link href="template/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+        <!-- Include Style -->
+        <link href="template/css/media.css" rel="stylesheet">
+        <!-- Include Jstree -->
+        <link href="template/dist/themes/default/style.css" rel="stylesheet" />
+        <link rel="stylesheet" href="index.html" type="text/css">
+
+    </head>
+    <body>
+        <div id="header-include"></div>
+
+        <!--        <div class="tab-pane" id="page-wrapper" style="height:100%">
+                    <form name="input_duplicate_folders" action="javascript:getAll()">
+                        <input class="textarea" type=text size="25" value="" name="filter" style="margin-bottom: 0px; margin-left:10px">
+                        <input type="submit" value="Get All">
+                        <input type="checkbox" name="gps" value="gpOnly"> GPS only
+                    </form>
+                    <div class="container" style=" overflow-y: scroll;height:75%; width:100%;padding:0">
+                        <div>
+                            <table class="hover-table" id="all-table"></table>
+                        </div>
+                    </div>
+                </div>-->
+
+        <div class="tab-pane" id="page-wrapper" style="position: relative;height: 80%" align="center">
+            <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
+                <br> <br> <button id="butGetFolder" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-search"></span> Get Folders</button>
+            </form>
+            
+            <div class="container" style=" overflow-y: scroll;height:60%; width:100%;padding:0">
+                <div>
+                    <table class="table" id="duplicate-folder-table"></table>
+                </div>
+            </div>
+
+            <div id="duplicate-folders-details" class="table">
+                <table class="hover-table" id="duplicate-folder-details-table"></table>
+            </div>
+        </div>
+
+        <!-- Script JQuery & Bootstrap -->
+        <script src="template/js/jquery-1.10.2.js"></script>
+        <script src="template/js/bootstrap.min.js"></script>
+        <script src="js/thumbstore_1.js"></script>
+        <script>
+            $(function() {
+                $("#header-include").load("template/include/header.html");
+            });
+        </script>
+    </body>
+</html>

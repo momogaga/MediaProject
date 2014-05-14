@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang="en" style="height:100%">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>MediaStore - Charts</title>
+        
+        <!--NEW-->
+        <link href="template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="template/font-awesome/css/font-awesome.css" rel="stylesheet">
+        <link href="template/css/media.css" rel="stylesheet">
+        
+        <script src="js/jquery-1.8.2.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="js/jquery.form.js"></script>
+        <script src="js/thumbstore.js"></script>
+        <script src="js/jquery.iframe-transport.js"></script>
+        <script src="js/canvasjs/canvasjs.min.js"></script>   
+        
+        <!--<script src="js/customCanvas.js"></script>-->
+        <!--<script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>-->
+        <!--<script src="js/mustache.js"></script>-->
+        <!--<link rel="stylesheet" href="js/jquery-ui.css"/>-->
+        <!--<link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>-->
+        <!--<link rel="stylesheet" href="css/bootstrap.min.css"/>-->
+    </head>
+    <body>
+        <div id="header-include"></div>
+        
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <br>
+                    <div>
+                        <iframe src="thumbstore_status.html" height="30"
+                                style="width:100%; border: 0; padding: 0; overflow-x: hidden; display: block" class="frame">
+                        </iframe>
+                    </div>
+
+                    <div>
+                        <div class="tab-pane active" id="tabs-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(function() {
+                $("#header-include").load("template/include/header.html");
+            });
+        </script>
+        <script>
+            $('#tabs-1').load('thumbstore.html');
+        </script>
+    </body>
+</html>

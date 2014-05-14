@@ -673,6 +673,8 @@ public class RestTest {
             try {
                 json.put("path", mfd.getPath());
                 json.put("size", mfd.getSize());
+                json.put("lat", mfd.getLat());
+                json.put("lon", mfd.getLon());
                 mJSONArray.put(json);
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -816,7 +816,7 @@ public class ThumbStore {
             query = "FROM IMAGES, PATHS " +
                     "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE " +
                     " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') " +
-                    "AND  (lat <> 0 OR lon <>0))";
+                    "AND  lat <> 0 OR lon <>0";
         }
         //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
@@ -993,8 +993,10 @@ public class ThumbStore {
             long mtime = res.getLong("mtime");
             long size = res.getLong("size");
             String hash = res.getString("hash");
+            double lat = res.getDouble("lat");
+            double lon = res.getDouble("lon");
 
-            id = new MediaFileDescriptor(path, size, mtime, md5, hash);
+            id = new MediaFileDescriptor(path, size, mtime, md5, hash,lon,lat);
             id.setId(res.getInt("id"));
             // }
         } catch (SQLException e) {

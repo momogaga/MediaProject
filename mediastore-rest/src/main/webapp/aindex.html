@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MediaStore</title>
+        <!-- Include Bootstrap & FA -->
+        <link href="/template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/template/font-awesome/css/font-awesome.css" rel="stylesheet">
+        <!-- Include DataTables -->
+        <link href="/template/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+        <!-- Include Style -->
+        <link href="/template/css/media.css" rel="stylesheet">
+        <!-- Include Jstree -->
+        <link href="/template/dist/themes/default/style.css" rel="stylesheet" />
+        <!-- <link href="http://cdn.datatables.net/1.10.0/css/jquery.dataTables.css" rel="stylesheet" /> -->
+        <style>table.dataTable tbody tr.selected {
+                background-color: #f5f5f5;
+            }</style>
+
+    </head>
+    <body>
+        <!-- bandeau -->
+        <div id="wrapper">
+            <div id="header-include"></div>
+            <!-- /.navbar-static-top -->
+            <nav class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Chemin accès">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">
+                                        <i class="fa fa-ellipsis-h"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </li>
+
+                        <li class="sidebar-search">
+                            <form id="formUpload" name="formUpload" method="post" enctype="multipart/form-data">
+                                <input type="hidden" id="namesAllFiles" name="namesAllFiles"/>
+
+                                <div id="filedrag" ondragover="return false;" ondrop="dropHandler(event)">
+                                    <div id="dropText"><i class="fa fa-cloud-upload fa-4x"></i></div>
+                                    <ol id="droppedFiles"></ol>
+                                </div>
+
+                            </form>
+
+                        </li>
+
+                        <li class="sidebar-search">
+                            <div id="jstree"></div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <!-- /.navbar-static-side -->
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Home</h1>
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-camera-retro fa-fw"></i> Images
+                        </div>
+                        <div class="panel-body">
+                            <!--form à enlever--> 
+                            <form class="hidden" name="input_duplicate_folders" action="javascript:getAll()">
+                                <input class="textarea" type=text size="25" value="" name="filter" style="margin-bottom: 0px; margin-left:10px">
+                                <input type="submit" value="Get All">
+                                <input type="checkbox" name="gps" value="gpOnly"> GPS only
+                            </form>
+
+                            <div class="table-responsive">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered" id="example"></table>
+                            </div>
+                            <br />
+                            <!--boutons d'interaction avec les images du tab-->
+                            <div style="text-align: center">
+                                <a id="test" href="#" class="pathlink btn btn-default btn-info btn-sm"><span class="glyphicon glyphicon-open"></span> Open File</a>
+                                <a href="#" class="btn btn-default btn-warning btn-sm"><span class="glyphicon glyphicon-folder-open"></span> Open Folder</a>                                
+                                <a href="javascript:void(0)" class="btn btn-default btn-danger btn-sm" id="delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-group" id="accordion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                    <i class="fa fa-info fa-fw"></i> Infos
+                                </a>
+                            </div>
+                            <div id="collapseOne" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    Nom : Photo1.jpg <br>
+                                    Taille : 67 Ko <br>
+                                    Dimension : 335 x 720 px <br>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="mapGlobal" class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                                    <i class="fa fa-location-arrow fa-fw"></i> GPS
+                                </a>
+                            </div>
+                            <div id="collapseTwo" class="panel-collapse collapse">
+                                <div id="panel-map" class="panel-body">
+
+                                    Coordonnée Lat : 
+                                    <br><br>
+                                    Coordonnée Long : 
+                                    <br><br>
+                                    <div id="cadre">
+                                        <div id="map"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                                    <i class="fa fa-bookmark fa-fw"></i> Comparaison
+                                </a>
+                            </div>
+                            <div id="collapseThree" class="panel-collapse collapse in">
+
+                                <div class="tab-pane " id="tabs-drag" style="height:89%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <!-- Script Ajax JQuery -->
+            <script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+
+            <!-- Script Bootstrap -->
+            <script src="/template/js/bootstrap.min.js"></script>
+
+            <!-- Script Maps -->
+            <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgfQp0OgUsZoCHHq5as2jCEWBDsJOYHWU&sensor=false"></script>
+            <script type="text/javascript" src="/template/js/maps.js"></script>
+
+            <!-- Script Drag&Drop -->
+            <script src="js/jquery.fileupload.js"></script>
+            <script src="js/jquery.fileupload-fp.js"></script>
+            <script src="js/jquery.fileupload-ui.js"></script>
+            <script src="js/drag.js"></script>
+
+            <!-- Script DataTables -->
+            <script src="/template/js/plugins/dataTables/jquery.dataTables.js"></script>
+            <script src="/template/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+
+            <!-- Script Jstree -->
+            <script src="/template/dist/jstree.js"></script>
+            <script>
+                                    //                                    $(function() {
+                                    //                                        $('#jstree').jstree({'core': {
+                                    //                                                'data': [
+                                    //                                                    'Simple root node',
+                                    //                                                    {
+                                    //                                                        'text': 'Root node 2',
+                                    //                                                        'state': {
+                                    //                                                            'opened': true,
+                                    //                                                            'selected': true
+                                    //                                                        },
+                                    //                                                        'children': [
+                                    //                                                            {'text': 'Child 1'},
+                                    //                                                            'Child 2'
+                                    //                                                        ]
+                                    //                                                    }
+                                    //                                                ]
+                                    //                                            }});
+                                    //                                    });
+
+                                    $(function() {
+                                        $('#jstree').jstree({'core': {
+                                                'data': [
+                                                    {"id": "1", "parent": "#", "text": "C:"},
+                                                    {"id": "3", "parent": "1", "text": "Documents"},
+                                                    {"id": "4", "parent": "3", "text": "Images"},
+                                                    {"id": "5", "parent": "3", "text": "Vacs"}
+                                                ]
+                                            }});
+                                    });
+            </script>
+
+            <script src="js/thumbstores.js"></script>
+            <script src="js/thumbstore-datatable.js"></script>
+            <script src="js/datatables.js"></script>
+            <script>
+                                    $(document).ready(function() {
+                                        buildDataTables();
+                                    });
+            </script>
+
+            <script>
+                $(function() {
+                    $("#header-include").load("template/include/header.html");
+                });
+                $(function() {
+                    $("#menu-include").load("template/include/menu.html");
+                });
+                $(function() {
+                    $('#tabs-drag').load('drag.html');
+                });
+            </script>
+        </footer>
+    </body>
+</html>

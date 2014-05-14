@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- style pour gallery bootstrap -->
+        <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+    </head>
+    <body>
+        <!-- The Bootstrap Image Gallery lightbox, should be a child element of the document body -->
+        <div id="blueimp-gallery" class="blueimp-gallery">
+            <!-- The container for the modal slides -->
+            <div class="slides"></div>
+            <!-- Controls for the borderless lightbox -->
+            <h3 class="title"></h3>
+            <a class="prev">‹</a>
+            <a class="next">›</a>
+            <a class="close">×</a>
+            <a class="play-pause"></a>
+            <ol class="indicator"></ol>
+            <!-- The modal dialog, which will be used to wrap the lightbox content -->
+            <div class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title"></h4>
+                        </div>
+                        <div class="modal-body next"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left prev">
+                                <i class="glyphicon glyphicon-chevron-left"></i>
+                                Previous
+                            </button>
+                            <button type="button" class="btn btn-primary next">
+                                Next
+                                <i class="glyphicon glyphicon-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form name="input_path_gallery" action="javascript:getGallery()" class="form-inline">
+            <div align="center">
+                <input type=text size="25" value="" name="filter_path" class="form-control">
+                <button class="btn btn-sm btn-info"><span class="glyphicon glyphicon-search"></span> Get</button>
+            </div>
+        </form>
+
+        <br /><br />
+
+        <div id="gallery"></div>
+
+        <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+
+    </body>
+</html>
