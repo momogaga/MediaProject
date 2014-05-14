@@ -79,9 +79,24 @@ public class RestTest {
             Logger.getLogger().err("Could not register path");
         }
 
-
     }
 
+    /**
+     * [
+     * {title: "Item 1"}, {title: "Folder 2", folder: true, children: [ {title:
+     * "Sub-item 2.1"}, {title: "Sub-item 2.2"} ] }, {title: "Item 3"} ]
+     *
+     * @return
+     */
+    @GET
+    @Path("/getExplorator")
+    @Produces("application/json")
+    public Response getExplorator() throws JSONException {
+        String pathToExplore = "C:\\Users\\giuse_000\\Pictures\\Photo Mailys";
+        RootToJson diskFileExplorer = new RootToJson(pathToExplore, true);
+        diskFileExplorer.list();
+        return Response.status(200).entity(diskFileExplorer.getJson()).build();
+    }
 
     @GET
     @Path("/db/{param}")
@@ -99,7 +114,6 @@ public class RestTest {
         }
         return Response.status(404).build();
     }
-
 
     @GET
     @Path("/monitor")
@@ -132,7 +146,6 @@ public class RestTest {
         return Response.status(200).entity(result).build();
     }
 
-
     @GET
     @Path("/status")
     @Produces({MediaType.APPLICATION_JSON})
@@ -148,7 +161,6 @@ public class RestTest {
     public Response getPaths() {
         return Response.status(200).entity(tb.getIndexedPaths()).build();
     }
-
 
     protected String[] parseFolders(String json) {
         String[] folders = null;
@@ -167,7 +179,6 @@ public class RestTest {
         return folders;
     }
 
-
     @GET
     @Path("/identical")
     @Produces({MediaType.APPLICATION_JSON})
@@ -180,7 +191,6 @@ public class RestTest {
         Status.getStatus().setStringStatus(Status.IDLE);
         return Response.status(200).entity(dc).build();
     }
-
 
     @GET
     @Path("/duplicateFolder")
@@ -275,19 +285,17 @@ public class RestTest {
 
         MediaFileDescriptor mdf = tb.getMediaFileDescriptor(imageId);
 
-        final InputStream bigInputStream =
-                new ByteArrayInputStream(mdf.getSignatureAsByte());
+        final InputStream bigInputStream
+                = new ByteArrayInputStream(mdf.getSignatureAsByte());
         return Response.status(200).entity(bigInputStream).build();
 
         //return Response.status(404).build();
     }
 
-
     @GET
     @Path("open/")
     public Response openPath(@QueryParam("path") final String obj) {
         String[] folders = parseFolders(obj);
-
 
         for (String path : folders) {
             System.out.println("RestTest.openPath2 " + path);
@@ -302,7 +310,6 @@ public class RestTest {
         return Response.status(200).build();
     }
 
-
     protected String getImageAsHTMLImg(String imageId) {
         String img = "";
         try {
@@ -315,7 +322,6 @@ public class RestTest {
         return img;
     }
 
-
     @GET
     @Path("shrink/")
     public Response shrink(@QueryParam("folder") final java.util.List<String> obj) {
@@ -323,7 +329,6 @@ public class RestTest {
         tb.shrink(obj);
         return Response.status(200).entity("Shrink done").build();
     }
-
 
     @GET
     @Path("update/")
@@ -360,7 +365,6 @@ public class RestTest {
         System.out.println("RestTest.index() input_path " + path);
         return Response.status(200).entity("Indexing in progress").build();
     }
-
 
     @GET
     @Path("trash/")
@@ -404,9 +408,7 @@ public class RestTest {
         System.out.println("RestTest.moveToTrash " + trashedFileDest);
         java.nio.file.Files.move(source, trashedFileDest);
 
-
     }
-
 
     @GET
     @Path("findSimilarFromURL/")
@@ -427,7 +429,6 @@ public class RestTest {
         return Response.status(500).build();
     }
 
-
     private File streamToFile(InputStream source) {
         File temp = null;
         int total = 0;
@@ -439,7 +440,6 @@ public class RestTest {
             FileOutputStream fo = new FileOutputStream(temp);
 
             byte[] buffer = new byte[8 * 1024];
-
 
             try {
                 int bytesRead;
@@ -464,11 +464,11 @@ public class RestTest {
     public Response findSimilar(InputStream stream) {
         ThumbnailGenerator tg = new ThumbnailGenerator(null);
 //        BodyPartEntity bpe = (BodyPartEntity) multipart.getBodyParts().get(0).getEntity();
-      //  Collection<MediaFileDescriptor> c = null;
-      //  ArrayList<SimilarImage> al = null;
+        //  Collection<MediaFileDescriptor> c = null;
+        //  ArrayList<SimilarImage> al = null;
         File temp = null;
         MediaFileDescriptor initialImage = null;
-      //  InputStream source = stream; //bpe.getInputStream();
+        //  InputStream source = stream; //bpe.getInputStream();
         temp = streamToFile(stream);
         initialImage = tg.buildMediaDescriptor(temp);
 
@@ -477,7 +477,8 @@ public class RestTest {
     }
 
     private JSONObject computeSimilar(ThumbnailGenerator tg, File temp, MediaFileDescriptor initialImage) {
-        Collection<MediaFileDescriptor> c;ArrayList<SimilarImage> al;
+        Collection<MediaFileDescriptor> c;
+        ArrayList<SimilarImage> al;
         long t1 = System.currentTimeMillis();
         c = si.findSimilarMedia(temp.getAbsolutePath(), 20);
         long t2 = System.currentTimeMillis();
@@ -545,7 +546,6 @@ public class RestTest {
             e.printStackTrace();
         }
 
-
         JSONObject responseDetailsJson = new JSONObject();
         try {
             responseDetailsJson.put("success", true);
@@ -605,11 +605,9 @@ public class RestTest {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-
         System.out.println("RestTest.findGPS sending json " + responseDetailsJson);
         return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
     }
-
 
     @GET
     @Path("findGPSFromPath/")
@@ -641,7 +639,6 @@ public class RestTest {
         return Response.status(200).entity(responseDetailsJson).type(MediaType.APPLICATION_JSON).build();
     }
 
-
     @GET
     @Path("getAllGPS/")
     @Produces({MediaType.APPLICATION_JSON})
@@ -649,7 +646,6 @@ public class RestTest {
         ArrayList<String> al = tb.getAllWithGPS();
         return Response.status(200).entity(al).type(MediaType.APPLICATION_JSON).build();
     }
-
 
     @GET
     @Path("getAll/")
@@ -685,9 +681,9 @@ public class RestTest {
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
 
-
     @XmlRootElement
     public class SimilarImage {
+
         @XmlElement
         public String path;
         @XmlElement
@@ -755,9 +751,7 @@ public class RestTest {
 
         public void folderDeleted(java.nio.file.Path p) {
 
-
         }
     }
-
 
 }
