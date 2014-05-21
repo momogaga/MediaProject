@@ -92,7 +92,7 @@ public class RestTest {
     @Path("/getExplorator")
     @Produces("application/json")
     public Response getExplorator() throws JSONException {
-        String pathToExplore = "C:\\Users\\giuse_000\\Pictures\\Photo Mailys";
+        String pathToExplore = "C:\\Users\\Bastien\\Pictures\\11-08-13 eperon NW Abysse";
         RootToJson diskFileExplorer = new RootToJson(pathToExplore, true);
         diskFileExplorer.list();
         return Response.status(200).entity(diskFileExplorer.getJson()).build();

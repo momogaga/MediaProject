@@ -1,5 +1,6 @@
 /** Datatables function **/
 
+
 function getJsonForDT(array) {
 
     var JSONObj = new Object();
@@ -68,6 +69,7 @@ function getJsonForDT(array) {
                 $('#delete').attr("disabled", "disabled");
                 $('#openFile').attr("disabled", "disabled");
                 $('#openFolder').attr("disabled", "disabled");
+                $('#viewMap').attr("disabled", "disabled");
             }
             else {
                 table.$('tr.selected').removeClass('selected');
@@ -76,23 +78,45 @@ function getJsonForDT(array) {
                 var pos = $(this).index();
                 aData = oTable.fnGetData(pos);
 
-                //MAJ de la map
-                changeMarkerPosition(aData[4], aData[5]);
+
 
                 $('#delete').removeAttr("disabled");
                 $('#openFile').removeAttr("disabled");
                 $('#openFolder').removeAttr("disabled");
+                $('#viewMap').removeAttr("disabled");
 
                 $('#delete').replace("disabled", "");
                 $('#openFile').replace("disabled", "");
                 $('#openFolder').replace("disabled", "");
-
-                //bug
-                // callDelete(aData[3]);
+                $('#viewMap').replace("disabled", "");
             }
 
-
         });
+
+
+
+
+//        $("a:contains('Next')").on('click', function() {
+//            console.log("ok");
+//        });
+//        $("a:contains('Next')").attr("id", "nextPage");
+//
+//        $('#nextPage').click(function() {
+//            alert("ok");
+//        });
+
+
+
+
+//
+//        $('#example')
+//
+//                .on('page.dt', function() {
+//                    console.log('page');
+//                })
+//                .dataTable();
+
+
         //action du delete
         $('#delete').click(function() {
             table.row('.selected').remove().draw(false);
@@ -107,11 +131,11 @@ function getJsonForDT(array) {
             folder = aData[3].substring(0, aData[3].lastIndexOf("\\"));
             open(folder);
         });
-        //action du view map
-        $('#viewMap').click(function() {
-            $('#collapseTwo').removeClass('panel-collapse collapse');
-            $('#collapseTwo').addClass('panel-collapse collapse in');
+
+        $('#myModal').on('shown.bs.modal', function() {
+            changeMarkerPosition(aData[4], aData[5]);
         });
+
     });
 }
 
@@ -122,6 +146,7 @@ function buildDataTables() {
     $.getJSON('rest/hello/getAll', {
         filter: $("input[name=filter]").val(),
         folder: JSON.stringify(folders),
+        begin: 0,
         gps: $("input[name=gps]").is(":checked")
                 //$.param(folders)
     }, function(data) {
