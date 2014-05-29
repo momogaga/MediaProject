@@ -104,11 +104,14 @@ function constructTable(array) {
 
             $("#infos").html(infos);
             $("#collapseOne").attr("class", "panel-collapse collapse in");
-            
+
             $('#delete').removeAttr("disabled");
             $('#openFile').removeAttr("disabled");
             $('#openFolder').removeAttr("disabled");
-            $('#viewMap').removeAttr("disabled");
+
+            if (aData[4] !== 0 && aData[5] !== 0) {
+                $('#viewMap').removeAttr("disabled");
+            }
         }
 
     });
@@ -141,6 +144,7 @@ function constructTable(array) {
     $("#previousPage").click(function() {
         begin -= 5;
         loadData(begin);
+        $("#nextPage").removeAttr("disabled");
     });
 }
 
@@ -149,8 +153,9 @@ function callRestForDatatable() {
     $.getJSON('rest/hello/getAll', {
         filter: $("input[name=filter]").val(),
         folder: JSON.stringify(folders),
-        begin: begin,
-        gps: $("input[name=gps]").is(":checked")
+        begin: 0,
+        gps: $("input[name=gps]").is(":checked"),
+        nb: 5
     }, function(data) {
         constructTable(data);
     });
@@ -162,21 +167,26 @@ function loadData(begin) {
         filter: $("input[name=filter]").val(),
         folder: JSON.stringify(folders),
         begin: begin,
-        gps: $("input[name=gps]").is(":checked")
+        gps: $("input[name=gps]").is(":checked"),
+        nb: 5
     }, function(data) {
-        var t = $('#example').dataTable();
-        t.fnClearTable();
-        t.fnAddData(rebuildData(data));
-        t.fnDraw();
-        if (data.length < 5) {
+        if (data.length !== 0) {
+            var t = $('#example').dataTable();
+            t.fnClearTable();
+            t.fnAddData(rebuildData(data));
+            t.fnDraw();
+            if (data.length < 5) {
+                $('#nextPage').attr("disabled", "disabled");
+            }
+            if (begin > 0) {
+                $('#previousPage').removeAttr("disabled");
+            }
+            if (begin === 0) {
+                $('#previousPage').attr("disabled", "disabled");
+            }
+        }
+        else{
             $('#nextPage').attr("disabled", "disabled");
-        }
-        
-        if (begin > 0) {
-            $('#previousPage').removeAttr("disabled");
-        }
-        if (begin === 0) {
-            $('#previousPage').attr("disabled", "disabled");
         }
     });
 }

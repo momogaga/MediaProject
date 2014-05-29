@@ -4,7 +4,8 @@ function getGallery() {
     $.getJSON('rest/hello/getAll', {
         filter: $("input[name=filter_path]").val(),
         folder: JSON.stringify(folders),
-        gps: false
+        gps: false,
+        nb: 50
                 //$.param(folders)
     }, function(data) {
         buildGallery(data);
