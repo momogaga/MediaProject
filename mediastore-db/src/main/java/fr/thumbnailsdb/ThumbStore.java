@@ -814,18 +814,18 @@ public class ThumbStore {
         return list;
     }
 
-    public ArrayList<MediaFileDescriptor> getFromDB(String filter, boolean gps, int begin) {
+    public ArrayList<MediaFileDescriptor> getFromDB(String filter, boolean gps, int begin, int nb) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
         String query = null;
         if (!gps) {
             query = "FROM IMAGES, PATHS "
                     + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE"
-                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') LIMIT " + begin + ",5";
+                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') LIMIT " + begin + "," + nb;
         } else {
             query = "FROM IMAGES, PATHS "
                     + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE "
                     + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
-                    + "AND  lat <> 0 OR lon <>0 LIMIT " + begin + ",5";
+                    + "AND  lat <> 0 OR lon <>0 LIMIT " + begin + "," + nb;
         }
         //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
