@@ -1280,7 +1280,26 @@ public class ThumbStore {
         }
     }
 
-    public void addTagToImage(int id, String tag) {
+    public int pathToId(String path){
+        String query = "SELECT id FROM IMAGES WHERE path = '" + path + "'";
+        for (Connection connection : getConnections()) {
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                while (res.next()) {
+                    Logger.getLogger().log("ID trouvé : " + res.getInt(1));
+                    return res.getInt(1);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0; 
+    }
+    public void addTagToImage(String path, String tag) {
+        int id = pathToId(path);
         if (checkIfTagExist(id, tag) == false) {
             int idtag = checkTag(tag);
 
@@ -1377,13 +1396,12 @@ public class ThumbStore {
         }
         return false;
     }
-
     public ArrayList<MediaFileDescriptor> getByTag(String tag) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
         int begin = 0;
         String query = null;
         query = "SELECT * FROM IMAGES,RELATIONTAG,TAG WHERE RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID AND TAG.TAG = '" + tag + "'LIMIT " + begin + ",6";
-
+        
         for (Connection connection : getConnections()) {
             //mrs.add(connection, this.getAllInDataBase(connection));
             Statement sta;
@@ -1401,13 +1419,12 @@ public class ThumbStore {
         }
         return list;
     }
-
     public ArrayList<MediaFileDescriptor> getAllTag(String tag) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
         int begin = 0;
         String query = null;
         query = "SELECT * FROM IMAGES,RELATIONTAG,TAG WHERE RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID ORDER BY TAG.TAG LIMIT " + begin + ",6";
-
+        
         for (Connection connection : getConnections()) {
             //mrs.add(connection, this.getAllInDataBase(connection));
             Statement sta;
@@ -1425,23 +1442,22 @@ public class ThumbStore {
         }
         return list;
     }
-
     public static long getSizeLengthFile(long size) {
+    
+    float sizeKb = 1024.0f;
+    float sizeMo = sizeKb * sizeKb;
+    float sizeGo = sizeMo * sizeKb;
+    float sizeTerra = sizeGo * sizeKb;
 
-        float sizeKb = 1024.0f;
-        float sizeMo = sizeKb * sizeKb;
-        float sizeGo = sizeMo * sizeKb;
-        float sizeTerra = sizeGo * sizeKb;
 
-        if (size < sizeMo) {
-            size = (long) (size / sizeKb);
-        } else if (size < sizeGo) {
-            return size = (long) (size / sizeKb);
-        } else if (size < sizeTerra) {
-            return size = (long) (size / sizeKb);
-        }
+    if(size < sizeMo)
+        size = (long) (size / sizeKb);
+    else if(size < sizeGo)
+        return size = (long) (size / sizeKb);
+    else if(size < sizeTerra)
+        return size = (long) (size / sizeKb);
 
-        return size;
-    }
+    return size;
+}
 
 }
