@@ -1,374 +1,252 @@
 <!DOCTYPE html>
-
-<html lang="en" style="height:100%">
-<head>
-<meta charset="utf-8"/>
-<link rel="stylesheet"
-      href="js/jquery-ui.css"/>
-<link href="js/nailthumb/jquery.nailthumb.1.1.css" type="text/css" rel="stylesheet"/>
-<link rel="stylesheet" href="css/bootstrap.min.css"/>
-
-<script src="js/jquery-1.8.2.js"></script>
-<script src="js/jquery-ui.js"></script>
-<script src="js/jquery.form.js"></script>
-<script src="js/thumbstore.js"></script>
-<script src="js/jquery.iframe-transport.js"></script>
-
-<script src="js/customCanvas.js"></script>
-
-<script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
-<script src="js/mustache.js"></script>
-<script src="js/canvasjs/canvasjs.min.js"></script>
-<script src="js/jquery.ay-table-sort.js"></script>
-
-<!--<script src="js/jquery.exif.js"></script>-->
-
-<!--<script type="text/javascript" src="galleriffic-2.0/js/jquery.galleriffic.js"></script>-->
-<!--<link rel="stylesheet" href="galleriffic-2.0/css/galleriffic-1.css" type="text/css"/>-->
-
-
-<style>
-    table {
-        table-layout: auto;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    thead {
-        background: #b9c9fe;
-    }
-
-    td, th {
-        padding: 5px;
-    }
-
-    tbody tr {
-        border-top: 1px solid #fff;
-        background: #e8edff;
-    }
-
-    th.size {
-        width: 10%;
-        text-align: center
-    }
-
-    td.files {
-        text-align: center
-    }
-
-    .authorship {
-        margin-top: 20px;
-    }
-
-    th.files {
-        width: 10%;
-    }
-
-    .paths {
-        font-size: 12px;
-    }
-
-    tbody {
-        border-top: 5px solid #fff;
-    }
-
-    thead th {
-        text-align: left;
-        cursor: pointer;
-    }
-
-    th.ay-sort-asc span {
-        background: url("js/images/sort_up.png") right center no-repeat;
-        padding-right: 25px;
-        background-size: 15px 15px;
-    }
-
-    th.ay-sort-desc span {
-        background: url("js/images/sort_down.png") right center no-repeat;
-        padding-right: 25px;
-        background-size: 15px 15px;
-    }
-
-</style>
-
-
-<script type="text/javascript"
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJYZeuZ4jmifhLj-u4YrBIFv8X7K7dHe8&sensor=false">
-</script>
-
-
-<style>
-    .ui-progressbar .ui-progressbar-value {
-        background-image: url(js/images/pbar-ani.gif);
-    }
-
-    .cls {
-        /*clear: both;*/
-        /*float : left;*/
-        display: inline-block;
-        width: 33%;
-        height:35%;
-
-    }
-
-    .cls:nth-child(odd) {
-        background-color: #eee;
-    }
-
-    .cls:nth-child(even) {
-        background-color: #fff;
-    }
-
-    .flt {
-        float: left;
-    }
-
-    .square {
-        width: 100px;
-        height: 100px;
-    }
-
-    .horiz {
-        width: 150px;
-        height: 90px;
-    }
-
-    .vert {
-        width: 100px;
-        height: 130px;
-    }
-
-    .nailthumb-image-titles-bigger span.nailthumb-title {
-        background: none repeat scroll 0 0 rgba(0, 125, 0, 0.5);
-        font-size: 15px;
-        height: 30px;
-    }
-
-    .description {
-        padding-bottom: 10px;
-        word-wrap: break-word;
-        width: 90%;
-    }
-
-        /*remove border of thead tabs*/
-    .ui-widget-content {
-        border: none;
-    }
-
-        /* selected row input table*/
-    table.hover-table {
-        border-collapse: collapse;
-    }
-
-    .hover-table tr {
-        background-color: #e8edff;
-        border-top: 1px solid #fff;
-    }
-
-    .hover-table tr:hover {
-        background-color: #b9c9fe;
-    }
-
-    .hover-table  th {
-        background-color: #9aaffe;
-    }
-
-    .hover-table  th, #example td {
-        padding: 3px 5px;
-    }
-
-    .hover-table  td:hover {
-        cursor: pointer;
-    }
-
-    .hover-table  thead {
-        background-color: #b9c9fe;
-    }
-
-    .signatureDiv {
-        margin-left:10px;
-        float:left;
-    }
-
-    .caption {
-        background-color: #c3c3c3;
-    }
-
-    .thumbnails{
-        height:85%;
-    }
-
-    .smallImage {
-        height:auto;
-        width:auto;
-        max-width:100px;
-        max-height:100px
-    }
-
-</style>
-
-
-<script src="bootstrap/js/bootstrap.js"/>
-
-<script>
-
-    //global variables
-
-    jQuery.ajaxSettings.traditional = true;
-
-    $(function () {
-        $("#tabs").tabs({     cache:true,
-                    show:function (event, ui) {
-                        if (ui.index == 4) {
-                            initialize();
-                            google.maps.event.trigger(map, 'resize');
-                        }
-                    }
-                }
-        );
-    })
-    ;
-    $(function () {
-        $("#progressbar").progressbar({
-            value:59
-        });
-    });
-    $(document).ready(function() {
-        $('.textarea').keydown(function() {
-            if (event.keyCode == 13) {
-                this.form.submit();
-                return false;
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MediaStore</title>
+        <!-- Include Bootstrap & FA -->
+        <link href="template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="template/font-awesome/css/font-awesome.css" rel="stylesheet">
+        <!-- Include DataTables -->
+        <link href="template/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+        <!-- Include Style -->
+        <link href="template/css/media.css" rel="stylesheet">
+        <!-- Include Jstree -->
+        <link href="template/fancytree/skin/ui.fancytree.css" rel="stylesheet" type="text/css">
+        <!-- <link href="http://cdn.datatables.net/1.10.0/css/jquery.dataTables.css" rel="stylesheet" /> -->
+        <style>table.dataTable tbody tr.selected {
+                background-color: #f5f5f5;
             }
-        });
-    });
+        </style>
+        <style>
+            html, body, #map-canvas {
+                height: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+        </style>
+
+    </head>
+    <body>
+        <!-- bandeau -->
+        <div id="wrapper">
+            <div id="header-include"></div>
+            <!-- /.navbar-static-top -->
+            <nav class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Chemin accès">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">
+                                        <i class="fa fa-ellipsis-h"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </li>
+
+                        <li class="sidebar-search">
+                            <form id="formUpload" name="formUpload" method="post" enctype="multipart/form-data">
+                                <input type="hidden" id="namesAllFiles" name="namesAllFiles"/>
+
+                                <div id="filedrag" ondragover="return false;" ondrop="dropHandler(event)">
+                                    <div id="dropText"><i class="fa fa-cloud-upload fa-4x"></i></div>
+                                    <ol id="droppedFiles"></ol>
+                                </div>
+
+                            </form>
+
+                        </li>
+
+                        <li class="sidebar-search">
+                            <div id="jstree"></div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <!-- /.navbar-static-side -->
+
+        <div id="page-wrapper">
+            <br>
+
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-camera-retro fa-fw"></i> Images
+                        </div>
+                        <div class="panel-body">
+                            <!--form à enlever--> 
+                            <form class="hidden" name="input_duplicate_folders" action="javascript:getAll()">
+                                <input class="textarea" type=text size="25" value="" name="filter" style="margin-bottom: 0px; margin-left:10px">
+                                <input type="submit" value="Get All">
+                                <input type="checkbox" name="gps" value="gpOnly"> GPS only
+                            </form>
+                            <div class="table-responsive">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered" id="example"></table>
+                            </div>
+
+                            <!--boutons d'interaction avec les images du tab-->
+                            <div style="text-align: right">
+                                <div class="btn-group">
+                                    <button disabled="disabled" id="previousPage" type="button" class="btn btn-default"><i class="fa fa-chevron-left"></i>  Previous</button>
+                                    <button id="nextPage" type="button" class="btn btn-default">Next  <i class="fa fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <br>
 
 
-//    $(function(){
-//        $.ay.tableSort({target: $('table'), debug: true});
-//    });
-
-</script>
-</head>
-<body style="height:100%; overflow-y:hidden">
+                            <div style="text-align: center">
+                                <a disabled="disabled" data-toggle="modal" data-target="#myModal" href="#mapGlobal" id="viewMap" class="pathlink btn btn-default btn-success btn-sm">View map  <i class="fa fa-map-marker"></i></a>
+                                <a disabled="disabled" id="openFile" href="#" class="pathlink btn btn-default btn-info btn-sm"><span class="glyphicon glyphicon-open"></span> Open File</a>
+                                <a disabled="disabled" id="openFolder" href="#" class="btn btn-default btn-warning btn-sm"><span class="glyphicon glyphicon-folder-open"></span> Open Folder</a>                                
+                                <a disabled="disabled" href="javascript:void(0)" class="btn btn-default btn-danger btn-sm" id="delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
 
 
-<div id="header" style="padding:0; height:5%">
-    <iframe src="thumbstore_status.html" height="30"
-            style="width:100%; border: 0; padding: 0; overflow-x: hidden; display: block" class="frame"></iframe>
 
-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-group" id="accordion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                    <i class="fa fa-info fa-fw"></i> Infos
+                                </a>
+                            </div>
+                            <div id="collapseOne" class="panel-collapse collapse">
+                                <div id="infos" class="panel-body">                           
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                                    <i class="fa fa-tags fa-fw"></i> Tags
+                                </a>
+                            </div>
+                            <div id="collapseTwo" class="panel-collapse collapse">
+                                <div class="panel-body">
 
 
-<ul class="nav nav-tabs" data-tabs="tabs">
-    <!--<li class="active"><a data-toggle="tab" href="thumbstore.html">ThumbStore controle</a></li>-->
-    <li class="active"><a data-toggle="tab" href="#tabs-1">ThumbStore controle</a></li>
 
-    <li><a data-toggle="tab" href="#tabs-2">Duplicate media</a></li>
-    <li><a data-toggle="tab" href="#tabs-folder">Duplicate folders</a></li>
-    <li><a data-toggle="tab" href="#tabs-all">All</a></li>
-
-    <!--<li><a data-toggle="tab" href="drag.html">Drag'n'Drop</a></li>-->
-    <li><a data-toggle="tab" href="#tabs-drag">Drag'n'Drop</a></li>
-    <li><a data-toggle="tab" href="#tabs-gps">GPS</a></li>
-    <li><a data-toggle="tab" href="#tabs-gallery">Gallery</a></li>
-
-</ul>
+                                    <form class="form-inline" role="form">
+                                        <label for="tag">Add tag :</label>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" >
+                                        </div>
+                                        <button type="button" class="btn btn-success">+</button>
 
 
-<!--<div id="tabs" style="height:95%; width:100%; position:relative; padding:0">-->
-<!--<ul>-->
-<!--<li><a href="thumbstore.html">ThumbStore controle</a></li>-->
-<!--<li><a href="#tabs-2">Duplicate media</a></li>-->
-<!--<li><a href="#tabs-folder">Duplicate folders</a></li>-->
-<!--<li><a href="drag.html">Drag'n'Drop</a></li>-->
-<!--<li><a href="grid.html">GPS</a></li>-->
+                                    </form>
 
-<!--</ul>-->
 
-<div class="tab-content" style="height:100%">
-    <div class="tab-pane active" id="tabs-1" style="margin-left:10px">
-        <!--<a href="thumbstore.html"></a>-->
-    </div>
 
-    <div class="tab-pane" id="tabs-2">
-        <form name="myform" action="rest/hello/identical" method="POST">
-            <div align="center">
-                <br> <br> <input class="textarea" type=text size="25" value="5" name="max">
-                <br> <a href="javascript: getDuplicate()">Search</a>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                                    <i class="fa fa-bookmark fa-fw"></i> Comparaison
+                                </a>
+                            </div>
+                            <div id="collapseThree" class="panel-collapse collapse">
+
+                                <div class="tab-pane " id="tabs-drag" style="height:89%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title" id="myModalLabel">Map</h4>
+                                </div>
+                                <div id="map-canvas" class="modal-body" style="width: 568px; height: 500px"></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
-
-
-        <!--<div id="accordion"></div>-->
-        <div style="width:98%;float:left">
-            <table class="hover-table" id="duplicate-file-table"></table>
         </div>
-        <!--<span id="duplicate_result"></span>-->
-    </div>
+        <footer>
+            <!-- Script Ajax JQuery -->
+            <script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js" type="text/javascript"></script>
 
-    <div class="tab-pane" id="tabs-folder" style="position: relative;height: 80%">
+            <!-- Script Bootstrap -->
+            <script src="template/js/bootstrap.min.js"></script>
 
-        <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
+            <!-- Script Maps -->
+            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+            <!--<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgfQp0OgUsZoCHHq5as2jCEWBDsJOYHWU&sensor=false"></script>-->
+            <script src="js/map.js"></script>
 
-            <input type="submit" value="Get Folders" style="margin-left:10px">
-        </form>
+            <!-- Script Drag&Drop -->
+            <script src="js/jquery.fileupload.js"></script>
+            <script src="js/jquery.fileupload-fp.js"></script>
+            <script src="js/jquery.fileupload-ui.js"></script>
+            <script src="js/drag.js"></script>
 
-        <div class="container"
-             style=" overflow-y: scroll;height:60%; width:100%;padding:0">
-            <!--<div style="width:65%;float:left">-->
-            <div>
-                <table class="hover-table" id="duplicate-folder-table"></table>
-            </div>
-        </div>
+            <!-- Script DataTables -->
+            <script src="template/js/plugins/dataTables/jquery.dataTables.js"></script>
+            <script src="template/js/plugins/dataTables/dataTables.bootstrap.js"></script>
 
-        <!--<div id="duplicate-folders-details" style="width:35% ; height : 75% ;-->
-        <!--position : fixed; top:25%; left : 65% ; overflow-y: auto; background-color : #d5cfcc">-->
-        <div id="duplicate-folders-details" style="width:100% ; height : 45% ;
-         overflow-y: auto; background-color : #d5cfcc;  border: solid 1px black;">
+            <!-- Script Jstree -->
+            <script src="template/fancytree/jquery.fancytree.js" type="text/javascript"></script>
+            <script type="text/javascript">
+                                    $.getJSON("rest/hello/getExplorator", function(data) {
+                                        // Create the tree inside the <div id="tree"> element.
+                                        var chaine = JSON.stringify(data);
 
-            <table class="hover-table" id="duplicate-folder-details-table"></table>
-
-        </div>
-
-    </div>
-    <div class="tab-pane" id="tabs-all" style="height:100%">
-        <form name="input_duplicate_folders" action="javascript:getAll()">
-            <input class="textarea" type=text size="25" value="" name="filter" style="margin-bottom: 0px; margin-left:10px">
-            <input type="submit" value="Get All">
-            <input type="checkbox" name="gps" value="gpOnly"> GPS only
-        </form>
-        <div class="container"
-             style=" overflow-y: scroll;height:75%; width:100%;padding:0">
-            <div>
-                <table class="hover-table" id="all-table"></table>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="tab-pane " id="tabs-drag" style="height:89%;">
-    </div>
-    <div class="tab-pane " id="tabs-gps">
-    </div>
-
-    <div class="tab-pane" id="tabs-gallery">
-
-        <form name="input_path_gallery" action="javascript:getGallery()">
-            <input class="textarea" type=text size="25" value="" name="filter_path" style="margin-bottom: 0px; margin-left:10px">
-            <input type="submit" value="Get">
-
-        </form>
-           <div name="gallery" id="gallery"></div>
-    </div>
-
-</div>
-
-<script>
-    $('#tabs-1').load('thumbstore.html');
-    $('#tabs-drag').load('drag.html');
-  //  $('#tabs-gps').load('grid.html');
-</script>
+                                        $("#jstree").fancytree({
+                                            source: jQuery.parseJSON(chaine),
+                                            persist: true
+                                        });
+                                    });
+            </script>
 
 
-</body>
+            <script src="js/thumbstores.js"></script>
+            <script src="js/thumbstore-datatable.js"></script>
+            <script src="js/datatables.js"></script>
+            <script>
+                                    $(document).ready(function() {
+                                        initDataTable();
+                                        callRestForDatatable();
+                                    });
+            </script>
+
+            <script>
+                $(function() {
+                    $("#header-include").load("template/include/header.html");
+                });
+                $(function() {
+                    $("#menu-include").load("template/include/menu.html");
+                });
+                $(function() {
+                    $('#tabs-drag').load('drag.html');
+                });
+            </script>
+        </footer>
+    </body>
 </html>
