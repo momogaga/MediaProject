@@ -1,9 +1,12 @@
 /** Datatables function **/
 
+var JSONObj = new Object();
+var oTable;
+var begin = 0;
 
-function getJsonForDT(array) {
+//initialise la structure du tableau
+function initDataTable() {
 
-    var JSONObj = new Object();
     var aoColumns1 = new Object();
     var aoColumns2 = new Object();
     var aoColumns3 = new Object();
@@ -18,12 +21,13 @@ function getJsonForDT(array) {
     JSONObj.iTotalDisplayRecords = 3;
     JSONObj.bProcessing = true;
     JSONObj.iDisplayLength = 5;
-    JSONObj.bPaginate = true; //enlève la pagination
+    JSONObj.bPaginate = false; //enlève la pagination
     JSONObj.sPaginationType = "simple";
     JSONObj.bFilter = false; //enlève le search
     JSONObj.sDom = "<'row'<'span8'l><'span8'f>r>t<'row'<'span8'i><'span8'p>>";
     JSONObj.bLengthChange = false;
     JSONObj.bInfo = false;
+    JSONObj.bSort = false;
 
     aoColumns1.sTitle = "Miniature";
     aoColumns2.sTitle = "Nom";
@@ -33,14 +37,25 @@ function getJsonForDT(array) {
     aoColumns6.sTitle = "Lon";
 
     JSONObj.aoColumns = [aoColumns1, aoColumns2, aoColumns3, aoColumns4, aoColumns5, aoColumns6];
+}
 
+//ajoute les données au tableau
+function rebuildData(array) {
     var aaData = new Array();
-
     for (i in array) {
         var row = new Object();
         row.DT_RowId = "row_" + i;
-        row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=50&h=50"/>';
-        row[1] = array[i].path.substring(array[i].path.lastIndexOf("\\"));
+
+        var name = array[i].path.substring(array[i].path.lastIndexOf("\\"));
+        var ext = name.substring(name.lastIndexOf("."));
+        ext = ext.toLowerCase();
+
+        if (ext === '.jpeg' || ext === '.jpg' || ext === '.bmp' || ext === '.gif' || ext === '.png' || ext === '.tiff') {
+            row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=50&h=50"/>';
+        } else {
+            row[0] = '<i class="fa fa-file fa-3x"></i>';
+        }
+        row[1] = name;
         row[2] = array[i].size;
         row[3] = array[i].path;
         row[4] = array[i].lat;
@@ -48,116 +63,113 @@ function getJsonForDT(array) {
 
         aaData.push(row);
     }
-    JSONObj.aaData = aaData;
+    // JSONObj.aaData = aaData;
+    return aaData;
+}
 
-    //pour debug
-    var str = JSON.stringify(JSONObj, undefined, 3);
-    //console.log(str);
-    var oTable;
+function constructTable(array) {
 
-    $(document).ready(function() {
-        oTable = $('#example').dataTable(JSONObj);
+    var a = rebuildData(array);
+    JSONObj.aaData = a;
+    oTable = $('#example').dataTable(JSONObj);
+
+    var table = $('#example').DataTable();
+
+    $('#example tbody').on('click', 'tr', function() {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+
+            $('#delete').attr("disabled", "disabled");
+            $('#openFile').attr("disabled", "disabled");
+            $('#openFolder').attr("disabled", "disabled");
+            $('#viewMap').attr("disabled", "disabled");
+        }
+        else {
+            table.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+
+            var pos = $(this).index();
+            aData = oTable.fnGetData(pos);
+
+            var infos = "Nom : " + aData[1].substring(1)
+                    + "<br />" + "Taille : " + aData[2]
+                    + "<br />" + "Paths : " + aData[3]
+                    + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5]
+
+            $("#infos").html(infos);
+
+            $('#delete').removeAttr("disabled");
+            $('#openFile').removeAttr("disabled");
+            $('#openFolder').removeAttr("disabled");
+            $('#viewMap').removeAttr("disabled");
+        }
+
     });
+    $('#example').on('page.dt', function() {
+        console.log('page');
+    }).dataTable();
 
-    $(document).ready(function() {
-        var table = $('#example').DataTable();
-
-        $('#example tbody').on('click', 'tr', function() {
-            if ($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-
-                $('#delete').attr("disabled", "disabled");
-                $('#openFile').attr("disabled", "disabled");
-                $('#openFolder').attr("disabled", "disabled");
-                $('#viewMap').attr("disabled", "disabled");
-            }
-            else {
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-
-                var pos = $(this).index();
-                aData = oTable.fnGetData(pos);
-
-
-
-                $('#delete').removeAttr("disabled");
-                $('#openFile').removeAttr("disabled");
-                $('#openFolder').removeAttr("disabled");
-                $('#viewMap').removeAttr("disabled");
-
-                $('#delete').replace("disabled", "");
-                $('#openFile').replace("disabled", "");
-                $('#openFolder').replace("disabled", "");
-                $('#viewMap').replace("disabled", "");
-            }
-
-        });
-
-
-
-
-//        $("a:contains('Next')").on('click', function() {
-//            console.log("ok");
-//        });
-//        $("a:contains('Next')").attr("id", "nextPage");
-//
-//        $('#nextPage').click(function() {
-//            alert("ok");
-//        });
-
-
-
-
-//
-//        $('#example')
-//
-//                .on('page.dt', function() {
-//                    console.log('page');
-//                })
-//                .dataTable();
-
-
-        //action du delete
-        $('#delete').click(function() {
-            table.row('.selected').remove().draw(false);
-        });
-        //action du open file
-        $('#openFile').click(function() {
-            open(aData[3]);
-        });
-        //action du open folder
-        $('#openFolder').click(function() {
-            var folder = aData[3];
-            folder = aData[3].substring(0, aData[3].lastIndexOf("\\"));
-            open(folder);
-        });
-
-        $('#myModal').on('shown.bs.modal', function() {
-            changeMarkerPosition(aData[4], aData[5]);
-        });
-
+    //action du delete
+    $('#delete').click(function() {
+        table.row('.selected').remove().draw(false);
+    });
+    //action du open file
+    $('#openFile').click(function() {
+        open(aData[3]);
+    });
+    //action du open folder
+    $('#openFolder').click(function() {
+        var folder = aData[3];
+        folder = aData[3].substring(0, aData[3].lastIndexOf("\\"));
+        open(folder);
+    });
+    $('#myModal').on('shown.bs.modal', function() {
+        changeMarkerPosition(aData[4], aData[5]);
+    });
+    $("#nextPage").click(function() {
+        begin += 5;
+        loadData(begin);
+    });
+    $("#previousPage").click(function() {
+        begin -= 5;
+        loadData(begin);
     });
 }
 
-
-function buildDataTables() {
-    // debugger;
+function callRestForDatatable() {
     var folders = getSelectedFolders();
     $.getJSON('rest/hello/getAll', {
         filter: $("input[name=filter]").val(),
         folder: JSON.stringify(folders),
-        begin: 0,
+        begin: begin,
         gps: $("input[name=gps]").is(":checked")
-                //$.param(folders)
     }, function(data) {
-        //var str = JSON.stringify(data, undefined, 2);
-        // console.log("pretty print  : " + str);
-        getJsonForDT(data);
-        //   debugger;
+        constructTable(data);
     });
 }
 
-
-
+function loadData(begin) {
+    var folders = getSelectedFolders();
+    $.getJSON('rest/hello/getAll', {
+        filter: $("input[name=filter]").val(),
+        folder: JSON.stringify(folders),
+        begin: begin,
+        gps: $("input[name=gps]").is(":checked")
+    }, function(data) {
+        var t = $('#example').dataTable();
+        t.fnClearTable();
+        t.fnAddData(rebuildData(data));
+        t.fnDraw();
+        if (data.length < 5) {
+            $('#nextPage').attr("disabled", "disabled");
+        }
+        if (begin > 0) {
+            $('#previousPage').removeAttr("disabled");
+        }
+        if (begin === 0) {
+            $('#previousPage').attr("disabled", "disabled");
+        }
+    });
+}
 
 

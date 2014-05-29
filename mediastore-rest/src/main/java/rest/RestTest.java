@@ -650,12 +650,12 @@ public class RestTest {
     @GET
     @Path("getAll/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getAll(@QueryParam("folder") final String obj, @QueryParam("filter") String filter, @QueryParam("gps") boolean gps) {
+    public Response getAll(@QueryParam("folder") final String obj, @QueryParam("filter") String filter, @QueryParam("gps") boolean gps, @QueryParam("begin") int begin) {
         //TODO : handle folder parameter
         String[] folders = this.parseFolders(obj);
         Status.getStatus().setStringStatus("Requesting all media with filter : " + filter + " GPS : " + gps);
         long t0 = System.currentTimeMillis();
-        ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter, gps);
+        ArrayList<MediaFileDescriptor> pd = tb.getFromDB(filter, gps, begin);
         long t1 = System.currentTimeMillis();
         System.out.println("RestTest.getAll with filter " + filter + "  took " + (t1 - t0) + " ms");
         Iterator<MediaFileDescriptor> it = pd.iterator();

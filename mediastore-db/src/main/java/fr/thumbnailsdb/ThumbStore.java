@@ -10,7 +10,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -21,7 +23,6 @@ public class ThumbStore {
     protected static String DEFAULT_DB = "localDB";
     protected static int CURRENT_VERSION = 5;
 
-
     //This is used as a cache of preloaded descriptors
     protected PreloadedDescriptors preloadedDescriptors;
     // protected LSH lsh;
@@ -29,9 +30,6 @@ public class ThumbStore {
 
     protected HashMap<String, Connection> connexions = new HashMap<String, Connection>();
     protected ArrayList<String> pathsOfDBOnDisk = new ArrayList<String>();
-
-
-
 
     public ThumbStore() {
         this(DEFAULT_DB);
@@ -45,7 +43,6 @@ public class ThumbStore {
         System.err.println("ThumbStore.ThumbStore() using " + path + " as DB");
         this.addDB(path);
     }
-
 
     public void addDB(String path) {
         this.pathsOfDBOnDisk.add(path);
@@ -73,7 +70,6 @@ public class ThumbStore {
         }
 
     }
-
 
     private HashSet<Connection> getConnections() {
         HashSet<Connection> r = new HashSet<Connection>();
@@ -108,6 +104,16 @@ public class ThumbStore {
             Statement st = connexion.createStatement();
             st.execute(table);
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created!");
+            st = connexion.createStatement();
+
+            String tag = "CREATE TABLE TAG(id int NOT NULL AUTO_INCREMENT,tag varchar(256), PRIMARY KEY(id))";
+            st.execute(tag);
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() table tag created!");
+            st = connexion.createStatement();
+
+            String relationtag = "CREATE TABLE RELATIONTAG(id int,idtag int,FOREIGN KEY (idtag) REFERENCES tag (id))";
+            st.execute(relationtag);
+            Logger.getLogger().log("ThumbStore.checkAndCreateTables() relationtag created!");
             st = connexion.createStatement();
 
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() creating Index on path and path_id");
@@ -149,7 +155,6 @@ public class ThumbStore {
             st.execute(table);
             Logger.getLogger().log("ThumbStore.checkAndCreateTables() table created with version 0");
         }
-
 
         // now we check for version number and decides if an upgrade is required
         String version = "SELECT * FROM VERSION";
@@ -211,7 +216,6 @@ public class ThumbStore {
                 upgradeToV5(connection);
             }
 
-
             Statement st = connection.createStatement();
             String action = "Shutdown compact";
             st.execute(action);
@@ -258,7 +262,6 @@ public class ThumbStore {
         st.execute(action);
     }
 
-
     private void upgradeToV3(Connection connection) throws SQLException {
         //ok we need to upgrade the DB to the next version
         //This one includes an index for the path
@@ -271,7 +274,6 @@ public class ThumbStore {
         action = "UPDATE VERSION SET version=3 WHERE version=2";
         st.execute(action);
     }
-
 
     private void upgradeToV4(Connection connection) throws SQLException {
         Statement st = connection.createStatement();
@@ -294,11 +296,9 @@ public class ThumbStore {
         Logger.getLogger().log("ThumbStore.upgradeToV5 creating column for path id in IMAGES");
         //   Logger.getLogger().log("ThumbStore.upgradeToV5 dropping column data");
 
-
         //create a temporary table
         String action = "CREATE TABLE IMAGES_TMP(id  bigint identity(1,1),path varchar(256), path_id int, size long, mtime long, md5 varchar(256), hash varchar(100),  lat double, lon double);";
         st.execute(action);
-
 
         //add the path_id to the PATHS table
         action = "ALTER TABLE PATHS ADD path_id  int AUTO_INCREMENT";
@@ -324,7 +324,6 @@ public class ThumbStore {
 //            //path_id starts at 1 in the DB                                                        d
 //              hashPaths.put(currentPaths.get(i), i+1);
 //        }
-
         System.out.println("ThumbStore.upgradeToV5 got " + currentPaths.size() + " indexed paths");
         int index = 0;
 
@@ -354,12 +353,10 @@ public class ThumbStore {
 
         }
 
-
         action = "DROP table IMAGES";
         st.execute(action);
         action = "ALTER table images_tmp rename to IMAGES";
         st.execute(action);
-
 
         action = "CREATE INDEX PATH_ID_INDEX ON IMAGES(path_id)";
         st.execute(action);
@@ -370,9 +367,7 @@ public class ThumbStore {
         action = "UPDATE VERSION SET version=5 WHERE version=4";
         st.execute(action);
 
-
     }
-
 
     public void compact() {
         for (Connection connection : getConnections()) {
@@ -389,8 +384,8 @@ public class ThumbStore {
     }
 
     /**
-     * Add the path to the list of indexed pathsOfDBOnDisk
-     * An empty database is used or the first one found
+     * Add the path to the list of indexed pathsOfDBOnDisk An empty database is
+     * used or the first one found
      *
      * @param path
      */
@@ -436,7 +431,6 @@ public class ThumbStore {
     }
 
     //TODO : process connexions.values() to eliminate duplicates
-
     public ArrayList<String> getIndexedPaths() {
         Statement sta;
         ResultSet res = null;
@@ -457,7 +451,6 @@ public class ThumbStore {
         return paths;
     }
 
-
     public void updateIndexedPath(String current, String newP) {
 
         PreparedStatement psmnt;
@@ -477,8 +470,8 @@ public class ThumbStore {
     }
 
     /**
-     * Return the connection to the DB currently responsible
-     * for managing the root path of mediaFile
+     * Return the connection to the DB currently responsible for managing the
+     * root path of mediaFile
      *
      * @param mediaFile
      * @return
@@ -494,7 +487,6 @@ public class ThumbStore {
         }
         return result;
     }
-
 
     /**
      * return s as root path and relative path
@@ -513,8 +505,7 @@ public class ThumbStore {
     }
 
     /**
-     * Save the descriptor to the db
-     * DO NOT check that the key is not used
+     * Save the descriptor to the db DO NOT check that the key is not used
      *
      * @param id
      */
@@ -535,7 +526,6 @@ public class ThumbStore {
             psmnt.setLong(3, id.getSize());
             psmnt.setLong(4, id.getMtime());
 
-
             psmnt.setString(5, id.getMD5());
             psmnt.setString(6, id.getHash());
             psmnt.setDouble(7, id.getLat());
@@ -551,7 +541,6 @@ public class ThumbStore {
             id.setId(getIndex(id.getPath()));
             this.getPreloadedDescriptors().add(id);
         }
-
 
     }
 
@@ -624,7 +613,6 @@ public class ThumbStore {
         return count;
     }
 
-
     public boolean isInDataBaseBasedOnName(String path) {
         boolean result = false;
         ResultSet res = getFromDatabase(path);
@@ -637,7 +625,6 @@ public class ThumbStore {
         }
         return result;
     }
-
 
     public void deleteFromDatabase(String path) {
 
@@ -660,13 +647,12 @@ public class ThumbStore {
         }
     }
 
-
     public int getIndex(String path) {
         ResultSet res = null;
         Connection connexion = findResponsibleDB(path);
         try {
-            PreparedStatement psmnt = connexion.prepareStatement("FROM IMAGES, PATHS " +
-                    "SELECT paths.path||images.path as path,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            PreparedStatement psmnt = connexion.prepareStatement("FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             psmnt.setString(1, path);
             //		st = connexion.createStatement();
             psmnt.execute();
@@ -688,8 +674,8 @@ public class ThumbStore {
 
             String[] decomposedPath = this.decomposePath(path);
             if (decomposedPath == null) {
-                psmnt = connexion.prepareStatement("FROM IMAGES, PATHS " +
-                        "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                psmnt = connexion.prepareStatement("FROM IMAGES, PATHS "
+                        + "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 psmnt.setString(1, path);
             } else {
                 psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -697,9 +683,7 @@ public class ThumbStore {
                 psmnt.setString(1, decomposedPath[1]);
             }
 
-
             //check whether this is a full path or not
-
             //		st = connexion.createStatement();
             psmnt.execute();
             res = psmnt.getResultSet();
@@ -710,7 +694,6 @@ public class ThumbStore {
         return res;
     }
 
-
     public ResultSet getFromDatabase(int index) {
         ResultSet res = null;
         //TODO: Fix for multiple connections
@@ -718,9 +701,8 @@ public class ThumbStore {
         try {
             PreparedStatement psmnt = connexion.prepareStatement(
                     //"SELECT * FROM IMAGES WHERE id=?"
-                    "FROM IMAGES, PATHS\n" +
-                            "SELECT paths.path||images.path as path,id,size,mtime,md5,hash,lat,lon   WHERE images.id=? AND images.path_ID=paths.path_ID"
-                    , ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                    "FROM IMAGES, PATHS\n"
+                    + "SELECT paths.path||images.path as path,id,size,mtime,md5,hash,lat,lon   WHERE images.id=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             psmnt.setInt(1, index);
             //		st = connexion.createStatement();
             psmnt.execute();
@@ -731,7 +713,6 @@ public class ThumbStore {
         }
         return res;
     }
-
 
     public long getMTime(String path) {
 
@@ -752,7 +733,6 @@ public class ThumbStore {
         return 0;
     }
 
-
     public ArrayList<String> getAllWithGPS() {
         Statement sta;
         ResultSet res = null;
@@ -766,7 +746,6 @@ public class ThumbStore {
                     // System.err.println("getAllWithGPS adding  " + res.getString("path"));
                     al.add(res.getString("path").replaceAll("\\\\", "\\\\\\\\"));
                 }
-
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -784,15 +763,14 @@ public class ThumbStore {
         return mrs;
     }
 
-
     public ResultSet getAllInDataBase(Connection connexion) {
         Statement sta;
         long t0 = System.currentTimeMillis();
         try {
             sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            return sta.executeQuery("FROM IMAGES, PATHS " +
-                    "SELECT paths.path||images.path as path,id size,mtime,md5,hash,lat,lon WHERE" +
-                    " paths.path_id=images.path_id ");
+            return sta.executeQuery("FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,id size,mtime,md5,hash,lat,lon WHERE"
+                    + " paths.path_id=images.path_id ");
 //            return sta.executeQuery("SELECT path,data,id,md5,size,COUNT(md5) FROM IMAGES GROUP BY path,md5 HAVING ( COUNT(md5) > 1 )");
 
         } catch (SQLException e) {
@@ -806,17 +784,16 @@ public class ThumbStore {
 
     public ArrayList<MediaFileDescriptor> getFromDB(String filter, boolean gps) {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
-
         String query = null;
         if (!gps) {
-            query = "FROM IMAGES, PATHS " +
-                    "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE" +
-                    " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\')";
+            query = "FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE"
+                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\')";
         } else {
-            query = "FROM IMAGES, PATHS " +
-                    "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE " +
-                    " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') " +
-                    "AND  lat <> 0 OR lon <>0";
+            query = "FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE "
+                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
+                    + "AND  lat <> 0 OR lon <>0";
         }
         //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
@@ -837,6 +814,37 @@ public class ThumbStore {
         return list;
     }
 
+    public ArrayList<MediaFileDescriptor> getFromDB(String filter, boolean gps, int begin) {
+        ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
+        String query = null;
+        if (!gps) {
+            query = "FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE"
+                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') LIMIT " + begin + ",5";
+        } else {
+            query = "FROM IMAGES, PATHS "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE "
+                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
+                    + "AND  lat <> 0 OR lon <>0 LIMIT " + begin + ",5";
+        }
+        //   MultipleResultSet mrs = new MultipleResultSet();
+        for (Connection connection : getConnections()) {
+            //mrs.add(connection, this.getAllInDataBase(connection));
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                // mrs.add(connection,r);
+                while (res.next()) {
+                    list.add(getCurrentMediaFileDescriptor(res));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
 
     public String getPath(int[] data) {
         Statement sta;
@@ -846,10 +854,8 @@ public class ThumbStore {
             try {
                 sta = connexion.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-
                 PreparedStatement psmnt;
                 psmnt = connexion.prepareStatement("SELECT paths.path||images.path AS path FROM IMAGES, PATHS WHERE data=(?)");
-
 
                 psmnt.setBytes(1, Utils.toByteArray(data));
                 psmnt.execute();
@@ -869,7 +875,6 @@ public class ThumbStore {
         // Statement sta;
         ResultSet res = null;
         String p = null;
-
 
         if (c == null) {
             Logger.getLogger().err("Thumbstore : Connection is NULL ");
@@ -891,7 +896,6 @@ public class ThumbStore {
         }
         return p;
     }
-
 
     public ArrayList<MediaFileDescriptor> getDuplicatesMD5(MediaFileDescriptor mfd) {
         Statement sta;
@@ -980,7 +984,6 @@ public class ThumbStore {
 
     }
 
-
     public MediaFileDescriptor getCurrentMediaFileDescriptor(ResultSet res) {
         MediaFileDescriptor id = null;
         try {
@@ -996,7 +999,9 @@ public class ThumbStore {
             double lat = res.getDouble("lat");
             double lon = res.getDouble("lon");
 
-            id = new MediaFileDescriptor(path, size, mtime, md5, hash,lon,lat);
+            size = getSizeLengthFile(size);
+
+            id = new MediaFileDescriptor(path, size, mtime, md5, hash, lon, lat);
             id.setId(res.getInt("id"));
             // }
         } catch (SQLException e) {
@@ -1027,7 +1032,6 @@ public class ThumbStore {
         }
         return null;
     }
-
 
     public void displayImage(BufferedImage bf) {
         Graphics2D gg = bf.createGraphics();
@@ -1113,11 +1117,9 @@ public class ThumbStore {
         }
     }
 
-
     public ArrayList<String> getPath() {
         return this.pathsOfDBOnDisk;
     }
-
 
     public PreloadedDescriptors getPreloadedDescriptors() {
         if (preloadedDescriptors == null) {
@@ -1193,9 +1195,8 @@ public class ThumbStore {
     }
 
     /**
-     * return LSH status
-     * [0] = LSH size
-     * [1] = number of candidates for last query
+     * return LSH status [0] = LSH size [1] = number of candidates for last
+     * query
      *
      * @return
      */
@@ -1214,7 +1215,7 @@ public class ThumbStore {
         List<Candidate> result = lsh.lookupCandidatesMT(id.getHash());
         System.out.println("Found " + result.size() + " candidates out of " + lsh.size());
 
-       // ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
+        // ArrayList<MediaFileDescriptor> al = new ArrayList<MediaFileDescriptor>(result.size());
         //TODO : Fix for multiple connections
         //assume only one connection
         LoggingStopWatch watch = null;
@@ -1236,7 +1237,7 @@ public class ThumbStore {
 
     public void buildLSH(boolean force) {
         lsh = new PersistentLSH(5, 15, 100);
-        if ((force)  || lsh.size() == 0) {
+        if ((force) || lsh.size() == 0) {
             Status.getStatus().setStringStatus("Teaching LSH");
             System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH forced build or empty lsh size : " + lsh.size());
             lsh.clear();
@@ -1247,9 +1248,9 @@ public class ThumbStore {
                 try {
                     while (res.next()) {
                         processed++;
-                        if (processed>10000) {
+                        if (processed > 10000) {
                             System.out.println("fr.thumbnailsdb.ThumbStore.buildLSH processed 10 000");
-                            processed=0;
+                            processed = 0;
                         }
                         // String path = res.getString("path");
                         int index = res.getInt("ID");
@@ -1272,11 +1273,175 @@ public class ThumbStore {
         return (this.preloadedDescriptors != null);
     }
 
-
     public void flushPreloadedDescriptors() {
         if (this.preloadedDescriptors != null) {
             this.preloadedDescriptors.clear();
             this.preloadedDescriptors = null;
         }
     }
+
+    public void addTagToImage(int id, String tag) {
+        if (checkIfTagExist(id, tag) == false) {
+            int idtag = checkTag(tag);
+
+            try {
+                Connection c = connectToDB(DEFAULT_DB);
+                try {
+                    PreparedStatement psmnt;
+                    Logger.getLogger().log("Associate the tag with the picture...");
+                    psmnt = c.prepareStatement("insert into RELATIONTAG(id,idtag)" + "values(?,?)");
+                    psmnt.setInt(1, id);
+                    psmnt.setInt(2, idtag);
+                    psmnt.execute();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } catch (InstantiationException ex) {
+                java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex) {
+                java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            Logger.getLogger().log("Done...");
+        }
+
+    }
+
+    public int checkTag(String tag) {
+
+        String query = "SELECT * FROM TAG WHERE tag = '" + tag + "'";
+        for (Connection connection : getConnections()) {
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                while (res.next()) {
+                    return res.getInt(1);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        Logger.getLogger().log("The tag will be create");
+        addTagToDB(tag);
+        int result = 0;
+        result = checkTag(tag);
+        return result;
+    }
+
+    public void addTagToDB(String tag) {
+        Logger.getLogger().log("Create tag in DB of tag...");
+        try {
+            Connection c = connectToDB(DEFAULT_DB);
+            try {
+                PreparedStatement psmnt;
+                psmnt = c.prepareStatement("insert into TAG(tag)" + "values(?)");
+                psmnt.setString(1, tag);
+                psmnt.execute();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(ThumbStore.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Logger.getLogger().log("Done");
+    }
+
+    public boolean checkIfTagExist(int id, String tag) {
+
+        String query = "SELECT * FROM RELATIONTAG,TAG WHERE RELATIONTAG.IDTAG = TAG.ID AND TAG.TAG = '" + tag + "' AND RELATIONTAG.ID =  '" + id + " '";
+
+        for (Connection connection : getConnections()) {
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                while (res.next()) {
+                    return true;
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<MediaFileDescriptor> getByTag(String tag) {
+        ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
+        int begin = 0;
+        String query = null;
+        query = "SELECT * FROM IMAGES,RELATIONTAG,TAG WHERE RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID AND TAG.TAG = '" + tag + "'LIMIT " + begin + ",6";
+
+        for (Connection connection : getConnections()) {
+            //mrs.add(connection, this.getAllInDataBase(connection));
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                // mrs.add(connection,r);
+                while (res.next()) {
+                    list.add(getCurrentMediaFileDescriptor(res));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public ArrayList<MediaFileDescriptor> getAllTag(String tag) {
+        ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
+        int begin = 0;
+        String query = null;
+        query = "SELECT * FROM IMAGES,RELATIONTAG,TAG WHERE RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID ORDER BY TAG.TAG LIMIT " + begin + ",6";
+
+        for (Connection connection : getConnections()) {
+            //mrs.add(connection, this.getAllInDataBase(connection));
+            Statement sta;
+            try {
+                sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet res = sta.executeQuery(query);
+                // mrs.add(connection,r);
+                while (res.next()) {
+                    list.add(getCurrentMediaFileDescriptor(res));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public static long getSizeLengthFile(long size) {
+
+        float sizeKb = 1024.0f;
+        float sizeMo = sizeKb * sizeKb;
+        float sizeGo = sizeMo * sizeKb;
+        float sizeTerra = sizeGo * sizeKb;
+
+        if (size < sizeMo) {
+            size = (long) (size / sizeKb);
+        } else if (size < sizeGo) {
+            return size = (long) (size / sizeKb);
+        } else if (size < sizeTerra) {
+            return size = (long) (size / sizeKb);
+        }
+
+        return size;
+    }
+
 }

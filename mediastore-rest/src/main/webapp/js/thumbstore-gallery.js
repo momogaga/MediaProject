@@ -17,9 +17,12 @@ function buildGallery(array) {
     $('#gallery').children().remove();
     for (f in array) {
         var tag = array[f];
+        var ext = tag.path.substring(tag.path.lastIndexOf("."));
+        ext = ext.toLowerCase();
 
-        $('#gallery').append("<a href='rest/hello/getThumbnail?path=" + tag.path + "&w=600&h=600' data-gallery=''><img src='rest/hello/getThumbnail?path=" + tag.path + "&w=70&h=70'></a>");
-
+        if (ext === '.jpeg' || ext === '.jpg' || ext === '.bmp' || ext === '.gif' || ext === '.png' || ext === '.tiff') {
+            $('#gallery').append("<a href='rest/hello/getThumbnail?path=" + tag.path + "&w=600&h=600' title='"+ tag.path +"' data-gallery=''><img src='rest/hello/getThumbnail?path=" + tag.path + "&w=70&h=70' alt='"+tag.path+"'></a>");
+        }
     }
 }
 

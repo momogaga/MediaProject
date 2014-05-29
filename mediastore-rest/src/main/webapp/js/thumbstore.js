@@ -2,19 +2,19 @@
 var duplicateFolderDetails = {};
 
 function getSize() {
-    $.get("rest/hello/db/size", function (data) {
+    $.get("rest/hello/db/size", function(data) {
         document.getElementById('db_size').innerHTML = data;
     });
 }
 
 function getPath() {
-    $.get("rest/hello/db/path", function (data) {
+    $.get("rest/hello/db/path", function(data) {
         document.getElementById('db_path').innerHTML = data;
     });
 }
 
 function getIndexedPaths(div) {
-    $.get("rest/hello/paths", function (data) {
+    $.get("rest/hello/paths", function(data) {
         var val = 1;
         var cbh = document.getElementById('db_paths');
         //   data.push("toto");
@@ -33,55 +33,55 @@ function getIndexedPaths(div) {
 }
 
 function getStatus() {
-    $.get("rest/hello/status",function (data) {
+    $.get("rest/hello/status", function(data) {
         document.getElementById('db_status').innerHTML = data["stringStatus"];
-    }).error(function () {
-            document.getElementById('db_status').innerHTML = "Cannot connect to REST service";
+    }).error(function() {
+        document.getElementById('db_status').innerHTML = "Cannot connect to REST service";
 
-        });
+    });
 }
 
 function getDuplicate() {
     var folders = getSelectedFolders();
     $.get(
-        "rest/hello/identical",
-        {
-            folder:JSON.stringify(folders), //folders,
-            max:$("input[name=max]").val()
-        },
-        function (data) {
-            var i = 1;
-            var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
+            "rest/hello/identical",
+            {
+                folder: JSON.stringify(folders), //folders,
+                max: $("input[name=max]").val()
+            },
+    function(data) {
+        var i = 1;
+        var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
                 + ' <th class="ay-sort"><span>#Files</span></th>  <th class="ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
 
-            var template = ' <tr >'
+        var template = ' <tr >'
                 + '<td class="size"><a href="#"  onclick="">{{fileSize}}</a></td>'
                 + '<td class="files">{{occurences}}</td><td class="paths"> ';
 
-            for (i in data) {
-                data[i]['occurences'] = data[i].al.length;
-                data[i]['fileSize'] = data[i]['fileSize'] / 1024 / 1024;
-                data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
-                var rowTag = Mustache.to_html(template, data[i]);
-                for (f in data[i].al) {
-                    rowTag += '<div class="paths">' + toFolderAndFileLink(data[i].al[f]) + ' ' + toDeleteLink(data[i].al[f]) + '</div> ';
-                }
-                html_table += rowTag + '</td></tr> ';
+        for (i in data) {
+            data[i]['occurences'] = data[i].al.length;
+            data[i]['fileSize'] = data[i]['fileSize'] / 1024 / 1024;
+            data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
+            var rowTag = Mustache.to_html(template, data[i]);
+            for (f in data[i].al) {
+                rowTag += '<div class="paths">' + toFolderLink(getFolder(data[i].al[f])) + toFileLink(data[i].al[f]) + toDeleteLink(data[i].al[f]) + data[i].al[f] + '</div> ';
             }
-            html_table += '</tbody>';
-            updateDuplicateTable('#duplicate-file-table', html_table);
-        });
+            html_table += rowTag + '</td></tr> ';
+        }
+        html_table += '</tbody>';
+        updateDuplicateTable('#duplicate-file-table', html_table);
+    });
 }
 
 
 function updateDuplicateTable(table, html_table) {
     $(table).children().remove();
     $(table).append(html_table);
-    $(table).delegate("tr", "click", function () {
+    $(table).delegate("tr", "click", function() {
         $(this).addClass("selected").siblings().removeClass("selected");
     });
-    $(document).ready(function () {
-        $.ay.tableSort({target:$('table'), debug:false});
+    $(document).ready(function() {
+        $.ay.tableSort({target: $('table'), debug: false});
         generatePathLink();
         generateDeleteLink();
     });
@@ -103,7 +103,7 @@ function toFileLink(path) {
 }
 
 function toFolderLinks(path1, path2) {
-    var a1 = '  <a class="pathlink btn-mini btn-info" href="#!"  data-p1="' + path1 + '" data-p2="' + path2 + '">';
+    var a1 = '  <a class="pathlink btn-xs btn-info" href="#!"  data-p1="' + path1 + '" data-p2="' + path2 + '">';
     var a2 = ' [folders] <a>';
     return  a1 + a2;
 }
@@ -126,8 +126,8 @@ function getFolder(path) {
 }
 function toFolderAndFileLink(path) {
     var folder = getFolder(path);
-    return path + '' + toFileLink(path) + ' ' +
-        toFolderLink(folder);
+    return path + toFileLink(path) + ' ' +
+            toFolderLink(folder);
 }
 
 function toDeleteLink(path) {
@@ -136,7 +136,7 @@ function toDeleteLink(path) {
 
 function toLinks(path) {
     return toFolderAndFileLink(path) + ' '
-        + toThumbnailLink(path) + ' ' + toDeleteLink(path);
+            + toThumbnailLink(path) + ' ' + toDeleteLink(path);
 
 }
 
@@ -145,28 +145,28 @@ function getDuplicateFolderDetails(folder1, folder2) {
     var tab = [];
     for (var i = 0; i < d[0].length; ++i) {
         tab.push({
-            f1:d[0][i],
-            f2:d[1][i]
+            f1: d[0][i],
+            f2: d[1][i]
         });
     }
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
-        + '<th class="ay-sort"><span>Paths</span></th>' +
-        '</tr></thead> <tbody>';
+            + '<th class="ay-sort"><span>Paths</span></th>' +
+            '</tr></thead> <tbody>';
 
     var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}">'
-        + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
-        + '<td class="files">{{occurences}}</td>'
-        + '<td class="f1">{{filesInFolder1}}</td>'
-        + '<td class="f2">{{filesInFolder2}}</td>';
+            + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
+            + '<td class="files">{{occurences}}</td>'
+            + '<td class="f1">{{filesInFolder1}}</td>'
+            + '<td class="f2">{{filesInFolder2}}</td>';
 
 //    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}<a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
 //        '<a class="deletelink  btn btn-warning" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
 //        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
 //        '{{/.}}';
     var templateFiles = '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}' + toFileLink("{{f1.path}}") +
-        toDeleteLink("{{f1.path}}") + '<br>' +
-        '{{f2.path}}' + toFileLink("{{f2.path}}") + toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
+            toDeleteLink("{{f1.path}}") + '<br>' +
+            '{{f2.path}}' + toFileLink("{{f2.path}}") + toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
     for (i in tab) {
         var htmlFiles = Mustache.to_html(templateFiles, tab[i]);
         html_table += htmlFiles;
@@ -177,8 +177,8 @@ function getDuplicateFolderDetails(folder1, folder2) {
 
     $('#duplicate-folder-details-table').children().remove();
     $('#duplicate-folder-details-table').append(html_table);
-    $(document).ready(function () {
-        $.ay.tableSort({target:$('#duplicate-folder-details-table'), debug:false});
+    $(document).ready(function() {
+        $.ay.tableSort({target: $('#duplicate-folder-details-table'), debug: false});
         generatePathLink();
         generateDeleteLink();
     });
@@ -211,14 +211,14 @@ function getSelectedFolders() {
 }
 
 function getAll() {
-   // debugger;
+    // debugger;
     var folders = getSelectedFolders();
     $.getJSON('rest/hello/getAll', {
-        filter:$("input[name=filter]").val(),
-        folder:JSON.stringify(folders),
-        gps:$("input[name=gps]").is(":checked")
-        //$.param(folders)
-    }, function (data) {
+        filter: $("input[name=filter]").val(),
+        folder: JSON.stringify(folders),
+        gps: $("input[name=gps]").is(":checked")
+                //$.param(folders)
+    }, function(data) {
         buildAllTable(data);
         //   debugger;
     });
@@ -230,11 +230,11 @@ function getGallery() {
 
     var folders = getSelectedFolders();
     $.getJSON('rest/hello/getAll', {
-        filter:$("input[name=filter_path]").val(),
-        folder:JSON.stringify(folders),
-        gps:false
-        //$.param(folders)
-    }, function (data) {
+        filter: $("input[name=filter_path]").val(),
+        folder: JSON.stringify(folders),
+        gps: false
+                //$.param(folders)
+    }, function(data) {
         buildGallery(data);
         //   debugger;
     });
@@ -243,21 +243,21 @@ function getGallery() {
 function buildAllTable(array) {
     //debugger;
     var html_table = '<thead> <tr> <th class="size ay-sort sorted-asc"><span>Size</span></th>'
-        + '<th class="paths ay-sort"><span>Paths</span></th>' +
-        '</tr></thead> <tbody>';
+            + '<th class="paths ay-sort"><span>Paths</span></th>' +
+            '</tr></thead> <tbody>';
 
     for (i in array) {
         html_table += '<tr>'
-            + '<td class="size">' + array[i].size + '</td>'
-            + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
+                + '<td class="size">' + array[i].size + '</td>'
+                + '<td class="paths">' + toLinks(array[i].path) + '</td></tr>';
         //   debugger;
     }
     html_table += "</tbody>"
 
     $('#all-table').children().remove();
     $('#all-table').append(html_table);
-    $(document).ready(function () {
-        $.ay.tableSort({target:$('#all-table'), debug:false});
+    $(document).ready(function() {
+        $.ay.tableSort({target: $('#all-table'), debug: false});
         generatePathLink();
         generateDeleteLink();
         generateThumbnailLink();
@@ -287,10 +287,10 @@ function buildGallery(array) {
         var thumb = document.createElement('div');
         thumb.className = "thumbnail";
         var image = array[f];
-        var imgTag=document.createElement("img");
-        imgTag.src="rest/hello/getThumbnail?path="+image.path + "&w=600&h=600";
+        var imgTag = document.createElement("img");
+        imgTag.src = "rest/hello/getThumbnail?path=" + image.path + "&w=600&h=600";
 
-        imgTag.title=image.path;
+        imgTag.title = image.path;
         thumb.appendChild(imgTag);
 
 
@@ -312,26 +312,26 @@ function getDuplicateFolder() {
     $('#duplicate-folders-table-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
-        + ' <th class="ay-sort"><span>#Files</span></th>' +
-        '<th class="ay-sort"><span>&#37;F1</span></th>' +
-        '<th class="ay-sort"><span>&#37;F2</span></th>' +
-        '<th class="ay-sort"><span>Paths</span></th>' +
-        '</tr></thead> <tbody>';
+            + ' <th class="ay-sort"><span>#Files</span></th>' +
+            '<th class="ay-sort"><span>&#37;F1</span></th>' +
+            '<th class="ay-sort"><span>&#37;F2</span></th>' +
+            '<th class="ay-sort"><span>Paths</span></th>' +
+            '</tr></thead> <tbody>';
 
 
     var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}" >'
-        + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
-        + '<td class="files">{{occurences}}</td>'
-        + '<td class="f1">{{filesInFolder1}}</td>'
-        + '<td class="f2">{{filesInFolder2}}</td>';
+            + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
+            + '<td class="files">{{occurences}}</td>'
+            + '<td class="f1">{{filesInFolder1}}</td>'
+            + '<td class="f2">{{filesInFolder2}}</td>';
 
 
     // debugger;
     $.getJSON('rest/hello/duplicateFolder', {
-        folder:JSON.stringify(folders)
-        //$.param(folders)
-    }, function (data) {
-        $.each(data, function (key, val) {
+        folder: JSON.stringify(folders)
+                //$.param(folders)
+    }, function(data) {
+        $.each(data, function(key, val) {
             val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
             val['totalSize'] = val['totalSize'].toFixed(4);
 
@@ -340,10 +340,10 @@ function getDuplicateFolder() {
 
             var rowTag = Mustache.to_html(template, val);
             html_table += rowTag
-                + '<td class="paths"> <div id="folder1">' + val['folder1'] + '</div> ' +
-                '<div id="folder2">' + val['folder2'] + ' ' + toFolderLinks(val['folder1'], val['folder2']) +
-                '</div>  </td>'
-                + '</tr> ';
+                    + '<td class="paths"> <div id="folder1">' + val['folder1'] + '</div> ' +
+                    '<div id="folder2">' + val['folder2'] + ' ' + toFolderLinks(val['folder1'], val['folder2']) +
+                    '</div>  </td>'
+                    + '</tr> ';
             //   debugger;
 
             var fileArray = new Array();
@@ -356,8 +356,8 @@ function getDuplicateFolder() {
         //  debugger;
         updateDuplicateTable('#duplicate-folder-table', html_table);
 
-        $(document).ready(function () {
-            $('#duplicate-folder-table tr').click(function () {
+        $(document).ready(function() {
+            $('#duplicate-folder-table tr').click(function() {
                 var $this = $(this);
                 var folder1 = $this.data('p1');
                 var folder2 = $this.data('p2');
@@ -378,17 +378,17 @@ function callOpen(para1, para2) {
     }
 
     result.folders = folders;
-    $.getJSON("rest/hello/open", {path:JSON.stringify(result)});
+    $.getJSON("rest/hello/open", {path: JSON.stringify(result)});
 }
 
 function callDelete(para1) {
     //$(".paths > div").contents().
-    $(".paths").contents().filter(function () {
+    $(".paths").contents().filter(function() {
         debugger;
         return this.nodeValue == para1
     }).wrap('<div style="float:left; text-decoration:line-through"/>');
 
-    $.get("rest/hello/trash", {path:para1});
+    $.get("rest/hello/trash", {path: para1});
 }
 
 function callThumbnail(source, p1) {
@@ -405,14 +405,14 @@ function callThumbnail(source, p1) {
 function shrink() {
     var folders = getSelectedFolders();
     $.get("rest/hello/shrink", {
-        folder:JSON.stringify(folders)
-    }, function (data) {
+        folder: JSON.stringify(folders)
+    }, function(data) {
     });
 }
 
 function update() {
     var folders = getSelectedFolders();
-    $.get("rest/hello/update", {folder:JSON.stringify(folders)}, function (data) {
+    $.get("rest/hello/update", {folder: JSON.stringify(folders)}, function(data) {
     });
 }
 
@@ -420,8 +420,8 @@ function shrinkUpdate() {
     var folders = getSelectedFolders();
     debugger;
     $.get("rest/hello/shrinkUpdate", {
-        folder:JSON.stringify(folders)
-    }, function (data) {
+        folder: JSON.stringify(folders)
+    }, function(data) {
     });
 }
 
@@ -431,8 +431,8 @@ function index(currentForm) {
     prettyPrint(currentForm);
     val = document.getElementById("index_path").value;
     $.get("rest/hello/index", {
-        path:val
-    }, function (data) {
+        path: val
+    }, function(data) {
     });
 }
 
@@ -445,21 +445,21 @@ function prettyPrint(object) {
 function equalHeight(group) {
     tallest = 0;
     //                      debugger;
-    group.each(function () {
+    group.each(function() {
         thisHeight = $(this).height();
         if (thisHeight > tallest) {
             tallest = thisHeight;
         }
     });
     // debugger;
-    group.each(function () {
+    group.each(function() {
         $(this).height(tallest);
     });
 }
 
 
 function generatePathLink() {
-    $('.pathlink').click(function () {
+    $('.pathlink').click(function() {
         var $this = $(this);
         var p1 = $this.data('p1');
         var p2 = $this.data('p2');
@@ -471,8 +471,8 @@ function generatePathLink() {
 }
 
 function generateDeleteLink() {
-  //  debugger;
-    $('.deletelink').click(function () {
+    //  debugger;
+    $('.deletelink').click(function() {
         var $this = $(this);
         var p1 = $this.data('p1');
         callDelete(p1);
@@ -480,7 +480,7 @@ function generateDeleteLink() {
 }
 
 function generateThumbnailLink() {
-    $('.thumbnaillink').click(function () {
+    $('.thumbnaillink').click(function() {
         var $this = $(this);
         var p1 = $this.data('p1');
         callThumbnail($this, p1);
@@ -489,11 +489,11 @@ function generateThumbnailLink() {
 
 
 function getWithRMSE(param, rmse) {
-    $.get("rest/hello/getThumbnail/", param.path, function (image) {
+    $.get("rest/hello/getThumbnail/", param.path, function(image) {
         var template = "<img src=\"data:image;base64,{{base64Sig}}\" title=\" {{title}} \"/>";
         var imgTag = Mustache.to_html(template, image);
         $("#duplicate_upload_result").prepend('<div class="floated_img"><div class="nailthumb-container nailthumb-image-titles-animated-onhover square">' + imgTag + "</div>" + rmse + "  " + image.title + "</div>");
-        jQuery(document).ready(function () {
+        jQuery(document).ready(function() {
             jQuery('.nailthumb-container').nailthumb();
             jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
         });

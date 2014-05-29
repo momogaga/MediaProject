@@ -1,49 +1,86 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-<html>
+
+<html lang="en" style="height:100%">
     <head>
-        <title>Duplicate Media</title>
-        <meta charset="windows-1252">
-        <meta name="viewport" content="width=device-width">
-        <!-- Include Bootstrap & FA -->
-        <link href="/template/css/bootstrap.min.css" rel="stylesheet">
-        <link href="/template/font-awesome/css/font-awesome.css" rel="stylesheet">
-        <!-- Include DataTables -->
-        <link href="/template/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-        <!-- Include Style -->
-        <link href="/template/css/media.css" rel="stylesheet">
-        <!-- Include Jstree -->
-        <link href="/template/dist/themes/default/style.css" rel="stylesheet" />
+        <title>Duplicate</title>
+
+        <link href="template/css/bootstrap.min.css" rel="stylesheet">
+        <link href="template/font-awesome/css/font-awesome.css" rel="stylesheet">
+        <link href="template/css/media.css" rel="stylesheet">
+
+        <script src="js/jquery-1.8.2.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="js/jquery.form.js"></script>
+        <script src="js/thumbstores.js"></script>
+        <script src="js/jquery.iframe-transport.js"></script>
+
+        <script src="js/customCanvas.js"></script>
+
+        <script src="js/nailthumb/jquery.nailthumb.1.1.js"></script>
+        <script src="js/mustache.js"></script>
+        <script src="js/canvasjs/canvasjs.min.js"></script>
+        <script src="js/jquery.ay-table-sort.js"></script>
+
+        <script src="bootstrap/js/bootstrap.js"></script>
+
+        <script>
+            getIndexedPaths('db_paths');
+        </script>
     </head>
     <body>
         <div id="header-include"></div>
-        <div id="page-wrapper">
-            <form name="myform" action="rest/hello/identical" class="form-inline"  method="POST">
-                <div align="center">
-                    <br> <br> <input type="text" class="form-control" value="" name="max">
-                    <a href="javascript: getDuplicate()" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-search"></span> Search</a>
-                </div>
-            </form>
 
-            <div style="width:98%;float:left">
-                <table class="hover-table" id="duplicate-file-table"></table>
+
+
+        <div id="page-wrapper">
+            <div class="row">
+                <br>
+                <div class="col-lg-12">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="glyphicon glyphicon-file"></i> Médias dupliqués :
+                        </div>
+                        <div>
+                            <div class="panel-body">
+                                <form name="myform" action="javascript: getDuplicate()">
+                                    <input id="input_valeur_dup_media" name="max" type="text" placeholder="Tapez un numéro" required="" class="form-control input-md">
+                                    <br>                            
+                                    <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-search"></span> Chercher</button>
+                                    <br>
+                                </form>
+
+                                <div class="form-group">
+                                    <table class="table" id="duplicate-file-table"></table>
+                                </div>  
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+
+                        <div class="panel-heading">
+                            <i class="glyphicon glyphicon-folder-open"></i> Dossiers dupliqués :
+                        </div>
+
+                        <div class="panel-body">
+                            <form name="input_duplicate_folders" action="javascript:getDuplicateFolder()">
+                                <input type="submit" value="Get Folders" class="btn btn-success">
+                            </form>
+                            <table class="table" id="duplicate-folder-table"></table>
+                            <table class="table" id="duplicate-folder-details-table"></table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <div id="db_paths" style="display:none;"></div>
         </div>
-        <footer>
-            <script src="js/thumbstore_1.js"></script>
-            <!-- Script JQuery & Bootstrap -->
-            <script src="/template/js/jquery-1.10.2.js"></script>
-            <script src="/template/js/bootstrap.min.js"></script>
-            <script>
-                $(function() {
-                    $("#header-include").load("template/include/header.html");
-                });
-            </script>
-        </footer>
+
+        <script>
+            $(function() {
+                $("#header-include").load("template/include/header.html");
+            });
+        </script>
     </body>
 </html>

@@ -1,0 +1,46 @@
+ var gaiSelected = [];
+
+
+    /* Add a click handler to the rows - this could be used as a callback */
+    $("#example tbody tr").click(function(event) {
+        $(oTable.fnSettings().aoData).each(function() {
+            $(this.nTr).removeClass('row_selected');
+            $(this.nTr).removeAttr("style");
+        });
+        $(event.target.parentNode).addClass('row_selected');
+
+        $(event.target.parentNode).css('background-color', 'red');
+
+
+
+    });
+
+    $("#example tbody tr").live("click", function() {
+
+        var anSelected = fnGetSelected(oTable);
+
+
+        // Get the row data
+        var aData = oTable.fnGetData(anSelected[0]);
+        console.log(aData)
+        // Get the cell data
+        var path = aData[4];
+        console.log("path selectionne : " + path)
+
+        callDelete(path);
+        
+    });
+
+    /* Add a click handler for the delete row */
+    $('#delete').click(function() {
+        var anSelected = fnGetSelected(oTable);
+        if (anSelected.length !== 0) {
+            oTable.fnDeleteRow(anSelected[0]);
+        }
+    });
+}
+
+function fnGetSelected(oTableLocal)
+{
+    return oTableLocal.$('tr.row_selected');
+}

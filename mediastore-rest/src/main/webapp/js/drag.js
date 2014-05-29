@@ -6,9 +6,9 @@ function displaySrcImage(image) {
     // li.appendChild(img);
 
     reader = new FileReader();
-    reader.onload = (function (theImg) {
+    reader.onload = (function(theImg) {
 
-        return function (evt) {
+        return function(evt) {
             theImg.src = evt.target.result;
 
         };
@@ -21,6 +21,8 @@ function displaySrcImage(image) {
     div_t.className = "smallImage";
     div_t.style.float = "left";
     div_t.appendChild(img);
+    img.style.height = "35%";
+    img.style.width = "35%";
 
     $("#duplicate_upload_source").append(div_t);
 }
@@ -54,7 +56,7 @@ function dataURItoBlob(dataURI) {
     }
 
     // write the ArrayBuffer to a blob, and you're done
-    var bb = new Blob([ab], { type:mimeString });
+    var bb = new Blob([ab], {type: mimeString});
     // bb.append(ab);
     return bb; //bb.getBlob(mimeString);
 }
@@ -65,12 +67,12 @@ function imageURLToBlob(url) {
 
     var xhr = new XMLHttpRequest();
     // debugger;
-    xhr.onreadystatechange = function(){
+    xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             //this.response is what you're looking for
             //  handler(this.response);
             console.log(this.response, typeof this.response);
-            var tab =[];
+            var tab = [];
             tab.push(this.response);
             uploadBlobs(tab);
             //   return response;
@@ -79,7 +81,7 @@ function imageURLToBlob(url) {
             //  img.src = url.createObjectURL(this.response);
         }
     }
-    xhr.open('GET', "rest/hello/getImageFromWeb?url="+url, true);
+    xhr.open('GET', "rest/hello/getImageFromWeb?url=" + url, true);
     xhr.responseType = 'blob';
     xhr.send();
 
@@ -94,7 +96,7 @@ function imageURLToBlob(url) {
 //var dataURI;
 function processData(data) {
     dataURI = "";
-   // debugger;
+    // debugger;
     // console.log("success " + data);
     //Do some stuff with the data
 }
@@ -107,13 +109,13 @@ function uploadOneFile(file, indice, nbFiles) {
     xhr.open('POST', 'rest/hello/findSimilar');
     xhr.setRequestHeader("X_FILENAME", file.name);
     var progressBar = document.getElementById("progressBar" + indice);
-    xhr.upload.onprogress = function (e) {
+    xhr.upload.onprogress = function(e) {
         //  debugger;
         progressBar.value = e.loaded;
         progressBar.max = e.total;
 
     };
-    xhr.onreadystatechange = function (e) {
+    xhr.onreadystatechange = function(e) {
         if (xhr.readyState == 4) {
             //    debugger;
             // continue only if HTTP status is "OK"
@@ -125,6 +127,8 @@ function uploadOneFile(file, indice, nbFiles) {
         }
     };
 
+    $("#collapseThree").attr("class", "panel-collapse collapse in");
+
     // Send the Ajax request
     //debugger;
     displaySrcImage(file);
@@ -134,7 +138,8 @@ function uploadOneFile(file, indice, nbFiles) {
 //from http://codeaid.net/javascript/convert-size-in-bytes-to-human-readable-format-(javascript)
 function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes == 0) return 'n/a';
+    if (bytes == 0)
+        return 'n/a';
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[[i]];
 }
@@ -162,7 +167,7 @@ function dropHandler(event) {
     //check if image was drag and drop from another tab
     //var link = $(event.dataTransfer.getData('text/html'));
     var tab_files = [];
-   // debugger;
+    // debugger;
     if (files.length == 0) {
         //this is either a link to an image or the base64 code
         var src = event.dataTransfer.getData('text/uri-list');//link.attr('src');
@@ -315,7 +320,7 @@ function displaySimilarImages(sourceSignature, object) {
     $('#duplicate_upload_result').append(ul);
 
 //    $('#duplicate_upload_result').append('</ul>');
-    jQuery(document).ready(function () {
+    jQuery(document).ready(function() {
         generatePathLink();
         jQuery('.nailthumb-container').nailthumb();
         jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
