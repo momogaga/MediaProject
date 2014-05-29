@@ -15,6 +15,8 @@ function initDataTable() {
     var aoColumns6 = new Object();
 
     aoColumns4.bVisible = false;
+    aoColumns5.bVisible = false;
+    aoColumns6.bVisible = false;
 
     JSONObj.sEcho = 1;
     JSONObj.iTotalRecords = 3;
@@ -83,6 +85,10 @@ function constructTable(array) {
             $('#openFile').attr("disabled", "disabled");
             $('#openFolder').attr("disabled", "disabled");
             $('#viewMap').attr("disabled", "disabled");
+
+            $("#infos").html(" ");
+            $("#collapseOne").attr("class", "panel-collapse collapse");
+
         }
         else {
             table.$('tr.selected').removeClass('selected');
@@ -92,12 +98,13 @@ function constructTable(array) {
             aData = oTable.fnGetData(pos);
 
             var infos = "Nom : " + aData[1].substring(1)
-                    + "<br />" + "Taille : " + aData[2]
+                    + "<br />" + "Taille : " + aData[2] + "kB"
                     + "<br />" + "Paths : " + aData[3]
-                    + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5]
+                    + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5];
 
             $("#infos").html(infos);
-
+            $("#collapseOne").attr("class", "panel-collapse collapse in");
+            
             $('#delete').removeAttr("disabled");
             $('#openFile').removeAttr("disabled");
             $('#openFolder').removeAttr("disabled");
@@ -111,6 +118,7 @@ function constructTable(array) {
 
     //action du delete
     $('#delete').click(function() {
+        callDelete(aData[3]);
         table.row('.selected').remove().draw(false);
     });
     //action du open file
@@ -163,6 +171,7 @@ function loadData(begin) {
         if (data.length < 5) {
             $('#nextPage').attr("disabled", "disabled");
         }
+        
         if (begin > 0) {
             $('#previousPage').removeAttr("disabled");
         }
