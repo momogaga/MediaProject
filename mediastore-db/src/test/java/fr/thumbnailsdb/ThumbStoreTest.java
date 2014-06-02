@@ -37,9 +37,9 @@ public class ThumbStoreTest {
     public void deleteDir() throws IOException {
         FileUtils.deleteDirectory(tmpDir);
         try{
-        FileUtils.deleteDirectory(new File("lsh"));
-        FileUtils.deleteDirectory(new File("lsh.p"));
-        FileUtils.deleteDirectory(new File("lsh.t"));
+        FileUtils.deleteDirectory(new File("LSH" + File.separator +  "lsh"));
+        FileUtils.deleteDirectory(new File("LSH" + File.separator +  "lsh.p"));
+        FileUtils.deleteDirectory(new File("LSH" + File.separator +  "lsh.t"));
         } catch (Exception e) {
 
         }

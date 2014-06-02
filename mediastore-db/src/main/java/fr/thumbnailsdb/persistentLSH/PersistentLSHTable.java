@@ -2,6 +2,7 @@ package fr.thumbnailsdb.persistentLSH;
 
 import fr.thumbnailsdb.Candidate;
 import fr.thumbnailsdb.lsh.KbitLSH;
+import fr.thumbnailsdb.utils.FixedBitSet;
 import org.mapdb.DB;
 import org.mapdb.Fun;
 
@@ -15,7 +16,7 @@ import java.util.NavigableSet;
 public class PersistentLSHTable {
 
     private KbitLSH hashFunction;
-    NavigableSet<Fun.Tuple2<String, Candidate>> multiMap;
+    NavigableSet<Fun.Tuple2<FixedBitSet, Candidate>> multiMap;
 
     public PersistentLSHTable(int k, int maxExcluded, int index, DB db) {
 
@@ -30,8 +31,8 @@ public class PersistentLSHTable {
     }
 
     public void add(String hash, int index) {
-        String hv = hashFunction.hash(hash);
-        multiMap.add(Fun.t2(hv,new Candidate(index, hash)));
+//        String hv = hashFunction.hash(hash);
+        multiMap.add(Fun.t2(hashFunction.hash(hash),new Candidate(index, hash)));
     }
 
     public List<Candidate> get(String key) {

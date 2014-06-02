@@ -17,30 +17,36 @@ import java.util.concurrent.*;
 public class PersistentLSH {
 
 
+    private static String directory = "LSH";
     private static String file = "lsh";
     //
     //   private int nbTables = 10;
     private PersistentLSHTable[] tables;
     private PersistentLSHTable t;
     private int lastCandidatesCount;
-    DB db;
-
-    private ExecutorService executorService ;
+ //   DB db[];
+   DB db;
+    private ExecutorService executorService;
 
 
     public PersistentLSH(int nbTables, int k, int maxExcluded) {
         System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.PersistentLSH");
         executorService = Executors.newFixedThreadPool(nbTables);
-        db = DBMaker.newFileDB(new File(file))
-                .closeOnJvmShutdown().make();
+
         //DBMaker.newMemoryDB().make();
         tables = new PersistentLSHTable[nbTables];
+        //create the directory
+        new File(directory).mkdir();
+
+        //   db = new DB[nbTables];
+        db = DBMaker.newFileDB(new File(directory + File.separator + file))
+                    .closeOnJvmShutdown().transactionDisable().asyncWriteEnable().mmapFileEnable().make();
+
         StopWatch stopWatch = null;
         if (Configuration.timing()) {
             stopWatch = new LoggingStopWatch("PersistentLSH");
         }
         for (int i = 0; i < nbTables; i++) {
-            //System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.PersistentLSH loading table " + i);
             tables[i] = new PersistentLSHTable(k, maxExcluded, i, db);
             if (Configuration.timing()) {
                 stopWatch.lap("PersistentLSH." + i);
@@ -140,6 +146,9 @@ public class PersistentLSH {
     }
 
     public void commit() {
+//        for (int i = 0; i < db.length; i++) {
+//            db[i].commit();
+//        }
         db.commit();
     }
 
@@ -163,16 +172,25 @@ public class PersistentLSH {
         System.out.println("Adding to LSH " + max + " items");
         long t0 = System.currentTimeMillis();
         PersistentLSH lsh = new PersistentLSH(10, 30, nbBits);
+        int k = 0;
+        long t0_0 = System.currentTimeMillis();
         for (int i = 0; i < max; i++) {
 //            lsh.add(randomString(100), i);
+            if (k++ > 5000) {
+                k = 0;
+                long t1_1 = System.currentTimeMillis();
+                System.out.println("fr.thumbnailsdb.persistentLSH.PersistentLSH.testRandom added 5000 String at " + new Date() + " : " + (5000.0 / (t1_1 - t0_0))*1000 + " key/s");
+                t0_0 = System.currentTimeMillis();
+            }
+
             lsh.add(input[i], i);
         }
         lsh.commit();
         long t1 = System.currentTimeMillis();
         long usedMemory1 = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-        System.out.println("Test took " + (t1 - t0) + " ms");
+        System.out.println("Test took " + (t1 - t0) + " ms at "  + max*1000.0/(t1-t0) + " key/s");
         System.out.println("Test took " + ((usedMemory1 - usedMemory0) / 1024 / 1024) + " MB");
-        String s = randomString(nbBits);
+        String s = input[10];//randomString(nbBits);
         System.out.println("LSH looking for similar to " + s);
         List<Candidate> result = lsh.lookupCandidates(s);
         System.out.println("Found " + result.size() + " candidates");
@@ -232,6 +250,7 @@ public class PersistentLSH {
         if (Configuration.timing()) {
             stopWatch = new LoggingStopWatch("testLoad.lookupCandidates");
         }
+
         for (int i = 0; i < 10; i++) {
 //            if (Configuration.timing()) {
 //                stopWatch.lap("testLoad.lookupCandidates." +i);
@@ -245,8 +264,9 @@ public class PersistentLSH {
     }
 
     public static void main(String[] args) {
-          testLocal();
-       // testLoad(args[0]);
+//          testLocal();
+        testRandom(100000);
+        // testLoad(args[0]);
     }
 
 }

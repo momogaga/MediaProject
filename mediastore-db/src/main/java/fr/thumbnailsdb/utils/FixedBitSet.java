@@ -6,7 +6,7 @@ import java.util.BitSet;
 /**
  * A bitset with a fixed length
  */
-public class FixedBitSet implements Serializable {
+public class FixedBitSet implements Serializable, Comparable<FixedBitSet> {
 
 
     private int size;
@@ -24,6 +24,11 @@ public class FixedBitSet implements Serializable {
                 b.set(i);
             }
         }
+    }
+
+
+    public void set(int index) {
+      b.set(index);
     }
 
     public String toString(){
@@ -46,4 +51,24 @@ public class FixedBitSet implements Serializable {
         System.out.println("fr.thumbnailsdb.utils.FixedBitSet fromString " + b );
     }
 
+
+    @Override
+    public int compareTo(FixedBitSet o) {
+        if(this.size > this.size) {
+            return 1;
+        } else if(o.size > this.size) {
+            return -1;
+        } else {
+            for(int i = 0; i < size; i++) {
+                if(this.b.get(i) != o.b.get(i)) {
+                    if(this.b.get(i)) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }
+            }
+            return 0;
+        }
+    }
 }

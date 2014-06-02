@@ -1,6 +1,8 @@
 package fr.thumbnailsdb.lsh;
 
 
+import fr.thumbnailsdb.utils.FixedBitSet;
+
 import java.util.Random;
 
 /**
@@ -14,6 +16,7 @@ public class KbitLSH {
 
     public KbitLSH(int nbBits, int keyLength){
         indexes = new int[nbBits];
+
         Random r = new Random();
         for (int i = 0; i < nbBits; i++) {
              indexes[i]=r.nextInt(keyLength);
@@ -29,10 +32,12 @@ public class KbitLSH {
     }
 
 
-    public String hash(String s) {
-        String result="";
+    public FixedBitSet hash(String s) {
+        FixedBitSet result=new FixedBitSet(indexes.length);
         for (int i = 0; i < indexes.length; i++) {
-           result+=s.charAt(indexes[i]);
+           if (s.charAt(indexes[i])=='1') {
+               result.set(indexes[i]);
+           }
         }
      //   System.out.println("KbitLSH " + s + " -> " + result);
         return result; //.hashCode();

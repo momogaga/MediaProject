@@ -1288,7 +1288,7 @@ public class ThumbStore {
                 sta = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet res = sta.executeQuery(query);
                 while (res.next()) {
-                    Logger.getLogger().log("ID trouvé : " + res.getInt(1));
+                    Logger.getLogger().log("ID trouve : " + res.getInt(1));
                     return res.getInt(1);
                 }
 
