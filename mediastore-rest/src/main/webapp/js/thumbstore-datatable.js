@@ -173,7 +173,6 @@ function loadData(begin) {
         if (data.length !== 0) {
             var t = $('#example').dataTable();
             t.fnClearTable();
-            t.destroy();
             t.fnAddData(rebuildData(data));
             t.fnDraw();
             if (data.length < 5) {
