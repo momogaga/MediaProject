@@ -22,7 +22,7 @@ function buildGallery(array) {
         ext = ext.toLowerCase();
 
         if (ext === '.jpeg' || ext === '.jpg' || ext === '.bmp' || ext === '.gif' || ext === '.png' || ext === '.tiff') {
-            $('#gallery').append("<a href='rest/hello/getThumbnail?path=" + tag.path + "&w=600&h=600' title='"+ tag.path +"' data-gallery=''><img src='rest/hello/getThumbnail?path=" + tag.path + "&w=70&h=70' alt='"+tag.path+"'></a>");
+            $('#gallery').append("<a href='rest/hello/getThumbnail?path=" + tag.path + "&w=0&h=0' title='"+ tag.path +"' data-gallery=''><img src='rest/hello/getThumbnail?path=" + tag.path + "&w=70&h=70' alt='"+tag.path+"'></a>");
         }
     }
 }

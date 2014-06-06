@@ -263,11 +263,24 @@ public class RestTest {
 
     private InputStream generateThumbnailStream(String imageId, int w, int h) throws IOException {
         BufferedImage bf = ImageIO.read(new FileInputStream(new File(imageId)));
+        BufferedImage thumbImage;
         // scale it to the new size on-the-fly
-        BufferedImage thumbImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        if (w == 0 && h == 0) {
+            thumbImage = new BufferedImage(bf.getWidth(), bf.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+        } else {
+
+            thumbImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+        }
         Graphics2D graphics2D = thumbImage.createGraphics();
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(bf, 0, 0, w, h, null);
+        if (w == 0 && h == 0) {
+            graphics2D.drawImage(bf, 0, 0, null);
+
+        } else {
+            graphics2D.drawImage(bf, 0, 0, w, h, null);
+        }
         // save thumbnail image to outFilename
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         BufferedOutputStream out = new BufferedOutputStream(bout);
@@ -650,7 +663,7 @@ public class RestTest {
     @GET
     @Path("getAll/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getAll(@QueryParam("folder") final String obj, @QueryParam("filter") String filter, @QueryParam("gps") boolean gps, @QueryParam("begin") int begin,@QueryParam("nb") int nb) {
+    public Response getAll(@QueryParam("folder") final String obj, @QueryParam("filter") String filter, @QueryParam("gps") boolean gps, @QueryParam("begin") int begin, @QueryParam("nb") int nb) {
         //TODO : handle folder parameter
         String[] folders = this.parseFolders(obj);
         Status.getStatus().setStringStatus("Requesting all media with filter : " + filter + " GPS : " + gps);

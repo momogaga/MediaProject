@@ -53,7 +53,9 @@ function rebuildData(array) {
         ext = ext.toLowerCase();
 
         if (ext === '.jpeg' || ext === '.jpg' || ext === '.bmp' || ext === '.gif' || ext === '.png' || ext === '.tiff') {
-            row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=50&h=50"/>';
+
+            row[0] = '<img src="rest/hello/getThumbnail?path=' + array[i].path + '&w=50&h=50" /> <p hidden> rest/hello/getThumbnail?path=' + array[i].path + ' </p>';
+
         } else {
             row[0] = '<i class="fa fa-file fa-3x"></i>';
         }
@@ -76,8 +78,38 @@ function constructTable(array) {
     oTable = $('#example').dataTable(JSONObj);
 
     var table = $('#example').DataTable();
+       alreadyclicked=false;
 
     $('#example tbody').on('click', 'tr', function() {
+         
+           var el=$(this);
+        if (alreadyclicked)
+        {
+            alreadyclicked=false; // reset
+            clearTimeout(alreadyclickedTimeout); // prevent this from happening
+            // do what needs to happen on double click. 
+            //Afficher image
+            $("#imgToRemove").remove()
+            name = $('td', this).eq(0).text();
+            $('#myModalImg').modal('show');
+          $("#myModalId").append("<img src=\""+ name +"&w=0&h=0\"  id=\"imgToRemove\" />");
+             
+
+
+        }
+        else
+        {
+            alreadyclicked=true;
+            alreadyclickedTimeout=setTimeout(function(){
+                alreadyclicked=false; 
+           },300);
+
+           
+                   
+              
+                 
+            
+  
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
 
@@ -113,7 +145,9 @@ function constructTable(array) {
                 $('#viewMap').removeAttr("disabled");
             }
         }
-
+  // <-- dblclick tolerance here
+        }
+        return false;
     });
     $('#example').on('page.dt', function() {
         console.log('page');
