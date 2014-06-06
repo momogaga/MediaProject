@@ -35,16 +35,7 @@
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
-                        <li class="sidebar-search">
-                            <div class="input-group custom-search-form">
-                                <input type="text" class="form-control" placeholder="Chemin accès">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button">
-                                        <i class="fa fa-ellipsis-h"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </li>
+                        <div id="menu-include"></div>
 
                         <li class="sidebar-search">
                             <form id="formUpload" name="formUpload" method="post" enctype="multipart/form-data">
@@ -105,9 +96,6 @@
                                 <a disabled="disabled" id="openFile" href="#" class="pathlink btn btn-default btn-info btn-sm"><span class="glyphicon glyphicon-open"></span> Open File</a>
                                 <a disabled="disabled" id="openFolder" href="#" class="btn btn-default btn-warning btn-sm"><span class="glyphicon glyphicon-folder-open"></span> Open Folder</a>                                
                                 <a disabled="disabled" href="javascript:void(0)" class="btn btn-default btn-danger btn-sm" id="delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
-
-
-
                             </div>
                         </div>
                     </div>
@@ -133,22 +121,13 @@
                             <div id="collapseTwo" class="panel-collapse collapse">
                                 <div class="panel-body">
 
-
-
                                     <form class="form-inline" role="form">
                                         <label for="tag">Add tag :</label>
                                         <div class="form-group">
                                             <input type="text" class="form-control" >
                                         </div>
                                         <button type="button" class="btn btn-success">+</button>
-
-
                                     </form>
-
-
-
-
-
                                 </div>
                             </div>
                         </div>
@@ -166,8 +145,6 @@
                             </div>
                         </div>
                     </div>
-
-
 
                     <!-- Modal -->
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

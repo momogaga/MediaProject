@@ -21,6 +21,14 @@
     <body>
         <!-- bandeau -->
         <div id="header-include"></div>
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                    <div id="menu-include"></div>
+                </ul>
+            </div>
+        </nav>
         <!-- /.navbar-static-side -->
         <div id="page-wrapper">
             <div class="row">
@@ -43,6 +51,9 @@
         <script>
             $(function() {
                 $("#header-include").load("template/include/header.html");
+            });
+            $(function() {
+                $("#menu-include").load("template/include/menu.html");
             });
         </script>
 

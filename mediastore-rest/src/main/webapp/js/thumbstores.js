@@ -52,11 +52,11 @@ function getDuplicate() {
     function(data) {
         var i = 1;
         var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
-                + ' <th class="ay-sort"><span>#Files</span></th>  <th class="ay-sort"><span>Paths</span></th></tr></thead> <tbody>';
+                + ' <th class="ay-sort"><span>Files</span></th>  <th class="ay-sort"><span>Paths</span></th><th class="ay-sort"><span>Actions</span></th></tr></thead> <tbody>';
 
         var template = ' <tr >'
                 + '<td class="size"><a href="#"  onclick="">{{fileSize}}</a></td>'
-                + '<td class="files">{{occurences}}</td><td class="paths"> ';
+                + '<td class="files">{{occurences}}</td><td> ';
 
         for (i in data) {
             data[i]['occurences'] = data[i].al.length;
@@ -64,12 +64,24 @@ function getDuplicate() {
             data[i]['fileSize'] = data[i]['fileSize'].toFixed(4);
             var rowTag = Mustache.to_html(template, data[i]);
             for (f in data[i].al) {
-                rowTag += '<div class="btn-group btn-group-xs">' + toFolderLink(getFolder(data[i].al[f])) + toFileLink(data[i].al[f]) + toDeleteLink(data[i].al[f]) + data[i].al[f]  + '</div> ';
+                rowTag += '<div class="paths">' + data[i].al[f] + '</div> ';
             }
-            html_table += rowTag + '</td></tr> ';
+            html_table += rowTag + '</td><td style="width: 200px"> ';
+            var rowButton = "";
+            for (f in data[i].al) {
+                rowButton += '<div class="btn-group btn-group-xs">' + toFolderLink(getFolder(data[i].al[f])) + toFileLink(data[i].al[f]) + toDeleteLink(data[i].al[f]) + '</div>';
+            }
+
+            html_table += rowButton + '</td></tr>';
         }
         html_table += '</tbody>';
         updateDuplicateTable('#duplicate-file-table', html_table);
+
+        $(".paths").shorten({
+            "showChars": 75,
+            "moreText": "(+)",
+            "lessText": "(-)"
+        });
     });
 }
 
@@ -144,28 +156,28 @@ function getDuplicateFolderDetails(folder1, folder2) {
     var tab = [];
     for (var i = 0; i < d[0].length; ++i) {
         tab.push({
-            f1:d[0][i],
-            f2:d[1][i]
+            f1: d[0][i],
+            f2: d[1][i]
         });
     }
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
-        + '<th class="ay-sort"><span>Paths</span></th>' +
-        '</tr></thead> <tbody>';
+            + '<th class="ay-sort"><span>Paths</span></th>' +
+            '</tr></thead> <tbody>';
 
     var template = ' <tr data-p1="{{folder1}}" data-p2="{{folder2}}">'
-        + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
-        + '<td class="files">{{occurences}}</td>'
-        + '<td class="f1">{{filesInFolder1}}</td>'
-        + '<td class="f2">{{filesInFolder2}}</td>';
+            + '<td class="size"><a href="#"  onclick=""> {{totalSize}}</a></td>'
+            + '<td class="files">{{occurences}}</td>'
+            + '<td class="f1">{{filesInFolder1}}</td>'
+            + '<td class="f2">{{filesInFolder2}}</td>';
 
 //    var templateFiles = ' {{#.}} ' + '<tr><td>{{f1.size}}</td><td><div class="paths">{{f1.path}}<a class="pathlink" href="#!"  data-p1="{{f1.path}}">[file]</a> ' +
 //        '<a class="deletelink  btn btn-warning" href="#!"  data-p1="{{f1.path}}">[delete]</a>  <br>' +
 //        '{{f2.path}}<a class="pathlink" href="#!"  data-p1="{{f2.path}}">[file]</a>  <a class="deletelink" href="#!"  data-p1="{{f2.path}}">[delete]</a></div></td></tr><br>' +
 //        '{{/.}}';
     var templateFiles = '<tr><td>{{f1.size}}</td><td><div class="btn-group btn-group-xs">{{f1.path}}' + toFileLink("{{f1.path}}") +
-        toDeleteLink("{{f1.path}}") + '</div><br><div class="btn-group btn-group-xs">' +
-        '{{f2.path}}' + toFileLink("{{f2.path}}") + toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
+            toDeleteLink("{{f1.path}}") + '</div><br><div class="btn-group btn-group-xs">' +
+            '{{f2.path}}' + toFileLink("{{f2.path}}") + toDeleteLink("{{f2.path}}") + '</div></td></tr><br>';
     for (i in tab) {
         var htmlFiles = Mustache.to_html(templateFiles, tab[i]);
         html_table += htmlFiles;
@@ -176,8 +188,8 @@ function getDuplicateFolderDetails(folder1, folder2) {
 
     $('#duplicate-folder-details-table').children().remove();
     $('#duplicate-folder-details-table').append(html_table);
-    $(document).ready(function () {
-        $.ay.tableSort({target:$('#duplicate-folder-details-table'), debug:false});
+    $(document).ready(function() {
+        $.ay.tableSort({target: $('#duplicate-folder-details-table'), debug: false});
         generatePathLink();
         generateDeleteLink();
     });
@@ -311,9 +323,9 @@ function getDuplicateFolder() {
     $('#duplicate-folders-table-details').children().remove();
 
     var html_table = '<thead> <tr> <th class="ay-sort sorted-asc"><span>Size</span></th>'
-            + ' <th class="ay-sort"><span>#Files</span></th>' +
-            '<th class="ay-sort"><span>&#37;F1</span></th>' +
-            '<th class="ay-sort"><span>&#37;F2</span></th>' +
+            + ' <th class="ay-sort"><span>Files</span></th>' +
+            '<th class="ay-sort"><span>Common F1</span></th>' +
+            '<th class="ay-sort"><span>Common F2</span></th>' +
             '<th class="ay-sort"><span>Paths</span></th>' +
             '</tr></thead> <tbody>';
 
@@ -334,8 +346,8 @@ function getDuplicateFolder() {
             val['totalSize'] = val['totalSize'] / 1024.0 / 1024;
             val['totalSize'] = val['totalSize'].toFixed(4);
 
-            val['filesInFolder1'] = (val['occurences'] * 100.0 / val['filesInFolder1']).toFixed(0);
-            val['filesInFolder2'] = (val['occurences'] * 100.0 / val['filesInFolder2']).toFixed(0);
+            val['filesInFolder1'] = (val['occurences'] * 100.0 / val['filesInFolder1']).toFixed(0) + "%";
+            val['filesInFolder2'] = (val['occurences'] * 100.0 / val['filesInFolder2']).toFixed(0) + "%";
 
             var rowTag = Mustache.to_html(template, val);
             html_table += rowTag

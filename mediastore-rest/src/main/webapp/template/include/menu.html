@@ -1,33 +1,20 @@
-<nav class="navbar-default navbar-static-side" role="navigation">
-    <div class="sidebar-collapse">
-        <ul class="nav" id="side-menu">
-            <li class="sidebar-search">
-                <div class="input-group custom-search-form">
-                    <input type="text" class="form-control" placeholder="Chemin accès">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">
-                            <i class="fa fa-ellipsis-h"></i>
-                        </button>
-                    </span>
-                </div>
-            </li>
+<script>
+    getSize();
+    getPath();
+    getIndexedPaths('db_paths');
+</script>
 
-            <li class="sidebar-search">
-                <form id="formUpload" name="formUpload" method="post" enctype="multipart/form-data">
-                    <input type="hidden" id="namesAllFiles" name="namesAllFiles"/>
+<li class="sidebar-search">
+    <div>
+        <p>
+            Path db : <span id="db_path"> </span>
+        </p>
 
-                    <div id="filedrag" ondragover="return false;" ondrop="dropHandler(event)">
-                        <div id="dropText"><i class="fa fa-cloud-upload fa-4x"></i></div>
-                        <ol id="droppedFiles"></ol>
-                    </div>
+        <p>
+            Size of db : <span id="db_size"> </span>
+        </p>
 
-                </form>
+        <div id="db_paths" style="margin-bottom: 0"> </div>
 
-            </li>
-
-            <li class="sidebar-search">
-                <div id="jstree"></div>
-            </li>
-        </ul>
     </div>
-</nav>
+</li>
