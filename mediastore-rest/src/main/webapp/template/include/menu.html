@@ -1,20 +1,15 @@
+<li class="sidebar-search">
+    <div class="list-group-item">
+        <div> Path db : <span id="db_path"> </span></div>
+        <br />
+        <div> Size of db : <span id="db_size"> </span></div>
+        <br />
+        <div id="db_paths"> </div>
+    </div>
+</li>
+
 <script>
     getSize();
     getPath();
     getIndexedPaths('db_paths');
 </script>
-
-<li class="sidebar-search">
-    <div>
-        <p>
-            Path db : <span id="db_path"> </span>
-        </p>
-
-        <p>
-            Size of db : <span id="db_size"> </span>
-        </p>
-
-        <div id="db_paths" style="margin-bottom: 0"> </div>
-
-    </div>
-</li>

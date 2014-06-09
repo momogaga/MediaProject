@@ -23,11 +23,11 @@ function getIndexedPaths(div) {
             cb.type = 'checkbox';
             cb.checked = true;
             cbh.appendChild(cb);
-            cb.name = "folder";
+            cb.name = "folder"; 
+            cb.className = "col-md-1";
             cb.value = data[i];
             cbh.appendChild(document.createTextNode(data[i]));
-            val++;
-            cbh.appendChild(document.createElement('br'));
+            val++;        
         }
     });
 }

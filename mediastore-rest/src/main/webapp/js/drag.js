@@ -226,6 +226,86 @@ function uploadBlobs(tab_files) {
     console.log(tab_files.length + ' file(s) have been dropped:\n' + filenames);
 }
 
+//function displaySimilarImages(sourceSignature, object) {
+//    $('#duplicate_upload_result').children().remove();
+//    var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
+//    var sourceSig = document.createElement('div');
+//    sourceSig.style.float = "left";
+//    //sourceSig.style.marginLeft="10px";
+//    sourceSig.className = "signatureDiv";
+//
+//    var sourceSigCanvas = new customCanvas("data:image;base64," + sourceSignature, 100, 100);
+//    sourceSig.appendChild(sourceSigCanvas.canvas);
+//
+//    document.getElementById("duplicate_upload_source").appendChild(sourceSig);
+//
+//    var ul = document.createElement('ul');
+//    ul.className = "thumbnails";
+//
+//
+//    for (f in object) {
+//        var li = document.createElement('li');
+//        li.className = "span4";
+//
+//        var thumb = document.createElement('div');
+//        thumb.className = "thumbnail";
+//
+//        var container = document.createElement('div');
+//        container.className = "container";
+//
+//        var row = document.createElement('div');
+//        row.className = "row";
+//
+//        var spanImg = document.createElement('div');
+//        spanImg.className = "span2";
+//
+//        var spanSig = document.createElement('div');
+//        spanSig.className = "span2";
+//
+//        var caption = document.createElement('div');
+//        caption.className = "caption";
+//        caption.style.wordWrap = "break-word"
+//
+//        var image = object[f];
+//        var distance = (image.distance);
+//        var templateThumbnail = '<img class="smallImage" src="data:image;base64,{{base64Data}}" title="{{path}}"/>';
+//        var imgTag = Mustache.to_html(templateThumbnail, image);
+//        spanImg.innerHTML = imgTag;
+//
+//        row.appendChild(spanImg);
+//        row.appendChild(spanSig);
+//
+//        container.appendChild(row);
+//
+//        thumb.appendChild(container);
+//
+//        li.appendChild(thumb);
+//        li.appendChild(caption);
+//        //build the description
+//
+//        var sigTag = "data:image;base64," + image.base64Sig;
+//        var canv = new customCanvas(sigTag, 100, 100);
+//        spanSig.appendChild(canv.canvas);
+//        sourceSigCanvas.addOther(canv);
+//
+//        caption.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
+////        $('#duplicate_upload_result').append(li);
+//        ul.appendChild(li)
+//    }
+//
+//
+////    $('#duplicate_upload_result').wrap('<ul class="thumbnails"/>');
+//    $('#duplicate_upload_result').append(ul);
+//
+////    $('#duplicate_upload_result').append('</ul>');
+//    jQuery(document).ready(function() {
+//        generatePathLink();
+//        jQuery('.nailthumb-container').nailthumb();
+//        jQuery('.nailthumb-image-titles-animated-onhover').nailthumb();
+//        equalHeight($(".caption"));
+//    });
+//}
+
 function displaySimilarImages(sourceSignature, object) {
     $('#duplicate_upload_result').children().remove();
     var sourceSigHTML = '<div  style="float:left; margin-left:10px"/><img class="pathlink" src="data:image;base64,' + sourceSignature + '" height="100" width="100"></div>';
@@ -239,53 +319,25 @@ function displaySimilarImages(sourceSignature, object) {
 
     document.getElementById("duplicate_upload_source").appendChild(sourceSig);
 
-    var ul = document.createElement('ul');
-    ul.className = "thumbnails";
+    var table = document.createElement('table');
+    table.className = "table table-bordered";
 
+    var thead = document.createElement('thead');
+    var intitule = document.createElement('tr');
+    intitule.innerHTML = '<th>Miniature</th><th>Signature</th><th>Actions</th>';
+
+    thead.appendChild(intitule);
+    var tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
 
     for (f in object) {
-        //we want to build elements with the following form
-//        <li class="span4">
-//            <div class="thumbnail">
-//                <div class="container">
-//                    <div class="row">
-//                        <div class="span2">
-//                           '<img class="pathlink" src="data:image;base64,{{base64Data}}" title="{{path}}"/>'
-//                        </div>
-//                        <div class="span2" >
-//                           canvas
-//                        </div>
-//                    </div>
-//                </div>
-//            </div>
-//            <div class="caption">description </div>
-//           </div>
-//        </li>
 
+        var tr = document.createElement('tr');
 
-        var li = document.createElement('li');
-        li.className = "span4";
-
-
-        var thumb = document.createElement('div');
-        thumb.className = "thumbnail";
-
-        var container = document.createElement('div');
-        container.className = "container";
-
-        var row = document.createElement('div');
-        row.className = "row";
-
-
-        var spanImg = document.createElement('div');
-        spanImg.className = "span2";
-
-        var spanSig = document.createElement('div');
-        spanSig.className = "span2";
-
-        var caption = document.createElement('div');
-        caption.className = "caption";
-        caption.style.wordWrap = "break-word"
+        var spanImg = document.createElement('td');
+        var spanSig = document.createElement('td');
+        var caption = document.createElement('td');
 
         var image = object[f];
         var distance = (image.distance);
@@ -293,16 +345,9 @@ function displaySimilarImages(sourceSignature, object) {
         var imgTag = Mustache.to_html(templateThumbnail, image);
         spanImg.innerHTML = imgTag;
 
-        row.appendChild(spanImg);
-        row.appendChild(spanSig);
-
-        container.appendChild(row);
-
-        thumb.appendChild(container);
-
-
-        li.appendChild(thumb);
-        li.appendChild(caption);
+        tr.appendChild(spanImg);
+        tr.appendChild(spanSig);     
+        tr.appendChild(caption);
         //build the description
 
         var sigTag = "data:image;base64," + image.base64Sig;
@@ -310,14 +355,14 @@ function displaySimilarImages(sourceSignature, object) {
         spanSig.appendChild(canv.canvas);
         sourceSigCanvas.addOther(canv);
 
-        caption.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path) + '</a><br>';
+        caption.innerHTML = 'Distance:' + distance + ', Files in folder:  ' + image.foldersize + ' <br>  ' + toFolderAndFileLink(image.path);
 //        $('#duplicate_upload_result').append(li);
-        ul.appendChild(li)
+        tbody.appendChild(tr);
     }
 
-
+    console.log(table);
 //    $('#duplicate_upload_result').wrap('<ul class="thumbnails"/>');
-    $('#duplicate_upload_result').append(ul);
+    $('#duplicate_upload_result').append(table);
 
 //    $('#duplicate_upload_result').append('</ul>');
     jQuery(document).ready(function() {
