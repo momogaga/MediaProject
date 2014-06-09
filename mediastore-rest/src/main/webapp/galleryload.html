@@ -57,19 +57,28 @@ and open the template in the editor.
         </form>
 
         <br /><br />
-        <div class="btn-group btn-group-justified">
-            <div class="btn-group">
-                <button type="button" class="btn btn-info"><span class="glyphicon glyphicon-minus"></span></button>
-            </div>
-        </div>
-        <br>
+        <!--        <div class="btn-group btn-group-justified">
+                    <div class="btn-group">
+                        <button id="minus" type="button" class="btn btn-info"><span class="glyphicon glyphicon-minus"></span></button>
+                    </div>
+                </div>
+                <br>-->
         <div id="gallery"></div>
         <br>
         <div class="btn-group btn-group-justified">
             <div class="btn-group">
-                <button type="button" class="btn btn-info"><span class="glyphicon glyphicon-plus"></span></button>
+                <button id="plus" type="button" class="btn btn-info"><i class="fa fa-spinner fa-spin"></i>
+                </button>
             </div>
         </div>
+
+        <script>
+            $(document).ready(function() {
+                $("#plus").on("click", function() {
+                    appendPictures();
+                });
+            });
+        </script>
 
         <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
 
