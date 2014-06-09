@@ -174,6 +174,15 @@ function constructTable(array) {
     $('#myModal').on('shown.bs.modal', function() {
         changeMarkerPosition(aData[4], aData[5]);
     });
+    
+    $("#addTag").click(function() {
+        var tag = document.getElementById("formtag").value;
+        var folder = aData[3];
+        $.get("rest/hello/tag", 
+        {tag: tag,
+            path: folder});
+    });
+    
     $("#nextPage").click(function() {
         begin += 5;
         loadData(begin);

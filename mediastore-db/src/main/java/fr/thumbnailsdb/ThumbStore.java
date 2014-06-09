@@ -1281,7 +1281,7 @@ public class ThumbStore {
     }
 
     public int pathToId(String path){
-        String query = "SELECT id FROM IMAGES WHERE path = '" + path + "'";
+        String query = "SELECT id  FROM IMAGES, PATHS WHERE paths.path||images.path  = '" + path + "'";
         for (Connection connection : getConnections()) {
             Statement sta;
             try {

@@ -694,6 +694,16 @@ public class RestTest {
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
 
+    
+    @GET
+    @Path("tag/")
+    public Response addtag(@QueryParam("path") String path, @QueryParam("tag") String tag) {
+        System.out.println("RestTest.addTag input_path " + path + "Tag : " + tag);
+        tb.addTagToImage(path,tag);
+        int test = tb.pathToId(path);
+        return Response.status(200).build(); //.entity(path).type("application/folder").build();
+    }
+    
     @XmlRootElement
     public class SimilarImage {
 
