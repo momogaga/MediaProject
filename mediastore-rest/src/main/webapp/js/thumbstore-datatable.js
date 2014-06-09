@@ -77,7 +77,10 @@ function constructTable(array) {
     JSONObj.aaData = a;
     oTable = $('#example').dataTable(JSONObj);
 
-    var table = $('#example').DataTable();
+    var table = $('#example').DataTable( {
+    retrieve: true
+    
+} );
        alreadyclicked=false;
 
     $('#example tbody').on('click', 'tr', function() {
