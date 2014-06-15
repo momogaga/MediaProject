@@ -6,11 +6,11 @@ function getGallery() {
         filter: $("input[name=filter_path]").val(),
         folder: JSON.stringify(folders),
         gps: false,
-        nb: 2
+        nb: 50
                 //$.param(folders)
     }, function(data) {
         buildGallery(data);
-        begin = 2;
+        begin = 50;
     });
 }
 
@@ -34,11 +34,11 @@ function appendPictures() {
         folder: JSON.stringify(folders),
         gps: false,
         begin: begin,
-        nb: 2
+        nb: 50
                 //$.param(folders)
     }, function(data) {
         addPictures(data);
-        begin += 2;
+        begin += 50;
     });
 }
 

@@ -60,7 +60,7 @@ function rebuildData(array) {
             row[0] = '<i class="fa fa-file fa-3x"></i>';
         }
         row[1] = name;
-        row[2] = array[i].size;
+        row[2] = array[i].size + "kB";
         row[3] = array[i].path;
         row[4] = array[i].lat;
         row[5] = array[i].lon;
@@ -77,78 +77,78 @@ function constructTable(array) {
     JSONObj.aaData = a;
     oTable = $('#example').dataTable(JSONObj);
 
-    var table = $('#example').DataTable( {
-    retrieve: true
-    
-} );
-       alreadyclicked=false;
+    var table = $('#example').DataTable({
+        retrieve: true
+
+    });
+    alreadyclicked = false;
 
     $('#example tbody').on('click', 'tr', function() {
-         
-           var el=$(this);
+
+        var el = $(this);
         if (alreadyclicked)
         {
-            alreadyclicked=false; // reset
+            alreadyclicked = false; // reset
             clearTimeout(alreadyclickedTimeout); // prevent this from happening
             // do what needs to happen on double click. 
             //Afficher image
             $("#imgToRemove").remove()
             name = $('td', this).eq(0).text();
             $('#myModalImg').modal('show');
-          $("#myModalId").append("<img src=\""+ name +"&w=0&h=0\"  id=\"imgToRemove\" />");
-             
+            $("#myModalId").append(" <div style=\"max-width:500px;\">");
+            $("#myModalId").append("<img src=\"" + name + "&w=0&h=0\"  id=\"imgToRemove\" />");
+            $("#myModalId").append(" </div>");
 
 
         }
         else
         {
-            alreadyclicked=true;
-            alreadyclickedTimeout=setTimeout(function(){
-                alreadyclicked=false; 
-           },300);
+            alreadyclicked = true;
+            alreadyclickedTimeout = setTimeout(function() {
+                alreadyclicked = false;
+            }, 300); // <-- dblclick tolerance here
 
-           
-                   
-              
-                 
-            
-  
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
 
-            $('#delete').attr("disabled", "disabled");
-            $('#openFile').attr("disabled", "disabled");
-            $('#openFolder').attr("disabled", "disabled");
-            $('#viewMap').attr("disabled", "disabled");
 
-            $("#infos").html(" ");
-            $("#collapseOne").attr("class", "panel-collapse collapse");
 
-        }
-        else {
-            table.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
 
-            var pos = $(this).index();
-            aData = oTable.fnGetData(pos);
 
-            var infos = "Nom : " + aData[1].substring(1)
-                    + "<br />" + "Taille : " + aData[2] + "kB"
-                    + "<br />" + "Paths : " + aData[3]
-                    + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5];
 
-            $("#infos").html(infos);
-            $("#collapseOne").attr("class", "panel-collapse collapse in");
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                $('#delete').attr("disabled", "disabled");
+                $('#openFile').attr("disabled", "disabled");
+                $('#openFolder').attr("disabled", "disabled");
+                $('#viewMap').attr("disabled", "disabled");
 
-            $('#delete').removeAttr("disabled");
-            $('#openFile').removeAttr("disabled");
-            $('#openFolder').removeAttr("disabled");
+                $("#infos").html(" ");
+                $("#collapseOne").attr("class", "panel-collapse collapse");
 
-            if (aData[4] !== 0 && aData[5] !== 0) {
-                $('#viewMap').removeAttr("disabled");
             }
-        }
-  // <-- dblclick tolerance here
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+
+                var pos = $(this).index();
+                aData = oTable.fnGetData(pos);
+
+                var infos = "Nom : " + aData[1].substring(1)
+                        + "<br />" + "Taille : " + aData[2] + "kB"
+                        + "<br />" + "Paths : " + aData[3]
+                        + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5];
+
+                $("#infos").html(infos);
+                $("#collapseOne").attr("class", "panel-collapse collapse in");
+
+                $('#delete').removeAttr("disabled");
+                $('#openFile').removeAttr("disabled");
+                $('#openFolder').removeAttr("disabled");
+
+                if (aData[4] !== 0 && aData[5] !== 0) {
+                    $('#viewMap').removeAttr("disabled");
+                }
+            }
+
         }
         return false;
     });
@@ -174,15 +174,15 @@ function constructTable(array) {
     $('#myModal').on('shown.bs.modal', function() {
         changeMarkerPosition(aData[4], aData[5]);
     });
-    
+
     $("#addTag").click(function() {
         var tag = document.getElementById("formtag").value;
         var folder = aData[3];
-        $.get("rest/hello/tag", 
-        {tag: tag,
-            path: folder});
+        $.get("rest/hello/tag",
+                {tag: tag,
+                    path: folder});
     });
-    
+
     $("#nextPage").click(function() {
         begin += 5;
         loadData(begin);
@@ -231,7 +231,7 @@ function loadData(begin) {
                 $('#previousPage').attr("disabled", "disabled");
             }
         }
-        else{
+        else {
             $('#nextPage').attr("disabled", "disabled");
         }
     });
