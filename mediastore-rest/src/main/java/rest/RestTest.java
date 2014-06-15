@@ -684,6 +684,7 @@ public class RestTest {
                 json.put("size", mfd.getSize());
                 json.put("lat", mfd.getLat());
                 json.put("lon", mfd.getLon());
+                json.put("tag", mfd.getTag());
                 mJSONArray.put(json);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -694,6 +695,7 @@ public class RestTest {
         return Response.status(200).entity(mJSONArray).type(MediaType.APPLICATION_JSON).build();
     }
 
+    
     
     @GET
     @Path("tag/")

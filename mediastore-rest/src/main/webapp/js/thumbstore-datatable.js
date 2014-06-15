@@ -13,6 +13,7 @@ function initDataTable() {
     var aoColumns4 = new Object();
     var aoColumns5 = new Object();
     var aoColumns6 = new Object();
+    var aoColumns7 = new Object();
 
     aoColumns4.bVisible = false;
     aoColumns5.bVisible = false;
@@ -37,8 +38,9 @@ function initDataTable() {
     aoColumns4.sTitle = "Path";
     aoColumns5.sTitle = "Lat";
     aoColumns6.sTitle = "Lon";
+    aoColumns7.sTitle = "Tag";
 
-    JSONObj.aoColumns = [aoColumns1, aoColumns2, aoColumns3, aoColumns4, aoColumns5, aoColumns6];
+    JSONObj.aoColumns = [aoColumns1, aoColumns2, aoColumns3, aoColumns4, aoColumns5, aoColumns6, aoColumns7];
 }
 
 //ajoute les données au tableau
@@ -60,10 +62,11 @@ function rebuildData(array) {
             row[0] = '<i class="fa fa-file fa-3x"></i>';
         }
         row[1] = name;
-        row[2] = array[i].size + "kB";
+        row[2] = array[i].size;
         row[3] = array[i].path;
         row[4] = array[i].lat;
         row[5] = array[i].lon;
+        row[6] = array[i].tag;
 
         aaData.push(row);
     }
@@ -95,9 +98,8 @@ function constructTable(array) {
             $("#imgToRemove").remove()
             name = $('td', this).eq(0).text();
             $('#myModalImg').modal('show');
-            $("#myModalId").append(" <div style=\"max-width:500px;\">");
             $("#myModalId").append("<img src=\"" + name + "&w=0&h=0\"  id=\"imgToRemove\" />");
-            $("#myModalId").append(" </div>");
+
 
 
         }
@@ -106,7 +108,7 @@ function constructTable(array) {
             alreadyclicked = true;
             alreadyclickedTimeout = setTimeout(function() {
                 alreadyclicked = false;
-            }, 300); // <-- dblclick tolerance here
+            }, 300);
 
 
 
@@ -116,6 +118,7 @@ function constructTable(array) {
 
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
+
                 $('#delete').attr("disabled", "disabled");
                 $('#openFile').attr("disabled", "disabled");
                 $('#openFolder').attr("disabled", "disabled");
@@ -135,7 +138,10 @@ function constructTable(array) {
                 var infos = "Nom : " + aData[1].substring(1)
                         + "<br />" + "Taille : " + aData[2] + "kB"
                         + "<br />" + "Paths : " + aData[3]
-                        + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5];
+                        + "<br />" + "Coordonn&eacutee maps : " + aData[4] + "," + aData[5]
+                        + "<br />" + "Tag : " + aData[6];
+
+
 
                 $("#infos").html(infos);
                 $("#collapseOne").attr("class", "panel-collapse collapse in");
@@ -148,7 +154,7 @@ function constructTable(array) {
                     $('#viewMap').removeAttr("disabled");
                 }
             }
-
+            // <-- dblclick tolerance here
         }
         return false;
     });

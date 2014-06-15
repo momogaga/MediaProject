@@ -674,8 +674,8 @@ public class ThumbStore {
 
             String[] decomposedPath = this.decomposePath(path);
             if (decomposedPath == null) {
-                psmnt = connexion.prepareStatement("FROM IMAGES, PATHS "
-                        + "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                psmnt = connexion.prepareStatement("FROM IMAGES, PATHS,RELATION,TAG "
+                        + "SELECT paths.path||images.path as fpath,id,size,mtime,md5,hash,lat,lon,tag.tag WHERE (paths.path||images.path)=? AND images.path_ID=paths.path_ID AND RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 psmnt.setString(1, path);
             } else {
                 psmnt = connexion.prepareStatement("SELECT * FROM IMAGES WHERE path=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -786,13 +786,13 @@ public class ThumbStore {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
         String query = null;
         if (!gps) {
-            query = "FROM IMAGES, PATHS "
+             query = "FROM IMAGES, PATHS,RELATIONTAG,TAG "
                     + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE"
-                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\')";
+                    + " paths.path_id=images.path_id AND RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\')";
         } else {
-            query = "FROM IMAGES, PATHS "
-                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE "
-                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
+            query = "FROM IMAGES, PATHS,RELATIONTAG,TAG "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon, tag.tag WHERE "
+                    + " paths.path_id=images.path_id AND RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID  AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
                     + "AND  lat <> 0 OR lon <>0";
         }
         //   MultipleResultSet mrs = new MultipleResultSet();
@@ -818,14 +818,14 @@ public class ThumbStore {
         ArrayList<MediaFileDescriptor> list = new ArrayList<MediaFileDescriptor>();
         String query = null;
         if (!gps) {
-            query = "FROM IMAGES, PATHS "
-                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE"
-                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') LIMIT " + begin + "," + nb;
+            query = "FROM IMAGES, PATHS, RELATIONTAG,TAG "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon,tag.tag WHERE"
+                    + " paths.path_id=images.path_id AND RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') LIMIT " + begin + "," + nb;
         } else {
-            query = "FROM IMAGES, PATHS "
-                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon WHERE "
-                    + " paths.path_id=images.path_id AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
-                    + "AND  lat <> 0 OR lon <>0 LIMIT " + begin + "," + nb;
+             query = "FROM IMAGES, PATHS,RELATIONTAG,TAG "
+                    + "SELECT paths.path||images.path as path,size,mtime,md5,hash,lat,lon, tag.tag WHERE "
+                    + " paths.path_id=images.path_id AND RELATIONTAG.ID = IMAGES.ID AND RELATIONTAG.IDTAG = TAG.ID  AND (LCASE(paths.path||images.path)) LIKE LCASE(\'%" + filter + "%\') "
+                    + "AND  lat <> 0 OR lon <>0";
         }
         //   MultipleResultSet mrs = new MultipleResultSet();
         for (Connection connection : getConnections()) {
@@ -998,10 +998,11 @@ public class ThumbStore {
             String hash = res.getString("hash");
             double lat = res.getDouble("lat");
             double lon = res.getDouble("lon");
+            String tag = res.getString("tag");
 
             size = getSizeLengthFile(size);
 
-            id = new MediaFileDescriptor(path, size, mtime, md5, hash, lon, lat);
+            id = new MediaFileDescriptor(path, size, mtime, md5, hash, lon, lat,tag);
             id.setId(res.getInt("id"));
             // }
         } catch (SQLException e) {
